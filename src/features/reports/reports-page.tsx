@@ -4,8 +4,9 @@ import { reorderWidgets, type DashboardContext } from '../../domain/dashboard/in
 import { availableCompactColumns, toggleCompactColumn } from '../../domain/export/index.ts'
 import { canAccess, visibleRisks } from '../../domain/permissions/index.ts'
 import { buildRegisterIndex } from '../../domain/register/index.ts'
-import { RATING_LABELS, RISK_STATUSES } from '../../domain/types/enums.ts'
-import type { ReportSection, ReportTemplate, RiskFilters } from '../../domain/types/index.ts'
+import { ratingLevels, ratingName } from '../../domain/risk-engine/index.ts'
+import { RISK_STATUSES } from '../../domain/types/enums.ts'
+import type { ReportSection, ReportTemplate, RiskFilters, RatingMatrix } from '../../domain/types/index.ts'
 import { pickNamed, useTranslation, type TranslationKey } from '../../i18n/index.ts'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
 import {
@@ -298,6 +299,8 @@ export function ReportsPage() {
                     void patch({ sections: template.sections.filter((candidate) => candidate.id !== section.id) })
                   }}
                   onLastColumn={() => { setNotice(t('report.section.lastColumn')) }}
+                  matrix={state.matrix}
+                  language={language}
                 />
               ) : null}
             </div>
@@ -321,6 +324,9 @@ function SectionEditor(props: {
   onDuplicate: () => void
   onDelete: () => void
   onLastColumn: () => void
+  /** Rating filter options read their names from the saved configuration. */
+  matrix: RatingMatrix
+  language: 'en' | 'ka'
 }) {
   const { t } = useTranslation()
   const { section } = props
@@ -432,7 +438,12 @@ function SectionEditor(props: {
               onChange={(event) => { setFilter('residualRating', event.target.value) }}
             >
               <option value="">{t('register.filter.all')}</option>
-              {RATING_LABELS.map((rating) => <option key={rating} value={rating}>{rating}</option>)}
+              {/* Keyed by the stable rating key; the label is configured (CR-003). */}
+              {ratingLevels(props.matrix).map((level) => (
+                <option key={level.key} value={level.key}>
+                  {ratingName(props.matrix, level.key, props.language)}
+                </option>
+              ))}
             </select>
           </label>
         </fieldset>

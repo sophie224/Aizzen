@@ -1,5 +1,6 @@
 import type { AppState, BusinessUnit, PermissionSet, RatingMatrix } from '../../domain/types/index.ts'
 import { MODULE_NAMES, SCALE_VALUES } from '../../domain/types/index.ts'
+import { RISK_DESCRIPTION_MAX_LENGTH } from '../../domain/risk-editor/index.ts'
 import { isPermissionLevel, isRatingLabel, isRecord } from '../../domain/validation/guards.ts'
 import { createSeedMatrix } from '../seed/matrix.ts'
 import {
@@ -145,6 +146,33 @@ export function repairUserScopes(state: AppState, notes: RepairNotes): void {
   }
 }
 
+/**
+ * Adds the manual `description` to risks that predate it (CR-002).
+ *
+ * Conservative and idempotent: a stored description is never replaced, and it
+ * is never back-filled from cause / event / consequence — an empty field means
+ * "nobody has written one yet", which is exactly what the Register shows.
+ */
+export function repairRisks(state: AppState, notes: RepairNotes): void {
+  let filled = 0
+  let clamped = 0
+
+  for (const risk of state.risks) {
+    if (typeof risk.description !== 'string') {
+      risk.description = ''
+      filled += 1
+      continue
+    }
+    if (risk.description.length > RISK_DESCRIPTION_MAX_LENGTH) {
+      risk.description = risk.description.slice(0, RISK_DESCRIPTION_MAX_LENGTH)
+      clamped += 1
+    }
+  }
+
+  if (filled > 0) notes.push(`risks: added an empty description to ${String(filled)} record(s)`)
+  if (clamped > 0) notes.push(`risks: clamped ${String(clamped)} over-length description(s)`)
+}
+
 /** Adds `visibleColumns` and `viewMode` to Saved Views that predate them. */
 export function repairSavedViews(state: AppState, notes: RepairNotes): void {
   for (const view of state.savedViews) {
@@ -183,8 +211,39 @@ export function repairDefaults(state: AppState, notes: RepairNotes): void {
 }
 
 /**
+ * Parses a legacy probability string such as `36%-65%` into a band.
+ *
+ * Anything that does not parse is preserved as free text rather than dropped —
+ * an organisation may already have written "Once in 10 years" there.
+ */
+function parseLegacyBand(probability: unknown): {
+  percentFrom: number | null
+  percentTo: number | null
+  textEn: string
+} {
+  if (typeof probability !== 'string' || probability.trim().length === 0) {
+    return { percentFrom: null, percentTo: null, textEn: '' }
+  }
+
+  const match = /^\s*(\d{1,3})\s*%?\s*[-–—]\s*(\d{1,3})\s*%?\s*$/.exec(probability)
+  if (!match) return { percentFrom: null, percentTo: null, textEn: probability.trim() }
+
+  const from = Number(match[1])
+  const to = Number(match[2])
+  if (from > 100 || to > 100) {
+    return { percentFrom: null, percentTo: null, textEn: probability.trim() }
+  }
+  return { percentFrom: from, percentTo: to, textEn: '' }
+}
+
+/**
  * Merges any missing or invalid matrix cell and colour from the 2026 defaults,
  * preserving every valid configured cell.
+ *
+ * Also brings a pre-CR-003 matrix up to the configurable shape: version, scale
+ * name, level display names, criterion descriptions and percentage bands. Every
+ * value an administrator had already configured is preserved; only absent ones
+ * are filled.
  */
 export function repairMatrix(state: AppState, notes: RepairNotes): void {
   const defaults = createSeedMatrix()
@@ -228,8 +287,39 @@ export function repairMatrix(state: AppState, notes: RepairNotes): void {
     notes.push(`rating matrix: restored ${String(restoredColors)} missing colour(s)`)
   }
 
+  // --- CR-003 configuration fields -------------------------------------------
+
+  const scaleNameEn =
+    typeof current.scaleNameEn === 'string' && current.scaleNameEn.trim().length > 0
+      ? current.scaleNameEn
+      : defaults.scaleNameEn
+  const scaleNameKa = typeof current.scaleNameKa === 'string' ? current.scaleNameKa : defaults.scaleNameKa
+
+  // Level display names are keyed by the stable rating key, so a configured
+  // rename survives while a missing entry falls back to the default name.
+  const configuredLevels = Array.isArray(current.levels) ? current.levels : []
+  const levels = defaults.levels.map((fallback) => {
+    const existing = configuredLevels.find(
+      (level) => isRecord(level) && level.key === fallback.key,
+    )
+    if (!isRecord(existing)) return fallback
+    return {
+      key: fallback.key,
+      nameEn:
+        typeof existing.nameEn === 'string' && existing.nameEn.trim().length > 0
+          ? existing.nameEn
+          : fallback.nameEn,
+      nameKa: typeof existing.nameKa === 'string' ? existing.nameKa : fallback.nameKa,
+      order: typeof existing.order === 'number' ? existing.order : fallback.order,
+    }
+  })
+
   state.matrix = {
+    version: typeof current.version === 'number' && current.version > 0 ? current.version : 1,
+    scaleNameEn,
+    scaleNameKa,
     cells,
+    levels,
     colors,
     impactLabels: isRecord(current.impactLabels)
       ? (current.impactLabels as RatingMatrix['impactLabels'])
@@ -239,9 +329,43 @@ export function repairMatrix(state: AppState, notes: RepairNotes): void {
       : defaults.likelihoodLabels,
   }
 
-  // Guarantee a label for every point on both scales.
+  // Guarantee a complete criterion for every point on both scales.
+  let filledCriteria = 0
   for (const value of SCALE_VALUES) {
-    state.matrix.impactLabels[value] ??= defaults.impactLabels[value]
-    state.matrix.likelihoodLabels[value] ??= defaults.likelihoodLabels[value]
+    const impact = state.matrix.impactLabels[value]
+    if (!isRecord(impact)) {
+      state.matrix.impactLabels[value] = defaults.impactLabels[value]
+      filledCriteria += 1
+    } else {
+      impact.descriptionEn ??= defaults.impactLabels[value].descriptionEn
+      impact.descriptionKa ??= defaults.impactLabels[value].descriptionKa
+    }
+
+    const likelihood = state.matrix.likelihoodLabels[value]
+    if (!isRecord(likelihood)) {
+      state.matrix.likelihoodLabels[value] = defaults.likelihoodLabels[value]
+      filledCriteria += 1
+      continue
+    }
+
+    likelihood.descriptionEn ??= defaults.likelihoodLabels[value].descriptionEn
+    likelihood.descriptionKa ??= defaults.likelihoodLabels[value].descriptionKa
+    likelihood.textKa ??= ''
+
+    // A pre-CR-003 matrix carries the band as the display string `36%-65%`.
+    if (likelihood.percentFrom === undefined && likelihood.percentTo === undefined) {
+      const parsed = parseLegacyBand((likelihood as { probability?: unknown }).probability)
+      likelihood.percentFrom = parsed.percentFrom
+      likelihood.percentTo = parsed.percentTo
+      likelihood.textEn ??= parsed.textEn
+      filledCriteria += 1
+    }
+    likelihood.textEn ??= ''
   }
+
+  if (filledCriteria > 0) {
+    notes.push(`rating matrix: completed ${String(filledCriteria)} scale criterion field(s)`)
+  }
+
+  if (!Array.isArray(state.matrixVersions)) state.matrixVersions = []
 }

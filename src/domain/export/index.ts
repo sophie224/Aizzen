@@ -1,6 +1,12 @@
 import { hierarchyPath } from '../business-units/index.ts'
 import { pickNamed } from '../localisation/index.ts'
-import { riskRating, riskScore } from '../risk-engine/index.ts'
+import {
+  impactLabel,
+  likelihoodLabel,
+  ratingName,
+  riskRating,
+  riskScore,
+} from '../risk-engine/index.ts'
 import { historicalTrend } from '../trend/index.ts'
 import type {
   BusinessUnit,
@@ -47,6 +53,14 @@ export function buildExportRows(risks: readonly Risk[], context: ExportContext):
   const userName = (id: string) => context.users.find((user) => user.id === id)?.name ?? ''
   const activeAttributes = context.customAttributes.filter((attribute) => attribute.active)
 
+  /* Exported labels follow the saved matrix configuration (CR-003). */
+  const rating = (score: Parameters<typeof riskRating>[0]) =>
+    ratingName(context.matrix, riskRating(score, context.matrix), language)
+  const impact = (score: { impact: Parameters<typeof impactLabel>[0] }) =>
+    impactLabel(score.impact, context.matrix, language)
+  const likelihood = (score: { likelihood: Parameters<typeof likelihoodLabel>[0] }) =>
+    likelihoodLabel(score.likelihood, context.matrix, language)
+
   return risks.map((risk) => {
     const category = context.categories.find((candidate) => candidate.id === risk.categoryId)
     const unit = context.businessUnits.find((candidate) => candidate.id === risk.businessUnitId)
@@ -54,6 +68,8 @@ export function buildExportRows(risks: readonly Risk[], context: ExportContext):
     const row: ExportRow = {
       'Risk ID': risk.ref,
       'Risk Name': risk.title,
+      // Exported in full — the register clamps it, the export never does.
+      Description: risk.description,
       'Category L1': category ? pickNamed(category, 'level1', language) : '',
       'Category L2': category ? pickNamed(category, 'level2', language) : '',
       'Business Unit': unit ? pickNamed(unit, 'name', language) : '',
@@ -63,17 +79,23 @@ export function buildExportRows(risks: readonly Risk[], context: ExportContext):
       Event: risk.event,
       Consequence: risk.consequence,
       'Inherent Impact': risk.inherent.impact,
+      'Inherent Impact Level': impact(risk.inherent),
       'Inherent Likelihood': risk.inherent.likelihood,
+      'Inherent Likelihood Level': likelihood(risk.inherent),
       'Inherent Score': riskScore(risk.inherent),
-      'Inherent Rating': riskRating(risk.inherent, context.matrix),
+      'Inherent Rating': rating(risk.inherent),
       'Residual Impact': risk.residual.impact,
+      'Residual Impact Level': impact(risk.residual),
       'Residual Likelihood': risk.residual.likelihood,
+      'Residual Likelihood Level': likelihood(risk.residual),
       'Residual Score': riskScore(risk.residual),
-      'Residual Rating': riskRating(risk.residual, context.matrix),
+      'Residual Rating': rating(risk.residual),
       'Target Impact': risk.target.impact,
+      'Target Impact Level': impact(risk.target),
       'Target Likelihood': risk.target.likelihood,
+      'Target Likelihood Level': likelihood(risk.target),
       'Target Score': riskScore(risk.target),
-      'Target Rating': riskRating(risk.target, context.matrix),
+      'Target Rating': rating(risk.target),
       Controls: risk.controls.map((control) => control.title).join('; '),
       'Action Plans': risk.actions
         .map((action) => `${action.title} (${action.status}, ${action.dueDate})`)

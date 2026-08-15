@@ -8,6 +8,7 @@ import {
   repairBusinessUnitTree,
   repairDefaults,
   repairMatrix,
+  repairRisks,
   repairRoles,
   repairSavedViews,
   repairSuperAdminUser,
@@ -34,7 +35,10 @@ const ARRAY_COLLECTIONS = [
   'customAttributes',
   'risks',
   'savedViews',
+  'matrixVersions',
   'dashboards',
+  'dashboardViews',
+  'dashboardLayouts',
   'reportTemplates',
   'auditEvents',
 ] as const
@@ -79,6 +83,7 @@ export function migrateState(raw: unknown): MigrationOutcome {
   repairBusinessUnitTree(state, notes)
   repairSuperAdminUser(state, notes)
   repairUserScopes(state, notes)
+  repairRisks(state, notes)
   repairSavedViews(state, notes)
   repairDefaults(state, notes)
   repairMatrix(state, notes)

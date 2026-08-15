@@ -1,15 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { SCALE_VALUES } from '../types/enums.ts'
 import type {
   BusinessUnit,
   Category,
-  MatrixCell,
   RatingMatrix,
   RemediationAction,
   Risk,
   User,
 } from '../types/index.ts'
-import { DEFAULT_RATING_COLORS, defaultRatingFor } from '../risk-engine/default-matrix.ts'
+import { createDefaultMatrix } from '../risk-engine/default-matrix.ts'
 import {
   BASE_COLUMNS,
   DEFAULT_VISIBLE_COLUMNS,
@@ -52,25 +50,7 @@ const USERS: User[] = [
 ]
 
 function makeMatrix(): RatingMatrix {
-  const cells: MatrixCell[] = []
-  for (const impact of SCALE_VALUES) {
-    for (const likelihood of SCALE_VALUES) {
-      cells.push({ impact, likelihood, rating: defaultRatingFor(impact, likelihood) })
-    }
-  }
-  return {
-    cells,
-    colors: { ...DEFAULT_RATING_COLORS },
-    impactLabels: {
-      1: { en: 'Minor', ka: '' }, 2: { en: 'Moderate', ka: '' }, 3: { en: 'Major', ka: '' },
-      4: { en: 'Severe', ka: '' }, 5: { en: 'Critical', ka: '' },
-    },
-    likelihoodLabels: {
-      1: { en: 'Remote', ka: '', probability: '' }, 2: { en: 'Unlikely', ka: '', probability: '' },
-      3: { en: 'Possible', ka: '', probability: '' }, 4: { en: 'Likely', ka: '', probability: '' },
-      5: { en: 'Almost Certain', ka: '', probability: '' },
-    },
-  }
+  return createDefaultMatrix()
 }
 
 function action(title: string): RemediationAction {
@@ -86,6 +66,7 @@ function risk(overrides: Partial<Risk> = {}): Risk {
     categoryId: 'cat_cyber', businessUnitId: 'bu_technology', riskOwnerId: 'usr_nino',
     originDate: '2026-01-01', reviewDate: '2027-01-01', targetDate: '2026-07-01',
     status: 'In Progress', responseType: 'Mitigate', outlook: 'Stable',
+    description: '',
     cause: 'A cause', event: 'An event', consequence: 'A consequence', statusNarrative: '',
     inherent: { impact: 4, likelihood: 4 },
     residual: { impact: 3, likelihood: 3 },
@@ -106,6 +87,7 @@ describe('search', () => {
   const target = risk({
     ref: 'SEC-004',
     title: 'Unpatched perimeter systems',
+    description: '',
     cause: 'Patch backlog in the estate',
     event: 'An attacker exploits a known vulnerability',
     consequence: 'Regulatory penalty and outage',
@@ -382,7 +364,7 @@ describe('columns', () => {
   })
 
   it('offers a sensible default selection', () => {
-    expect(DEFAULT_VISIBLE_COLUMNS).toContain('ref')
+    expect(DEFAULT_VISIBLE_COLUMNS).toContain('n')
     expect(DEFAULT_VISIBLE_COLUMNS).toContain('residual')
     expect(DEFAULT_VISIBLE_COLUMNS.length).toBeLessThan(BASE_COLUMNS.length)
   })

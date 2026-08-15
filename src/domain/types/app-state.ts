@@ -4,19 +4,34 @@ import type {
   BusinessUnit,
   Category,
   CustomAttribute,
+  MatrixVersion,
   RatingMatrix,
   Role,
   SiteContent,
   SsoConfig,
   User,
 } from './master-data.ts'
-import type { Dashboard, ReportTemplate, SavedView } from './reporting.ts'
+import type {
+  Dashboard,
+  DashboardLayout,
+  DashboardView,
+  ReportTemplate,
+  SavedView,
+} from './reporting.ts'
 
 /**
  * Current persisted schema version (ARCHITECTURE.md §4.1).
- * The legacy `app.html` build persists version 7; migration handles the gap.
+ *
+ * 9 added the manual `Risk.description` field (CR-002). 10 adds the
+ * configurable rating matrix (CR-003): the matrix gains a version, a scale
+ * name, level display names, criterion descriptions and percentage bands,
+ * AppState gains `matrixVersions`, and assessment snapshots record the matrix
+ * version they were taken against. 11 adds the Dashboard module's saved views
+ * and per-user widget layouts (CR-004). Every step is additive — migration
+ * fills what is missing and overwrites nothing that was configured. The legacy
+ * `app.html` build persists version 7; migration handles that gap too.
  */
-export const SCHEMA_VERSION = 8
+export const SCHEMA_VERSION = 11
 
 /**
  * Browser storage key. Retained deliberately from the v3 build for backward
@@ -40,12 +55,19 @@ export interface AppState {
   categories: Category[]
   businessUnits: BusinessUnit[]
   customAttributes: CustomAttribute[]
+  /** The live tenant configuration every matrix component reads (CR-003). */
   matrix: RatingMatrix
+  /** Superseded configurations, newest first, so history stays readable. */
+  matrixVersions: MatrixVersion[]
 
   risks: Risk[]
 
   savedViews: SavedView[]
   dashboards: Dashboard[]
+  /** Saved Dashboard filter sets, private per user (CR-004). */
+  dashboardViews: DashboardView[]
+  /** Per-user widget arrangement for the Dashboard module (CR-004). */
+  dashboardLayouts: DashboardLayout[]
   reportTemplates: ReportTemplate[]
 
   /** Global trail powering Recent Activity and Administration review. */

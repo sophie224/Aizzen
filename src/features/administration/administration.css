@@ -529,3 +529,239 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* --- configurable matrix (CR-003) ------------------------------------------ */
+
+.admin-section__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.admin-matrix__version {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-matrix__save {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+  font-weight: 600;
+}
+
+.admin-matrix__save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-matrix__dirty,
+.admin-matrix__saved,
+.admin-matrix__warning,
+.admin-matrix__confirm {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  max-width: none;
+}
+
+.admin-matrix__dirty,
+.admin-matrix__warning {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-warning-surface);
+}
+
+.admin-matrix__saved {
+  border: 1px solid #b7e0c4;
+  background: #e4f6ea;
+}
+
+.admin-matrix__confirm {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  border: 1px solid var(--color-danger);
+  background: var(--color-danger-surface);
+}
+
+.admin-matrix__confirm span {
+  flex: 1;
+}
+
+.admin-matrix__scale {
+  margin-top: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-3);
+}
+
+.admin-matrix__scale legend {
+  font-weight: 600;
+  padding: 0 var(--space-2);
+}
+
+.admin-matrix__scale label {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.admin-matrix__scale input {
+  font: inherit;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+}
+
+/*
+ * Rating levels: one ROW per level, not one column — four levels side by side
+ * would crush the two name fields and the colour picker into each other.
+ */
+.admin-levels {
+  margin-top: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.admin-levels legend {
+  font-weight: 600;
+  padding: 0 var(--space-2);
+}
+
+.admin-levels__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.admin-levels__row label {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  min-width: 0;
+}
+
+.admin-levels__row input:not([type='color']) {
+  font: inherit;
+  font-size: var(--text-sm);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.admin-levels__row input[type='color'] {
+  width: 3rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: none;
+}
+
+.admin-levels__row output {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  padding-bottom: 0.4rem;
+}
+
+.admin-levels [aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+@media (max-width: 60rem) {
+  .admin-levels__row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.admin-criteria {
+  margin-top: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.admin-criteria legend {
+  font-weight: 600;
+  padding: 0 var(--space-2);
+}
+
+.admin-criteria__row {
+  display: grid;
+  grid-template-columns: auto repeat(2, minmax(0, 1fr)) repeat(2, 5rem) repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  align-items: start;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-criteria__row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.admin-criteria__value {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: 1.25rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-page);
+  font-weight: 700;
+  font-size: var(--text-sm);
+}
+
+.admin-criteria label {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  min-width: 0;
+}
+
+.admin-criteria input,
+.admin-criteria textarea {
+  font: inherit;
+  font-size: var(--text-sm);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  min-width: 0;
+}
+
+.admin-criteria textarea {
+  min-height: 3.5rem;
+  resize: vertical;
+}
+
+.admin-criteria__description {
+  grid-column: span 2;
+}
+
+.admin-criteria [aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+@media (max-width: 75rem) {
+  .admin-criteria__row {
+    grid-template-columns: auto repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-criteria__description {
+    grid-column: 2 / -1;
+  }
+}

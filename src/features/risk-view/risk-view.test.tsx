@@ -26,6 +26,7 @@ function fullRisk(): Risk {
     categoryId: 'cat_16', businessUnitId: 'bu_security', riskOwnerId: 'usr_owner',
     originDate: '2026-01-01', reviewDate: '2027-01-01', targetDate: '2026-07-01',
     status: 'In Progress', responseType: 'Mitigate', outlook: 'Decreasing',
+    description: '',
     cause: 'Deferred modernisation', event: 'A core service fails', consequence: 'Customer outage',
     statusNarrative: 'Remediation underway.',
     inherent: { impact: 4, likelihood: 4 },
@@ -159,6 +160,23 @@ describe('header band', () => {
     expect(screen.getByLabelText(/Residual: .*score 9, impact 3 by likelihood 3/)).toBeInTheDocument()
     expect(screen.getByLabelText(/Target: .*score 4, impact 2 by likelihood 2/)).toBeInTheDocument()
   })
+
+  it('offers a way back to the register and an Edit control outside the band', async () => {
+    renderView('risk_full')
+    await screen.findByRole('heading', { level: 1 })
+
+    expect(screen.getByRole('link', { name: 'Back to register' })).toBeInTheDocument()
+    // Edit sits in the page header, not inside the summary band.
+    expect(within(header()).queryByRole('button', { name: 'Edit risk' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Edit risk' })).toBeInTheDocument()
+  })
+
+  it('marks an overdue target date in the KPI strip', async () => {
+    renderView('risk_full')
+    await screen.findByRole('heading', { level: 1 })
+    // Target date 2026-07-01, status In Progress.
+    expect(within(header()).getByText('Overdue')).toBeInTheDocument()
+  })
 })
 
 // --- tabs -------------------------------------------------------------------
@@ -191,7 +209,7 @@ describe('all five tabs', () => {
     await screen.findByRole('heading', { level: 1 })
 
     await openTab('Controls')
-    expect(screen.getByText('No controls recorded.')).toBeInTheDocument()
+    expect(screen.getByText('No controls documented.')).toBeInTheDocument()
 
     await openTab('Actions')
     expect(screen.getByText('No remediation actions recorded.')).toBeInTheDocument()
@@ -204,14 +222,46 @@ describe('all five tabs', () => {
 // --- overview ---------------------------------------------------------------
 
 describe('overview tab', () => {
-  it('shows cause, event and consequence as separate cards', async () => {
+  it('shows cause, event and consequence as numbered cards in one block', async () => {
     renderView('risk_full')
     await screen.findByRole('heading', { level: 1 })
 
-    expect(screen.getByRole('heading', { name: 'Cause', level: 2 })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Structured risk description', level: 2 }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Cause', level: 3 })).toBeInTheDocument()
     expect(screen.getByText('Deferred modernisation')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Event', level: 2 })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Consequence', level: 2 })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Event', level: 3 })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Consequence', level: 3 })).toBeInTheDocument()
+  })
+
+  it('shows the manual description in full, above the numbered cards', async () => {
+    const long = `First paragraph of the summary.\nSecond line after a break.`
+    await seed((state) => {
+      const risk = state.risks.find((candidate) => candidate.id === 'risk_full')
+      if (risk) risk.description = long
+    })
+
+    renderView('risk_full')
+    await screen.findByRole('heading', { level: 1 })
+
+    const heading = screen.getByRole('heading', { name: 'Description', level: 3 })
+    const body = heading.parentElement?.querySelector('p')
+    // Untruncated, with the author's line break preserved.
+    expect(body).toHaveTextContent('First paragraph of the summary.')
+    expect(body?.textContent).toBe(long)
+
+    // It precedes 01 Cause.
+    const cause = screen.getByRole('heading', { name: 'Cause', level: 3 })
+    expect(heading.compareDocumentPosition(cause)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
+  it('shows a muted empty state rather than hiding the description block', async () => {
+    renderView('risk_full')
+    await screen.findByRole('heading', { level: 1 })
+
+    expect(screen.getByRole('heading', { name: 'Description', level: 3 })).toBeInTheDocument()
+    expect(screen.getByText('No description provided.')).toBeInTheDocument()
   })
 
   it('shows the action table with the six required columns', async () => {
@@ -245,16 +295,15 @@ describe('trend, direction and outlook are three separate indicators', () => {
     await screen.findByRole('heading', { level: 1 })
 
     // Residual fell 16 -> 9 across the two snapshots.
-    const trend = screen.getByRole('heading', { name: 'Historical trend', level: 2 }).parentElement
-    expect(within(trend as HTMLElement).getByText('Improving')).toBeInTheDocument()
+    expect(screen.getByLabelText('Historical trend: Improving')).toBeInTheDocument()
 
     // Target 4 < residual 9.
-    const direction = screen.getByRole('heading', { name: 'Direction to target', level: 2 }).parentElement
-    expect(within(direction as HTMLElement).getByText('Decreasing toward target')).toBeInTheDocument()
+    expect(
+      screen.getByLabelText('Direction to target: Decreasing toward target'),
+    ).toBeInTheDocument()
 
     // Stored outlook, untouched by the computed trend.
-    const outlook = screen.getByRole('heading', { name: '12-month outlook', level: 2 }).parentElement
-    expect(within(outlook as HTMLElement).getByText('Decreasing')).toBeInTheDocument()
+    expect(screen.getByLabelText('12-month outlook: Decreasing')).toBeInTheDocument()
   })
 
   it('never lets the computed trend overwrite the manual outlook', async () => {
@@ -267,19 +316,15 @@ describe('trend, direction and outlook are three separate indicators', () => {
     renderView('risk_full')
     await screen.findByRole('heading', { level: 1 })
 
-    const trend = screen.getByRole('heading', { name: 'Historical trend', level: 2 }).parentElement
-    expect(within(trend as HTMLElement).getByText('Improving')).toBeInTheDocument()
-
-    const outlook = screen.getByRole('heading', { name: '12-month outlook', level: 2 }).parentElement
-    expect(within(outlook as HTMLElement).getByText('Increasing')).toBeInTheDocument()
+    expect(screen.getByLabelText('Historical trend: Improving')).toBeInTheDocument()
+    expect(screen.getByLabelText('12-month outlook: Increasing')).toBeInTheDocument()
   })
 
   it('reports New when there are fewer than two snapshots', async () => {
     renderView('risk_min')
     await screen.findByRole('heading', { level: 1 })
 
-    const trend = screen.getByRole('heading', { name: 'Historical trend', level: 2 }).parentElement
-    expect(within(trend as HTMLElement).getByText('New')).toBeInTheDocument()
+    expect(screen.getByLabelText('Historical trend: New')).toBeInTheDocument()
   })
 })
 
@@ -350,6 +395,30 @@ describe('assessment tab', () => {
 
     const residual = screen.getByRole('table', { name: /Residual assessment matrix/ })
     expect(within(residual).getByLabelText(/Impact 3, Likelihood 3: Significant/)).toBeInTheDocument()
+  })
+
+  it('prints every cell value and labels both axes', async () => {
+    renderView('risk_full')
+    await openTab('Assessment')
+
+    const residual = screen.getByRole('table', { name: /Residual assessment matrix/ })
+    // Impact 5 × Likelihood 5 is the top-right cell of every matrix.
+    expect(within(residual).getByLabelText(/Impact 5, Likelihood 5:/)).toHaveTextContent('25')
+    expect(within(residual).getByLabelText(/Impact 1, Likelihood 1:/)).toHaveTextContent('1')
+
+    // The card header states the scale words, not just the numbers.
+    expect(screen.getByText('Major × Possible')).toBeInTheDocument()
+  })
+
+  it('shows the matrix guidance panel with both scales and the impact note', async () => {
+    renderView('risk_full')
+    await openTab('Assessment')
+
+    expect(screen.getByRole('heading', { name: 'Matrix guidance', level: 2 })).toBeInTheDocument()
+    // The panel states which configuration is in force (CR-003).
+    expect(screen.getByText(/Rating · Version 1/)).toBeInTheDocument()
+    expect(screen.getByText('96%-100%')).toBeInTheDocument()
+    expect(screen.getByText(/highest applicable impact/i)).toBeInTheDocument()
   })
 
   it('shows the assessment history table', async () => {
@@ -496,7 +565,36 @@ describe('edit entry point', () => {
     await user.click(await screen.findByRole('button', { name: 'Edit risk' }))
 
     const dialog = await screen.findByRole('dialog')
-    expect(within(dialog).getByLabelText('Risk title')).toHaveValue('Legacy platform fragility')
+    expect(within(dialog).getByLabelText('Risk name')).toHaveValue('Legacy platform fragility')
+  })
+
+  it('pre-fills the manual description and saves an edit to it', async () => {
+    await seed((state) => {
+      const risk = state.risks.find((candidate) => candidate.id === 'risk_full')
+      if (risk) risk.description = 'Stored summary.'
+    })
+
+    renderView('risk_full')
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('button', { name: 'Edit risk' }))
+
+    const dialog = await screen.findByRole('dialog')
+    await user.click(within(dialog).getByRole('tab', { name: 'Structured risk description' }))
+    const field = within(dialog).getByLabelText('Risk description')
+    expect(field).toHaveValue('Stored summary.')
+
+    await user.clear(field)
+    await user.type(field, 'Revised summary.')
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => {
+      const persisted = JSON.parse(storage.map.get('erm-risk-management-v3-state') ?? '{}') as AppState
+      expect(persisted.risks.find((risk) => risk.id === 'risk_full')?.description).toBe('Revised summary.')
+    })
+
+    // The change is named in the audit trail like any other master field.
+    const persisted = JSON.parse(storage.map.get('erm-risk-management-v3-state') ?? '{}') as AppState
+    expect(persisted.auditEvents[0].changes).toContain('Description: changed')
   })
 
   it('closes the editor on Cancel without persisting', async () => {

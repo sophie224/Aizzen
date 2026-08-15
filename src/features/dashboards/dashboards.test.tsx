@@ -10,7 +10,7 @@ import { SessionRepositoryContext } from '../../app/session/session-repository-c
 import { SessionBootstrap } from '../../app/session/session-bootstrap.tsx'
 import { resetSessionStore } from '../../app/session/session-store.ts'
 import type { AppState, Risk } from '../../domain/types/index.ts'
-import { DashboardPage } from './dashboard-page.tsx'
+import { ConfigurableDashboards } from './dashboard-page.tsx'
 
 class MemoryStorage implements StorageLike {
   readonly map = new Map<string, string>()
@@ -28,6 +28,7 @@ function makeRisk(overrides: Partial<Risk> = {}): Risk {
     categoryId: 'cat_16', businessUnitId: 'bu_technology', riskOwnerId: 'usr_owner',
     originDate: '2026-01-01', reviewDate: '2027-01-01', targetDate: '2026-07-01',
     status: 'In Progress', responseType: 'Mitigate', outlook: 'Stable',
+    description: '',
     cause: 'c', event: 'e', consequence: 'q', statusNarrative: '',
     inherent: { impact: 4, likelihood: 4 },
     residual: { impact: 3, likelihood: 3 },
@@ -76,7 +77,7 @@ function renderDashboard(signedInAs = 'usr_admin'): RenderResult {
       <SessionRepositoryContext.Provider value={sessionRepository}>
         <SessionBootstrap>
           <MemoryRouter>
-            <DashboardPage />
+            <ConfigurableDashboards />
           </MemoryRouter>
         </SessionBootstrap>
       </SessionRepositoryContext.Provider>

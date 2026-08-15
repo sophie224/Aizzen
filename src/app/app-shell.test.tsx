@@ -131,16 +131,16 @@ describe('authorised but denied', () => {
 // --- layout requirements ----------------------------------------------------
 
 describe('shell layout', () => {
-  it('places the Aizzen brand mark in the header', async () => {
+  it('places the AIZEN brand mark at the head of the navigation rail', async () => {
     renderApp({ signedInAs: SEEDED.admin })
-    const banner = await screen.findByRole('banner')
-    expect(within(banner).getByRole('img', { name: /cotton flower/i })).toBeInTheDocument()
+    const nav = await screen.findByRole('navigation', { name: 'Primary navigation' })
+    expect(within(nav).getByRole('img', { name: /cotton flower/i })).toBeInTheDocument()
   })
 
   it('shows the client logo placeholder in the header until one is uploaded', async () => {
     renderApp({ signedInAs: SEEDED.admin })
     const banner = await screen.findByRole('banner')
-    expect(within(banner).getByText(/Client company logo/i)).toBeInTheDocument()
+    expect(within(banner).getByLabelText(/Client company logo/i)).toBeInTheDocument()
   })
 
   it('shows the ADMINISTRATION entry point to administrators', async () => {

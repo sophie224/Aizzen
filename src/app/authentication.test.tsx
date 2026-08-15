@@ -24,7 +24,9 @@ describe('sign-in with each demo account', () => {
     await signInWith(CREDENTIALS.admin.email, CREDENTIALS.admin.password)
 
     expect(await screen.findByRole('heading', { name: 'Dashboard', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText('ERM Administrator')).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('navigation', { name: 'Primary navigation' })).getByText('ERM Administrator'),
+    ).toBeInTheDocument()
   })
 
   it('loads the correct role for every seeded account', async () => {
@@ -41,7 +43,9 @@ describe('sign-in with each demo account', () => {
       const view = renderApp({ route: '/login' })
       await signInWith(testCase.credentials.email, testCase.credentials.password)
 
-      expect(await screen.findByText(testCase.name)).toBeInTheDocument()
+      // The rail prints the signed-in name and the job title, which coincide
+      // for the seeded Risk Manager account.
+      expect((await screen.findAllByText(testCase.name)).length).toBeGreaterThan(0)
 
       const nav = screen.getByRole('navigation', { name: 'Primary navigation' })
       const adminLink = within(nav).queryByRole('link', { name: 'Administration' })
@@ -182,7 +186,9 @@ describe('session persistence', () => {
     renderApp({ storage, sessionRepository })
 
     expect(await screen.findByRole('heading', { name: 'Dashboard', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText('ERM Administrator')).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('navigation', { name: 'Primary navigation' })).getByText('ERM Administrator'),
+    ).toBeInTheDocument()
   })
 
   it('stores only the user ID — never a credential or token', async () => {
@@ -285,8 +291,18 @@ describe('read-only roles surface no mutation controls', () => {
     await screen.findByRole('navigation', { name: 'Primary navigation' })
 
     const mutationLabels = /^(save|edit|new|add|create|delete|remove)\b/i
+    /*
+     * Saving a personal dashboard or register VIEW is a per-user preference,
+     * not a change to any risk record — every reader may do it, an auditor
+     * included. What must stay absent is anything that edits risk data.
+     */
+    const personalPreference = /^(save view|arrange)/i
     const buttons = screen.getAllByRole('button')
-    const offending = buttons.filter((button) => mutationLabels.test(button.textContent ?? ''))
+    const offending = buttons.filter(
+      (button) =>
+        mutationLabels.test(button.textContent ?? '') &&
+        !personalPreference.test(button.textContent ?? ''),
+    )
 
     expect(offending).toEqual([])
   })

@@ -29,6 +29,7 @@ function makeRisk(overrides: Partial<Risk> = {}): Risk {
     categoryId: 'cat_16', businessUnitId: 'bu_technology', riskOwnerId: 'usr_owner',
     originDate: '2026-01-01', reviewDate: '2027-01-01', targetDate: '2026-07-01',
     status: 'In Progress', responseType: 'Mitigate', outlook: 'Stable',
+    description: '',
     cause: 'c', event: 'e', consequence: 'q', statusNarrative: '',
     inherent: { impact: 4, likelihood: 4 },
     residual: { impact: 3, likelihood: 3 },

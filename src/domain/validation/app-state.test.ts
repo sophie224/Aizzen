@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { createDefaultMatrix } from '../risk-engine/default-matrix.ts'
 import legacyBaseline from '../../../fixtures/legacy-state.json'
 import { SCALE_VALUES } from '../types/enums.ts'
 import type {
@@ -38,19 +39,14 @@ function makeMatrix(): RatingMatrix {
     }
   }
   return {
+    version: 1,
+    scaleNameEn: 'Rating',
+    scaleNameKa: '',
     cells,
+    levels: createDefaultMatrix().levels,
     colors: { Low: '#00B050', Medium: '#FFF200', High: '#FFB900', Significant: '#F32121' },
-    impactLabels: {
-      1: { en: 'Minor', ka: '' }, 2: { en: 'Moderate', ka: '' }, 3: { en: 'Major', ka: '' },
-      4: { en: 'Severe', ka: '' }, 5: { en: 'Critical', ka: '' },
-    },
-    likelihoodLabels: {
-      1: { en: 'Remote', ka: '', probability: '0%-5%' },
-      2: { en: 'Unlikely', ka: '', probability: '6%-35%' },
-      3: { en: 'Possible', ka: '', probability: '36%-65%' },
-      4: { en: 'Likely', ka: '', probability: '66%-95%' },
-      5: { en: 'Almost Certain', ka: '', probability: '96%-100%' },
-    },
+    impactLabels: createDefaultMatrix().impactLabels,
+    likelihoodLabels: createDefaultMatrix().likelihoodLabels,
   }
 }
 
@@ -88,6 +84,7 @@ function makeRisk(): Risk {
     categoryId: 'cat_01', businessUnitId: 'bu_root', riskOwnerId: 'usr_test',
     originDate: '2026-01-01', reviewDate: '2027-01-01', targetDate: '2026-07-01',
     status: 'Draft', responseType: 'Mitigate', outlook: 'Stable',
+    description: '',
     cause: 'A cause.', event: 'An event.', consequence: 'A consequence.',
     statusNarrative: '',
     inherent: { ...score }, residual: { ...score }, target: { ...score },
@@ -116,6 +113,9 @@ function makeValidState(overrides: Partial<AppState> = {}): AppState {
     matrix: makeMatrix(),
     risks: [],
     savedViews: [],
+    matrixVersions: [],
+    dashboardViews: [],
+    dashboardLayouts: [],
     dashboards: [],
     reportTemplates: [],
     auditEvents: [],

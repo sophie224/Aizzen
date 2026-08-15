@@ -1,150 +1,274 @@
-/* Application shell: header, sidebar, content region (ARCHITECTURE.md §9). */
+/*
+ * Application shell: dark navy rail, light top bar, light content region
+ * (ARCHITECTURE.md §9 and the AIZEN Risk & Compliance target design).
+ */
 
 .shell {
   display: grid;
-  grid-template-rows: var(--header-height) 1fr;
-  min-height: 100%;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  grid-template-rows: var(--header-height) minmax(0, 1fr);
+  height: 100%;
+  background: var(--color-page);
 }
 
-/* --- header --------------------------------------------------------------- */
+/* --- navigation rail ------------------------------------------------------- */
 
-.shell__header {
+.rail {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-height: 0;
+  padding: var(--space-5) var(--space-3) var(--space-4);
+  background: var(--color-rail);
+  color: var(--color-text-on-primary);
+  overflow-y: auto;
+}
+
+.rail__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-2);
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+/* Navy-on-white mark, so it sits in a light badge rather than being recoloured. */
+.rail__mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  overflow: hidden;
+}
+
+.rail__mark img {
+  width: 1.6rem;
+  height: 1.6rem;
+  object-fit: contain;
+}
+
+.rail__brand-text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.rail__brand-name {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.1;
+}
+
+.rail__brand-line {
+  font-size: 0.5625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  overflow-wrap: anywhere;
+}
+
+.rail__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.rail__link,
+.rail__admin-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0.625rem var(--space-3);
+  border-radius: var(--radius-md);
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  line-height: 1.3;
+  transition: background var(--transition-fast) ease, color var(--transition-fast) ease;
+}
+
+.rail__link svg,
+.rail__admin-link svg {
+  flex: none;
+  opacity: 0.8;
+}
+
+.rail__link:hover,
+.rail__admin-link:hover {
+  background: var(--color-rail-hover);
+  color: var(--color-accent);
+}
+
+.rail__link[aria-current='page'],
+.rail__admin-link[aria-current='page'] {
+  background: var(--color-rail-active);
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.rail__link[aria-current='page'] svg,
+.rail__admin-link[aria-current='page'] svg {
+  opacity: 1;
+}
+
+/*
+ * Bottom-left ADMINISTRATION entry point — placement is a product requirement
+ * (ARCHITECTURE.md §9), so the rail pushes it to the end of the column.
+ */
+.rail__foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-top: var(--space-4);
+}
+
+.rail__user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: var(--space-2);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.rail__user-text {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+}
+
+.rail__user-name,
+.rail__user-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rail__user-name {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.rail__user-title {
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.rail__signout {
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: var(--space-1);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+
+.rail__signout:hover {
+  background: var(--color-rail-hover);
+  color: var(--color-accent);
+}
+
+/* --- top bar --------------------------------------------------------------- */
+
+.topbar {
+  grid-column: 2;
+  grid-row: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: 0 var(--space-5);
-  background: var(--color-primary);
-  color: var(--color-text-on-primary);
+  padding: 0 var(--space-6);
+  background: var(--color-topbar);
+  border-bottom: 1px solid var(--color-border);
 }
 
-/* Top-left: the AIZEN cotton-flower mark. */
-.shell__brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  color: var(--color-accent);
-  text-decoration: none;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+.topbar__identity {
+  min-width: 0;
 }
 
-.shell__brand-mark {
-  width: 2rem;
-  height: 2rem;
-  flex: none;
+.topbar__product {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-primary);
 }
 
-.shell__header-actions {
+.topbar__module {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.topbar__actions {
   display: flex;
   align-items: center;
   gap: var(--space-4);
 }
 
-/* Top-right: the uploadable client company logo. */
-.shell__client-logo {
+.topbar__language {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  cursor: pointer;
+}
+
+.topbar__language-seg {
+  padding: 0.15rem var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.topbar__language-seg.is-active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+/* Top-right client slot: placeholder button, or the uploaded logo. */
+.topbar__client {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--color-text-muted);
+}
+
+.topbar__client-logo {
   max-height: 2.25rem;
   max-width: 10rem;
   object-fit: contain;
 }
 
-.shell__client-logo-placeholder {
-  font-size: var(--text-xs);
-  color: var(--color-text-on-primary);
-  opacity: 0.7;
-}
-
-.shell__language {
-  background: transparent;
-  color: var(--color-accent);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: var(--radius-md);
-  padding: var(--space-2) var(--space-3);
-  cursor: pointer;
-  transition: background var(--transition-fast) ease;
-}
-
-.shell__language:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.shell__user {
-  font-size: var(--text-sm);
-  color: var(--color-text-on-primary);
-}
-
-/* --- body ----------------------------------------------------------------- */
-
-.shell__body {
-  display: grid;
-  grid-template-columns: var(--sidebar-width) 1fr;
-  min-height: 0;
-}
-
-.shell__sidebar {
-  display: flex;
-  flex-direction: column;
-  background: var(--color-surface-deep);
-  padding: var(--space-4) var(--space-3);
-}
-
-.shell__nav {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.shell__nav-link {
-  display: block;
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  color: var(--color-text-on-primary);
-  text-decoration: none;
-  transition: background var(--transition-fast) ease;
-}
-
-.shell__nav-link:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.shell__nav-link[aria-current='page'] {
-  background: var(--color-accent);
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
-/*
- * Bottom-left ADMINISTRATION entry point — placement is a product requirement
- * (ARCHITECTURE.md §9), so the sidebar pushes it to the end of the column.
- */
-.shell__admin-entry {
-  margin-top: auto;
-  padding-top: var(--space-4);
-  border-top: 1px solid rgba(255, 255, 255, 0.16);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.shell__admin-link {
-  display: block;
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  color: var(--color-accent);
-  text-decoration: none;
-  font-size: var(--text-sm);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  transition: background var(--transition-fast) ease;
-}
-
-.shell__admin-link:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
+/* --- content --------------------------------------------------------------- */
 
 .shell__main {
+  grid-column: 2;
+  grid-row: 2;
   min-width: 0;
-  padding: var(--space-6);
+  min-height: 0;
+  padding: var(--space-5) var(--space-6) var(--space-7);
   overflow-y: auto;
 }
 
@@ -191,20 +315,45 @@
 }
 
 @media (max-width: 60rem) {
-  .shell__body {
-    grid-template-columns: 1fr;
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
   }
 
-  .shell__sidebar {
+  .rail {
+    grid-column: 1;
+    grid-row: 1;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
   }
 
-  .shell__admin-entry {
+  .rail__nav,
+  .rail__foot {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .rail__user {
     margin-top: 0;
     border-top: 0;
-    padding-top: 0;
+  }
+
+  .topbar,
+  .shell__main {
+    grid-column: 1;
+  }
+
+  .topbar {
+    grid-row: 2;
+  }
+
+  .shell__main {
+    grid-row: 3;
+    padding: var(--space-4);
   }
 }

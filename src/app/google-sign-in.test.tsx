@@ -1,4 +1,4 @@
-import { render, screen, waitFor, type RenderResult } from '@testing-library/react'
+import { render, screen, within, waitFor, type RenderResult } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
@@ -125,7 +125,9 @@ describe('server session', () => {
     })
 
     expect(await screen.findByRole('heading', { name: 'Dashboard', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText('ERM Administrator')).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('navigation', { name: 'Primary navigation' })).getByText('ERM Administrator'),
+    ).toBeInTheDocument()
   })
 
   it('takes precedence over a stale local reference', async () => {
@@ -139,8 +141,11 @@ describe('server session', () => {
     })
 
     // The server session wins.
-    expect(await screen.findByText('ERM Administrator')).toBeInTheDocument()
-    expect(screen.queryByText('Internal Auditor')).toBeNull()
+    const nav = await screen.findByRole('navigation', { name: 'Primary navigation' })
+    await waitFor(() => {
+      expect(within(nav).getByText('ERM Administrator')).toBeInTheDocument()
+    })
+    expect(within(nav).queryByText('Internal Auditor')).toBeNull()
   })
 
   it('falls back to the local session when the service reports none', async () => {
@@ -149,7 +154,8 @@ describe('server session', () => {
 
     renderApp({ route: '/app/dashboard', sessionRepository })
 
-    expect(await screen.findByText('ERM Administrator')).toBeInTheDocument()
+    const nav = await screen.findByRole('navigation', { name: 'Primary navigation' })
+    expect(within(nav).getByText('ERM Administrator')).toBeInTheDocument()
   })
 
   it('still re-validates a server session against AppState', async () => {

@@ -39,7 +39,7 @@ const EXPECTED_PERMISSIONS: Record<string, Record<ModuleName, PermissionLevel>> 
 describe('seed state', () => {
   it('is at the current schema version', () => {
     expect(createSeedState().schemaVersion).toBe(SCHEMA_VERSION)
-    expect(SCHEMA_VERSION).toBe(8)
+    expect(SCHEMA_VERSION).toBe(11)
   })
 
   it('passes canonical validation', () => {
@@ -176,7 +176,8 @@ describe('seed rating matrix', () => {
 
     expect(matrix.impactLabels[1].en).toBe('Minor')
     expect(matrix.impactLabels[5].en).toBe('Critical')
-    expect(matrix.likelihoodLabels[3].probability).toBe('36%-65%')
+    expect(matrix.likelihoodLabels[3].percentFrom).toBe(36)
+    expect(matrix.likelihoodLabels[3].percentTo).toBe(65)
     expect(matrix.likelihoodLabels[5].en).toBe('Almost Certain')
   })
 })

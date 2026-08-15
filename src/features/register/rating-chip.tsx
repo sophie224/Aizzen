@@ -1,5 +1,6 @@
-import { assess } from '../../domain/risk-engine/index.ts'
+import { assess, ratingName } from '../../domain/risk-engine/index.ts'
 import type { RatingLabel, RatingMatrix, Score } from '../../domain/types/index.ts'
+import { useTranslation } from '../../i18n/index.ts'
 
 /*
  * Rating chip.
@@ -8,16 +9,18 @@ import type { RatingLabel, RatingMatrix, Score } from '../../domain/types/index.
  * colour alike. The component holds NO rating logic of its own; duplicating it
  * is prohibited (ARCHITECTURE.md §7).
  *
- * In Detailed mode all three chips share one size and show the full
- * `Score | Rating | Impact × Likelihood`, which is an explicit change request
- * (ARCHITECTURE.md §8.2).
+ * Variants share one accessible name so the chip reads identically wherever it
+ * appears:
+ *   compact  — Register rows: score, rating and Impact × Likelihood, condensed
+ *   detailed — the same information at reading size
+ *   pill     — rating word only, for the KPI strip where the score is printed
+ *              beside the chip at display size
  */
 
 export interface RatingChipProps {
   score: Score
   matrix: RatingMatrix
-  /** Detailed shows the full breakdown; compact shows score and rating only. */
-  variant?: 'compact' | 'detailed'
+  variant?: 'compact' | 'detailed' | 'pill'
   /** Accessible prefix, e.g. "Residual". */
   label: string
 }
@@ -41,7 +44,10 @@ function readableTextColor(background: string): string {
 }
 
 export function RatingChip({ score, matrix, variant = 'compact', label }: RatingChipProps) {
+  const { language } = useTranslation()
   const view = assess(score, matrix)
+  // The displayed word is the CONFIGURED name; `view.rating` stays the key.
+  const name = ratingName(matrix, view.rating, language)
 
   return (
     <span
@@ -52,15 +58,15 @@ export function RatingChip({ score, matrix, variant = 'compact', label }: Rating
        * rendered, and the accessible name spells the whole thing out
        * (ARCHITECTURE.md §9).
        */
-      aria-label={`${label}: ${view.rating}, score ${String(view.score)}, impact ${String(view.impact)} by likelihood ${String(view.likelihood)}`}
+      aria-label={`${label}: ${name}, score ${String(view.score)}, impact ${String(view.impact)} by likelihood ${String(view.likelihood)}`}
     >
-      <span className="rating-chip__score">{view.score}</span>
-      <span className="rating-chip__rating">{view.rating}</span>
-      {variant === 'detailed' ? (
+      {variant === 'pill' ? null : <span className="rating-chip__score">{view.score}</span>}
+      <span className="rating-chip__rating">{name}</span>
+      {variant === 'pill' ? null : (
         <span className="rating-chip__breakdown">
           {view.impact} × {view.likelihood}
         </span>
-      ) : null}
+      )}
     </span>
   )
 }

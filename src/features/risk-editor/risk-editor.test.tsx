@@ -32,6 +32,7 @@ function existingRisk(): Risk {
     categoryId: 'cat_16', businessUnitId: 'bu_technology', riskOwnerId: 'usr_owner',
     originDate: '2026-01-01', reviewDate: '2027-01-01', targetDate: '2026-07-01',
     status: 'In Progress', responseType: 'Mitigate', outlook: 'Stable',
+    description: '',
     cause: 'Deferred modernisation', event: 'A core service fails', consequence: 'Customer outage',
     statusNarrative: '',
     inherent: { impact: 4, likelihood: 4 },
@@ -88,9 +89,9 @@ function persisted(): AppState {
 
 async function fillRequired(user: ReturnType<typeof userEvent.setup>) {
   const dialog = screen.getByRole('dialog')
-  await user.type(within(dialog).getByLabelText('Risk title'), 'A brand new risk')
+  await user.type(within(dialog).getByLabelText('Risk name'), 'A brand new risk')
 
-  await user.click(within(dialog).getByRole('tab', { name: 'Structured description' }))
+  await user.click(within(dialog).getByRole('tab', { name: 'Structured risk description' }))
   await user.type(within(dialog).getByLabelText('Cause'), 'A cause')
   await user.type(within(dialog).getByLabelText('Event'), 'An event')
   await user.type(within(dialog).getByLabelText('Consequence'), 'A consequence')
@@ -114,7 +115,14 @@ describe('editor structure', () => {
     const dialog = screen.getByRole('dialog')
     expect(dialog).toHaveAttribute('aria-modal', 'true')
 
-    for (const tab of ['Basic', 'Structured description', 'Assessments', 'Controls', 'Actions', 'Custom fields']) {
+    for (const tab of [
+      'Basic information',
+      'Structured risk description',
+      'Risk assessments',
+      'Controls',
+      'Actions',
+      'Custom fields',
+    ]) {
       expect(within(dialog).getByRole('tab', { name: tab }), tab).toBeInTheDocument()
     }
   })
@@ -124,8 +132,8 @@ describe('editor structure', () => {
     const user = await openNewRisk()
     const dialog = screen.getByRole('dialog')
 
-    await user.click(within(dialog).getByRole('tab', { name: 'Assessments' }))
-    expect(within(dialog).getByRole('group', { name: 'Inherent' })).toBeInTheDocument()
+    await user.click(within(dialog).getByRole('tab', { name: 'Risk assessments' }))
+    expect(within(dialog).getByRole('group', { name: /^Inherent/ })).toBeInTheDocument()
   })
 })
 
@@ -160,7 +168,7 @@ describe('validation blocks save', () => {
     await fillRequired(user)
 
     const dialog = screen.getByRole('dialog')
-    await user.click(within(dialog).getByRole('tab', { name: 'Basic' }))
+    await user.click(within(dialog).getByRole('tab', { name: 'Basic information' }))
     await user.selectOptions(within(dialog).getByLabelText('Response'), 'Accept')
     await user.click(screen.getByRole('button', { name: 'Save' }))
 
@@ -174,7 +182,7 @@ describe('validation blocks save', () => {
     await fillRequired(user)
 
     const dialog = screen.getByRole('dialog')
-    await user.click(within(dialog).getByRole('tab', { name: 'Basic' }))
+    await user.click(within(dialog).getByRole('tab', { name: 'Basic information' }))
     await user.selectOptions(within(dialog).getByLabelText('Status'), 'Accepted')
     await user.click(screen.getByRole('button', { name: 'Save' }))
 
@@ -188,12 +196,16 @@ describe('validation blocks save', () => {
 // --- cancel -----------------------------------------------------------------
 
 describe('cancel persists nothing', () => {
-  it('discards a new risk on Cancel', async () => {
+  it('discards a new risk on Cancel, once the discard is confirmed', async () => {
     renderRegister()
     const user = await openNewRisk()
     await fillRequired(user)
 
+    // Edits are present, so Cancel asks before throwing them away (CR-002).
     await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Discard changes' }))
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).toBeNull()
@@ -201,11 +213,23 @@ describe('cancel persists nothing', () => {
     expect(persisted().risks).toHaveLength(1)
   })
 
+  it('closes straight away when nothing has been edited', async () => {
+    renderRegister()
+    const user = await openNewRisk()
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull()
+    })
+    expect(screen.queryByRole('button', { name: 'Discard changes' })).toBeNull()
+  })
+
   it('discards edits to an existing risk on Escape', async () => {
     renderRegister()
     const user = userEvent.setup()
 
-    await user.click(await screen.findByRole('link', { name: 'TECH-001' }))
+    await user.click(await screen.findByRole('link', { name: 'Legacy platform fragility' }))
     // The register links to the detail route; open the editor via New risk
     // and confirm Escape closes without writing.
     await user.click(screen.getByRole('button', { name: 'New risk' }))
@@ -267,8 +291,8 @@ describe('creating a risk', () => {
     const user = await openNewRisk()
     const dialog = screen.getByRole('dialog')
 
-    await user.type(within(dialog).getByLabelText('Risk title'), '   Padded title   ')
-    await user.click(within(dialog).getByRole('tab', { name: 'Structured description' }))
+    await user.type(within(dialog).getByLabelText('Risk name'), '   Padded title   ')
+    await user.click(within(dialog).getByRole('tab', { name: 'Structured risk description' }))
     await user.type(within(dialog).getByLabelText('Cause'), 'c')
     await user.type(within(dialog).getByLabelText('Event'), 'e')
     await user.type(within(dialog).getByLabelText('Consequence'), 'q')
@@ -288,24 +312,24 @@ describe('creating a risk', () => {
     expect(within(dialog).getByLabelText('Status')).toHaveValue('Draft')
     expect(within(dialog).getByLabelText('Risk type')).toHaveValue('Current')
     expect(within(dialog).getByLabelText('Response')).toHaveValue('Mitigate')
-    expect(within(dialog).getByLabelText('Outlook')).toHaveValue('Stable')
+    expect(within(dialog).getByLabelText('Risk outlook')).toHaveValue('Stable')
   })
 
   it('shows the default assessments 3x3, 2x3 and 2x2', async () => {
     renderRegister()
     const user = await openNewRisk()
     const dialog = screen.getByRole('dialog')
-    await user.click(within(dialog).getByRole('tab', { name: 'Assessments' }))
+    await user.click(within(dialog).getByRole('tab', { name: 'Risk assessments' }))
 
-    const inherent = within(dialog).getByRole('group', { name: 'Inherent' })
+    const inherent = within(dialog).getByRole('group', { name: /^Inherent/ })
     expect(within(inherent).getByLabelText('Impact')).toHaveValue('3')
     expect(within(inherent).getByLabelText('Likelihood')).toHaveValue('3')
 
-    const residual = within(dialog).getByRole('group', { name: 'Residual' })
+    const residual = within(dialog).getByRole('group', { name: /^Residual/ })
     expect(within(residual).getByLabelText('Impact')).toHaveValue('2')
     expect(within(residual).getByLabelText('Likelihood')).toHaveValue('3')
 
-    const target = within(dialog).getByRole('group', { name: 'Target' })
+    const target = within(dialog).getByRole('group', { name: /^Target/ })
     expect(within(target).getByLabelText('Impact')).toHaveValue('2')
     expect(within(target).getByLabelText('Likelihood')).toHaveValue('2')
   })
@@ -336,16 +360,205 @@ describe('assessment changes', () => {
     renderRegister()
     const user = await openNewRisk()
     const dialog = screen.getByRole('dialog')
-    await user.click(within(dialog).getByRole('tab', { name: 'Assessments' }))
+    await user.click(within(dialog).getByRole('tab', { name: 'Risk assessments' }))
 
-    const inherent = within(dialog).getByRole('group', { name: 'Inherent' })
+    const inherent = within(dialog).getByRole('group', { name: /^Inherent/ })
     // 3 x 3 = 9 -> Medium under the 2026 defaults.
-    expect(within(inherent).getByText(/9 · Medium/)).toBeInTheDocument()
+    expect(
+      within(inherent).getByLabelText('Inherent: Medium, score 9, impact 3 by likelihood 3'),
+    ).toBeInTheDocument()
 
     await user.selectOptions(within(inherent).getByLabelText('Impact'), '5')
     await waitFor(() => {
       // 5 x 3 = 15 -> High.
-      expect(within(inherent).getByText(/15 · High/)).toBeInTheDocument()
+      expect(
+        within(inherent).getByLabelText('Inherent: High, score 15, impact 5 by likelihood 3'),
+      ).toBeInTheDocument()
+    })
+  })
+})
+
+// --- manual risk description (CR-002) ---------------------------------------
+
+describe('manual risk description', () => {
+  it('offers the field above 01 Cause, with helper text and a counter', async () => {
+    renderRegister()
+    const user = await openNewRisk()
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('tab', { name: 'Structured risk description' }))
+
+    const description = within(dialog).getByLabelText('Risk description')
+    expect(description).toHaveValue('')
+    expect(within(dialog).getByText(/Short summary of the risk in free text/)).toBeInTheDocument()
+    expect(within(dialog).getByText('0 / 2000')).toBeInTheDocument()
+
+    // The manual field precedes the numbered structured blocks.
+    const cause = within(dialog).getByLabelText('Cause')
+    expect(description.compareDocumentPosition(cause)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
+  it('persists what was typed and counts the characters', async () => {
+    renderRegister()
+    const user = await openNewRisk()
+    await fillRequired(user)
+
+    const dialog = screen.getByRole('dialog')
+    await user.type(within(dialog).getByLabelText('Risk description'), 'A concise summary.')
+    expect(within(dialog).getByText('18 / 2000')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => {
+      expect(persisted().risks).toHaveLength(2)
+    })
+    const created = persisted().risks.find((risk) => risk.title === 'A brand new risk')
+    expect(created?.description).toBe('A concise summary.')
+  })
+
+  it('never derives the description from cause, event or consequence', async () => {
+    renderRegister()
+    const user = await openNewRisk()
+    await fillRequired(user)
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => {
+      expect(persisted().risks).toHaveLength(2)
+    })
+    const created = persisted().risks.find((risk) => risk.title === 'A brand new risk')
+    expect(created?.description).toBe('')
+  })
+
+  it('stops typing at the 2000 character cap', async () => {
+    renderRegister()
+    const user = await openNewRisk()
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('tab', { name: 'Structured risk description' }))
+
+    expect(within(dialog).getByLabelText('Risk description')).toHaveAttribute('maxLength', '2000')
+  })
+})
+
+describe('assessment matrix picker', () => {
+  it('offers labelled impact and likelihood options', async () => {
+    renderRegister()
+    const user = await openNewRisk()
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('tab', { name: 'Risk assessments' }))
+
+    const inherent = within(dialog).getByRole('group', { name: /^Inherent/ })
+    const impactOptions = within(within(inherent).getByLabelText('Impact')).getAllByRole('option')
+    expect(impactOptions.map((option) => option.textContent)).toContain('5 — Critical')
+
+    const likelihoodOptions = within(within(inherent).getByLabelText('Likelihood')).getAllByRole('option')
+    expect(likelihoodOptions.map((option) => option.textContent)).toContain('2 — Unlikely (6%-35%)')
+  })
+
+  it('reads its option labels from the saved matrix configuration (CR-003)', async () => {
+    await seed((state) => {
+      state.matrix.impactLabels[5] = { ...state.matrix.impactLabels[5], en: 'Catastrophic' }
+      state.matrix.likelihoodLabels[2] = {
+        ...state.matrix.likelihoodLabels[2],
+        en: 'Improbable', percentFrom: 10, percentTo: 30,
+      }
+      state.matrix.levels = state.matrix.levels.map((level) =>
+        level.key === 'Medium' ? { ...level, nameEn: 'Watch' } : level,
+      )
+    })
+
+    renderRegister()
+    const user = await openNewRisk()
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('tab', { name: 'Risk assessments' }))
+
+    const inherent = within(dialog).getByRole('group', { name: /^Inherent/ })
+    const impactOptions = within(within(inherent).getByLabelText('Impact')).getAllByRole('option')
+    expect(impactOptions.map((option) => option.textContent)).toContain('5 — Catastrophic')
+
+    const likelihoodOptions = within(within(inherent).getByLabelText('Likelihood')).getAllByRole('option')
+    expect(likelihoodOptions.map((option) => option.textContent)).toContain('2 — Improbable (10%-30%)')
+
+    // 3 x 3 = 9 is the Medium cell, now displayed as Watch.
+    expect(
+      within(inherent).getByLabelText('Inherent: Watch, score 9, impact 3 by likelihood 3'),
+    ).toBeInTheDocument()
+  })
+
+  it('sets impact and likelihood when a matrix cell is clicked', async () => {
+    renderRegister()
+    const user = await openNewRisk()
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('tab', { name: 'Risk assessments' }))
+
+    const inherent = within(dialog).getByRole('group', { name: /^Inherent/ })
+    await user.click(within(inherent).getByRole('button', { name: /Impact 5, Likelihood 4:/ }))
+
+    await waitFor(() => {
+      expect(within(inherent).getByLabelText('Impact')).toHaveValue('5')
+    })
+    expect(within(inherent).getByLabelText('Likelihood')).toHaveValue('4')
+    // 5 x 4 = 20 -> Significant, resolved by the engine, not by the component.
+    expect(
+      within(inherent).getByLabelText('Inherent: Significant, score 20, impact 5 by likelihood 4'),
+    ).toBeInTheDocument()
+  })
+
+  it('keeps the footer score summary in sync', async () => {
+    renderRegister()
+    const user = await openNewRisk()
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('tab', { name: 'Risk assessments' }))
+
+    const summary = within(dialog).getByLabelText('Score summary')
+    // Documented new-risk defaults: 3x3, 2x3, 2x2.
+    expect(summary).toHaveTextContent('Inherent9')
+    expect(summary).toHaveTextContent('Target4')
+
+    const target = within(dialog).getByRole('group', { name: /^Target/ })
+    await user.selectOptions(within(target).getByLabelText('Impact'), '5')
+
+    await waitFor(() => {
+      expect(summary).toHaveTextContent('Target10')
+    })
+  })
+})
+
+// --- actions ----------------------------------------------------------------
+
+describe('actions tab', () => {
+  it('renders a full card per action and keeps the tab counter in sync', async () => {
+    renderRegister()
+    const user = await openNewRisk()
+    const dialog = screen.getByRole('dialog')
+
+    await user.click(within(dialog).getByRole('tab', { name: 'Actions' }))
+    expect(within(dialog).getByText('Remediation actions')).toBeInTheDocument()
+
+    await user.click(within(dialog).getByRole('button', { name: 'Add action' }))
+
+    for (const field of ['Action title', 'Action owner', 'Deadline', 'Priority', 'Description', 'Deliverable', 'Notes']) {
+      expect(within(dialog).getByLabelText(field), field).toBeInTheDocument()
+    }
+
+    expect(within(dialog).getByRole('tab', { name: 'Actions' })).toHaveTextContent('1')
+  })
+
+  it('removes an action only after the inline confirmation', async () => {
+    renderRegister()
+    const user = await openNewRisk()
+    const dialog = screen.getByRole('dialog')
+
+    await user.click(within(dialog).getByRole('tab', { name: 'Actions' }))
+    await user.click(within(dialog).getByRole('button', { name: 'Add action' }))
+    await user.type(within(dialog).getByLabelText('Action title'), 'Patch rollout')
+
+    await user.click(within(dialog).getByRole('button', { name: 'Remove: Patch rollout' }))
+    // Still there until the removal is confirmed.
+    expect(within(dialog).getByLabelText('Action title')).toBeInTheDocument()
+
+    await user.click(within(within(dialog).getByRole('alert')).getByRole('button', { name: 'Remove' }))
+
+    await waitFor(() => {
+      expect(within(dialog).queryByLabelText('Action title')).toBeNull()
     })
   })
 })
@@ -422,7 +635,7 @@ describe('owner candidate lists', () => {
     await openNewRisk()
     const dialog = screen.getByRole('dialog')
 
-    const options = within(within(dialog).getByLabelText('Risk owner')).getAllByRole('option')
+    const options = within(within(dialog).getByLabelText('Risk owner (accountable)')).getAllByRole('option')
     expect(options.map((option) => option.textContent)).not.toContain('Nino Kapanadze')
   })
 
@@ -435,7 +648,7 @@ describe('owner candidate lists', () => {
     await user.selectOptions(within(dialog).getByLabelText('Business unit'), 'bu_finance')
 
     await waitFor(() => {
-      const options = within(within(dialog).getByLabelText('Risk owner')).getAllByRole('option')
+      const options = within(within(dialog).getByLabelText('Risk owner (accountable)')).getAllByRole('option')
       expect(options.map((option) => option.textContent)).not.toContain('Nino Kapanadze')
     })
   })

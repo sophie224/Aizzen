@@ -27,6 +27,7 @@ function seedRisk(overrides: Partial<Risk> = {}): Risk {
     categoryId: 'cat_16', businessUnitId: 'bu_technology', riskOwnerId: 'usr_owner',
     originDate: '2026-01-01', reviewDate: '2027-01-01', targetDate: '2026-07-01',
     status: 'In Progress', responseType: 'Mitigate', outlook: 'Stable',
+    description: '',
     cause: 'c', event: 'e', consequence: 'q', statusNarrative: '',
     inherent: { impact: 3, likelihood: 3 }, residual: { impact: 2, likelihood: 2 }, target: { impact: 1, likelihood: 1 },
     controls: [], actions: [],

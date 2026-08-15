@@ -98,6 +98,8 @@ export function createDraftRisk(context: DraftContext): Risk {
     status: 'Draft',
     responseType: 'Mitigate',
     outlook: 'Stable',
+    // Manual free text — a new risk starts empty and is never auto-filled.
+    description: '',
     cause: '',
     event: '',
     consequence: '',

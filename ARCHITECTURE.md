@@ -147,6 +147,7 @@ reportSection.dashboardId → dashboard.id
 | `status` | enum | manager controlled (`Draft` default) |
 | `responseType` | enum | `Avoid` \| `Mitigate` \| `Transfer` \| `Accept` |
 | `outlook` | enum | `Increasing` \| `Stable` \| `Decreasing` — **manual**, never overwritten by computed trend |
+| `description` | text | manual free-text summary, optional, max 2 000 chars — **never derived from cause/event/consequence** (CR-002) |
 | `cause` / `event` / `consequence` | text | **all three required** |
 | `statusNarrative` | text | monitoring/reporting narrative |
 | `inherent` / `residual` / `target` | `Score` | `{ impact: 1–5, likelihood: 1–5 }` |
@@ -246,7 +247,7 @@ interface AppRepository {
 
 ### 4.1 Schema migration and repair
 
-Current `schemaVersion = 8` (the legacy `app.html` is at 7 — the migration path must handle it). Migration is **idempotent**, never intentionally deletes valid risk data, fills missing collections with defaults, repairs invalid references conservatively, and persists only after a successful migration.
+Current `schemaVersion = 11` (9 added the manual `Risk.description` from CR-002; 10 adds the configurable rating matrix from CR-003 — matrix version, scale name, level display names, criterion descriptions and percentage bands, plus `matrixVersions` and the `matrixVersion` stamp on assessment snapshots; 11 adds the Dashboard module's saved views and per-user widget layouts from CR-004. Every step is additive and migration fills what is missing without overwriting configured values. The legacy `app.html` is at 7 — the migration path must handle it). Migration is **idempotent**, never intentionally deletes valid risk data, fills missing collections with defaults, repairs invalid references conservatively, and persists only after a successful migration.
 
 | Problem | Repair |
 |---|---|
@@ -469,7 +470,7 @@ Existing references never change when a Business Unit is later edited; a new ris
 
 **Out of scope in Phase 1:** server-side database · real SAML/OIDC · immutable audit ledger · email notifications · approval workflow engine · file/evidence repository · concurrent editing and conflict detection · reminder scheduler · API-enforced permissions.
 
-**Risk Register.** Case-insensitive search across risk reference, title, cause, event, consequence, category name, BU name *and full hierarchy path*, risk owner name and remediation action title. Filters: Risk Category (Level 1 group), Business Unit (selected + all descendants), Residual Rating, Risk Status, Risk Outlook — dashboards and report sections add Risk Type and Risk Owner. Sorting: title, owner, residual numeric score, target date; default risk reference ascending; clicking a header toggles direction. Two display modes — Compact (condensed management list) and Detailed (Cause/Event/Consequence, control/action detail, and equal-sized Inherent/Residual/Target chips showing `Score | Rating | Impact × Likelihood`). Column visibility is user-selected; an active custom attribute with `showInRegister = true` automatically joins the selectable columns.
+**Risk Register.** Case-insensitive search across risk reference, title, description, cause, event, consequence, category name, BU name *and full hierarchy path*, risk owner name and remediation action title. Filters: Risk Category (Level 1 group), Business Unit (selected + all descendants), Residual Rating, Risk Status, Risk Outlook — dashboards and report sections add Risk Type and Risk Owner. Sorting: title, owner, residual numeric score, target date; default risk reference ascending; clicking a header toggles direction. Two display modes — Compact (condensed management list) and Detailed (Cause/Event/Consequence, control/action detail, and equal-sized Inherent/Residual/Target chips showing `Score | Rating | Impact × Likelihood`). Column visibility is user-selected; an active custom attribute with `showInRegister = true` automatically joins the selectable columns.
 
 **Saved Views** persist search/filter state, sort state, visible columns, Compact/Detailed mode, owning user and `isDefault`. Actions: save current, apply, set default, clear default, remove. One default per user; setting a new default clears the old; the Register auto-applies the current user's default on open; deleting the default leaves the Register on its current state. Saved Views are user-specific and invisible to others.
 

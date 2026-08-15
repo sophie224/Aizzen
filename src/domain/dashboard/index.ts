@@ -2,7 +2,7 @@ import { summariseActions, isActionOverdue } from '../actions/index.ts'
 import { hierarchyPath } from '../business-units/index.ts'
 import { pickNamed } from '../localisation/index.ts'
 import { matchesFilters, type RegisterIndex } from '../register/index.ts'
-import { riskRating, riskScore } from '../risk-engine/index.ts'
+import { ratingName, riskRating, riskScore } from '../risk-engine/index.ts'
 import { historicalTrend } from '../trend/index.ts'
 import { RATING_LABELS, SCALE_VALUES } from '../types/enums.ts'
 import type {
@@ -172,14 +172,17 @@ export function computeDistribution(
   }
 
   if (grouping === 'rating') {
-    for (const rating of RATING_LABELS) counts.set(rating, { label: rating, count: 0 })
+    // Keyed by the stable rating key; the label is the configured name (CR-003).
+    for (const rating of RATING_LABELS) {
+      counts.set(rating, { label: ratingName(context.matrix, rating, context.language), count: 0 })
+    }
   }
 
   for (const risk of risks) {
     switch (grouping) {
       case 'rating': {
         const rating = riskRating(risk.residual, context.matrix, context.index.ratingLookup)
-        bump(rating, rating)
+        bump(rating, ratingName(context.matrix, rating, context.language))
         break
       }
       case 'category': {

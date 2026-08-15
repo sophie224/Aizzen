@@ -20,26 +20,48 @@ export interface ColumnDefinition {
   defaultVisible: boolean
 }
 
+/*
+ * Definition order is also table order, so the default selection renders in
+ * exactly the sequence of the target design:
+ *
+ *   N · Risk name · Description · Owner · Inherent · Existing controls ·
+ *   Residual · Target · Response · Action plan · Target date · Status ·
+ *   Risk trend · Risk outlook
+ *
+ * Reference, Category and Business unit remain selectable — they carry data no
+ * other column shows — but are off by default because the risk-name cell
+ * already prints the code and the category beneath the title.
+ */
 export const BASE_COLUMNS: readonly ColumnDefinition[] = [
-  { id: 'ref', labelKey: 'register.column.ref', sortable: true, defaultVisible: true },
+  { id: 'n', labelKey: 'register.column.n', sortable: true, defaultVisible: true },
+  { id: 'ref', labelKey: 'register.column.ref', sortable: true, defaultVisible: false },
   { id: 'title', labelKey: 'register.column.title', sortable: true, defaultVisible: true },
-  { id: 'category', labelKey: 'register.column.category', sortable: false, defaultVisible: true },
-  { id: 'businessUnit', labelKey: 'register.column.businessUnit', sortable: false, defaultVisible: true },
+  { id: 'description', labelKey: 'register.column.description', sortable: false, defaultVisible: true },
+  { id: 'category', labelKey: 'register.column.category', sortable: false, defaultVisible: false },
+  { id: 'businessUnit', labelKey: 'register.column.businessUnit', sortable: false, defaultVisible: false },
   { id: 'riskOwner', labelKey: 'register.column.riskOwner', sortable: true, defaultVisible: true },
-  { id: 'inherent', labelKey: 'register.column.inherent', sortable: false, defaultVisible: false },
+  { id: 'inherent', labelKey: 'register.column.inherent', sortable: false, defaultVisible: true },
+  { id: 'controls', labelKey: 'register.column.controls', sortable: false, defaultVisible: true },
   { id: 'residual', labelKey: 'register.column.residual', sortable: true, defaultVisible: true },
-  { id: 'target', labelKey: 'register.column.target', sortable: false, defaultVisible: false },
-  { id: 'status', labelKey: 'register.column.status', sortable: false, defaultVisible: true },
-  { id: 'outlook', labelKey: 'register.column.outlook', sortable: false, defaultVisible: false },
+  { id: 'target', labelKey: 'register.column.target', sortable: false, defaultVisible: true },
+  { id: 'response', labelKey: 'register.column.response', sortable: false, defaultVisible: true },
+  { id: 'actionPlan', labelKey: 'register.column.actionPlan', sortable: false, defaultVisible: true },
   { id: 'targetDate', labelKey: 'register.column.targetDate', sortable: true, defaultVisible: true },
+  { id: 'status', labelKey: 'register.column.status', sortable: false, defaultVisible: true },
+  { id: 'trend', labelKey: 'register.column.trend', sortable: false, defaultVisible: true },
+  { id: 'outlook', labelKey: 'register.column.outlook', sortable: false, defaultVisible: true },
 ]
 
 export const DEFAULT_VISIBLE_COLUMNS: readonly string[] = BASE_COLUMNS.filter(
   (column) => column.defaultVisible,
 ).map((column) => column.id)
 
-/** Maps the sortable column keys onto the sort fields the query understands. */
+/**
+ * Maps the sortable column keys onto the sort fields the query understands.
+ * `n` is the sequence column: its order IS reference order, so it sorts by ref.
+ */
 export const COLUMN_SORT_FIELD: Record<string, 'ref' | 'title' | 'owner' | 'residual' | 'targetDate'> = {
+  n: 'ref',
   ref: 'ref',
   title: 'title',
   riskOwner: 'owner',

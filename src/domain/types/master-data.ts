@@ -114,22 +114,72 @@ export interface LocalisedLabel {
   ka: string
 }
 
-export interface LikelihoodLabel extends LocalisedLabel {
-  /** Probability band over the next 12 months, e.g. `36%-65%`. */
-  probability: string
+/** A configurable point on the impact scale (CR-003). */
+export interface ImpactLabel extends LocalisedLabel {
+  /** When this level applies. Optional, shown as guidance and as a tooltip. */
+  descriptionEn: string
+  descriptionKa: string
+}
+
+export interface LikelihoodLabel extends ImpactLabel {
+  /**
+   * Percentage band over the horizon, e.g. 36–65. BOTH ends are null when the
+   * organisation expresses likelihood as text only ("Once in 10 years").
+   */
+  percentFrom: number | null
+  percentTo: number | null
+  /** Free text shown instead of, or after, the percentage band. */
+  textEn: string
+  textKa: string
 }
 
 /**
- * The 5×5 rating matrix. Rating is resolved by EXACT CELL, never by score
- * band, so the same score may carry different ratings in different cells
- * (ARCHITECTURE.md §7).
+ * One rating level.
+ *
+ * `key` is the STABLE identifier — it is what cells, filters, saved views and
+ * exports are keyed by, so renaming a level never invalidates stored data
+ * (CR-003). Colour lives in `RatingMatrix.colors`, keyed by the same key, so
+ * there is exactly one place a colour is stored.
+ */
+export interface RatingLevel {
+  key: RatingLabel
+  nameEn: string
+  nameKa: string
+  /** Display order, lowest severity first. */
+  order: number
+}
+
+/**
+ * The 5×5 rating matrix — the single tenant-wide configuration every matrix,
+ * axis label, rating badge and guidance panel reads from (CR-003).
+ *
+ * Rating is resolved by EXACT CELL, never by score band, so the same score may
+ * carry different ratings in different cells (ARCHITECTURE.md §7). Score stays
+ * Impact × Likelihood and no label change can affect it.
  */
 export interface RatingMatrix {
+  /**
+   * Bumped on every saved configuration. Assessment snapshots record the
+   * version they were taken against, so history stays readable after a change.
+   */
+  version: number
+  /** The word used for the scale itself, default "Rating". */
+  scaleNameEn: string
+  scaleNameKa: string
   /** All 25 cells. Migration repairs the set if any are missing. */
   cells: MatrixCell[]
+  /** Display names for the four levels, keyed by their stable key. */
+  levels: RatingLevel[]
   colors: Record<RatingLabel, string>
-  impactLabels: Record<ScaleValue, LocalisedLabel>
+  impactLabels: Record<ScaleValue, ImpactLabel>
   likelihoodLabels: Record<ScaleValue, LikelihoodLabel>
+}
+
+/** An archived configuration, kept so historical assessments stay readable. */
+export interface MatrixVersion {
+  version: number
+  savedAt: string
+  matrix: RatingMatrix
 }
 
 /** Client company logo shown top-right; base64 data URL in Phase 1. */

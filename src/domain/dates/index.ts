@@ -34,6 +34,14 @@ export function addMonths(date: IsoDate, months: number): IsoDate {
   return toIsoDate(candidate)
 }
 
+/** Adds whole days to an ISO date, anchored at midday to avoid DST rollover. */
+export function addDays(date: IsoDate, days: number): IsoDate {
+  const anchored = new Date(`${date}T12:00:00Z`)
+  if (Number.isNaN(anchored.getTime())) return date
+  anchored.setUTCDate(anchored.getUTCDate() + days)
+  return toIsoDate(anchored)
+}
+
 /** True when `date` falls strictly before `reference`. Empty dates are never before. */
 export function isBefore(date: IsoDate, reference: IsoDate): boolean {
   if (!date || !reference) return false

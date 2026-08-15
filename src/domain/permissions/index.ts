@@ -242,6 +242,7 @@ export function mergeAuthorisedRiskUpdate(
     result.targetDate = submitted.targetDate
     result.responseType = submitted.responseType
     result.outlook = submitted.outlook
+    result.description = submitted.description
     result.cause = submitted.cause
     result.event = submitted.event
     result.consequence = submitted.consequence

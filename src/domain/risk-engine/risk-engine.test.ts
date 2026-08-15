@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { SCALE_VALUES } from '../types/enums.ts'
-import type { MatrixCell, RatingLabel, RatingMatrix, ScaleValue } from '../types/index.ts'
-import { DEFAULT_RATING_COLORS, DEFAULT_RATING_TABLE, defaultRatingFor } from './default-matrix.ts'
+import type { RatingLabel, RatingMatrix, ScaleValue } from '../types/index.ts'
+import { createDefaultMatrix, DEFAULT_RATING_COLORS, DEFAULT_RATING_TABLE } from './default-matrix.ts'
 import {
   assess,
   buildRatingLookup,
@@ -12,31 +12,9 @@ import {
   riskScore,
 } from './index.ts'
 
-/** Builds a complete 2026-default matrix without importing the data layer. */
+/** The complete 2026 default configuration, with optional overrides. */
 function makeMatrix(overrides: Partial<RatingMatrix> = {}): RatingMatrix {
-  const cells: MatrixCell[] = []
-  for (const impact of SCALE_VALUES) {
-    for (const likelihood of SCALE_VALUES) {
-      cells.push({ impact, likelihood, rating: defaultRatingFor(impact, likelihood) })
-    }
-  }
-  return {
-    cells,
-    colors: { ...DEFAULT_RATING_COLORS },
-    impactLabels: {
-      1: { en: 'Minor', ka: 'მცირე' }, 2: { en: 'Moderate', ka: 'საშუალო' },
-      3: { en: 'Major', ka: 'დიდი' }, 4: { en: 'Severe', ka: '' },
-      5: { en: 'Critical', ka: 'კრიტიკული' },
-    },
-    likelihoodLabels: {
-      1: { en: 'Remote', ka: 'არასავარაუდო', probability: '0%-5%' },
-      2: { en: 'Unlikely', ka: '', probability: '6%-35%' },
-      3: { en: 'Possible', ka: 'შესაძლო', probability: '36%-65%' },
-      4: { en: 'Likely', ka: 'სავარაუდო', probability: '66%-95%' },
-      5: { en: 'Almost Certain', ka: 'თითქმის უდავო', probability: '96%-100%' },
-    },
-    ...overrides,
-  }
+  return { ...createDefaultMatrix(), ...overrides }
 }
 
 describe('riskScore', () => {
@@ -195,8 +173,12 @@ describe('bilingual scale labels', () => {
   })
 
   it('falls back to English when the Georgian label is empty', () => {
-    expect(impactLabel(4, matrix, 'ka')).toBe('Severe')
-    expect(likelihoodLabel(2, matrix, 'ka')).toBe('Unlikely')
+    const blank = makeMatrix()
+    blank.impactLabels[4] = { ...blank.impactLabels[4], ka: '' }
+    blank.likelihoodLabels[2] = { ...blank.likelihoodLabels[2], ka: '   ' }
+
+    expect(impactLabel(4, blank, 'ka')).toBe('Severe')
+    expect(likelihoodLabel(2, blank, 'ka')).toBe('Unlikely')
   })
 })
 

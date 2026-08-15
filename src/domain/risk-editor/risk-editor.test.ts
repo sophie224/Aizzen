@@ -13,6 +13,7 @@ import {
   diffRisk,
   ownerCandidates,
   prepareSave,
+  RISK_DESCRIPTION_MAX_LENGTH,
   validateRisk,
 } from './index.ts'
 
@@ -72,6 +73,7 @@ function risk(overrides: Partial<Risk> = {}): Risk {
     categoryId: 'cat_cyber', businessUnitId: 'bu_technology', riskOwnerId: 'usr_owner',
     originDate: '2026-01-01', reviewDate: '2027-01-01', targetDate: '2026-07-01',
     status: 'In Progress', responseType: 'Mitigate', outlook: 'Stable',
+    description: '',
     cause: 'A cause', event: 'An event', consequence: 'A consequence', statusNarrative: '',
     inherent: { impact: 4, likelihood: 4 },
     residual: { impact: 3, likelihood: 3 },
@@ -89,6 +91,8 @@ const SAVE_BASE = {
   now: '2026-03-01T09:00:00.000Z',
   historyId: 'hist_test',
   generatedRef: 'TECH-009',
+  // The matrix configuration in force when the snapshot is taken (CR-003).
+  matrixVersion: 3,
 }
 
 // --- validation -------------------------------------------------------------
@@ -194,6 +198,21 @@ describe('cleanRisk', () => {
     const custom = { attr_text: 'KRI value', attr_number: 42 }
     expect(cleanRisk(risk({ custom }), options).custom).toEqual(custom)
   })
+
+  it('trims the description at its ends but keeps the author’s line breaks', () => {
+    const cleaned = cleanRisk(risk({ description: '  First line.\nSecond line.  ' }), options)
+    expect(cleaned.description).toBe('First line.\nSecond line.')
+  })
+
+  it('clamps a description longer than the documented maximum', () => {
+    const cleaned = cleanRisk(risk({ description: 'x'.repeat(2500) }), options)
+    expect(cleaned.description).toHaveLength(RISK_DESCRIPTION_MAX_LENGTH)
+  })
+
+  it('never fills the description from cause, event or consequence', () => {
+    const cleaned = cleanRisk(risk({ description: '' }), options)
+    expect(cleaned.description).toBe('')
+  })
 })
 
 // --- change detection -------------------------------------------------------
@@ -223,6 +242,10 @@ describe('diffRisk', () => {
   it('records score transitions with before and after values', () => {
     const changes = diffRisk(risk(), risk({ residual: { impact: 5, likelihood: 4 } }))
     expect(changes).toContain('Residual: 9 → 20')
+  })
+
+  it('names a description change like any other master field', () => {
+    expect(diffRisk(risk(), risk({ description: 'A new summary' }))).toContain('Description: changed')
   })
 
   it('records control and action changes', () => {

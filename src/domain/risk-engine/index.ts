@@ -1,8 +1,16 @@
-import { SCALE_VALUES } from '../types/enums.ts'
+import { RATING_LABELS, SCALE_VALUES } from '../types/enums.ts'
 import type { RatingLabel, ScaleValue } from '../types/enums.ts'
-import type { RatingMatrix, Score } from '../types/index.ts'
-import { pickLabel } from '../localisation/index.ts'
-import { DEFAULT_RATING_COLORS, defaultRatingFor } from './default-matrix.ts'
+import type { RatingLevel, RatingMatrix, Score } from '../types/index.ts'
+import { pickLabel, pickLanguage } from '../localisation/index.ts'
+import {
+  DEFAULT_RATING_COLORS,
+  DEFAULT_SCALE_NAME_EN,
+  DEFAULT_SCALE_NAME_KA,
+  defaultImpactLabels,
+  defaultLikelihoodLabels,
+  defaultRatingFor,
+  defaultRatingLevels,
+} from './default-matrix.ts'
 
 /*
  * The one risk engine (ARCHITECTURE.md §7).
@@ -93,6 +101,46 @@ export function assess(
   }
 }
 
+/*
+ * --- configured labels (CR-003) ----------------------------------------------
+ *
+ * Every name, description and probability band the UI renders is read through
+ * one of these functions. No component keeps its own copy of a label, so an
+ * administrator's rename shows up everywhere at once. All of them fall back to
+ * English when the Georgian value is blank (ARCHITECTURE.md §9).
+ */
+
+/** The configured word for the scale itself, default "Rating". */
+export function scaleName(matrix: RatingMatrix, language: 'en' | 'ka'): string {
+  return pickLanguage(matrix.scaleNameEn, matrix.scaleNameKa, language) || DEFAULT_SCALE_NAME_EN
+}
+
+/** The configured display name for a rating level, keyed by its stable key. */
+export function ratingName(
+  matrix: RatingMatrix,
+  key: RatingLabel,
+  language: 'en' | 'ka',
+): string {
+  const level = matrix.levels?.find((candidate) => candidate.key === key)
+  if (!level) return key
+  return pickLanguage(level.nameEn, level.nameKa, language) || key
+}
+
+/** Levels in configured order, for dropdowns, legends and filters. */
+export function ratingLevels(matrix: RatingMatrix): RatingLevel[] {
+  const configured = matrix.levels ?? []
+  const known = RATING_LABELS.map(
+    (key, index) =>
+      configured.find((level) => level.key === key) ?? {
+        key,
+        nameEn: key,
+        nameKa: '',
+        order: index + 1,
+      },
+  )
+  return [...known].sort((a, b) => a.order - b.order)
+}
+
 /** Bilingual impact label, falling back to English when Georgian is absent. */
 export function impactLabel(value: ScaleValue, matrix: RatingMatrix, language: 'en' | 'ka'): string {
   const label = matrix.impactLabels[value]
@@ -109,13 +157,76 @@ export function likelihoodLabel(
   return label ? pickLabel(label, language) : String(value)
 }
 
+export function impactDescription(
+  value: ScaleValue,
+  matrix: RatingMatrix,
+  language: 'en' | 'ka',
+): string {
+  const label = matrix.impactLabels[value]
+  if (!label) return ''
+  return pickLanguage(label.descriptionEn ?? '', label.descriptionKa ?? '', language)
+}
+
+export function likelihoodDescription(
+  value: ScaleValue,
+  matrix: RatingMatrix,
+  language: 'en' | 'ka',
+): string {
+  const label = matrix.likelihoodLabels[value]
+  if (!label) return ''
+  return pickLanguage(label.descriptionEn ?? '', label.descriptionKa ?? '', language)
+}
+
 /**
- * Rebuilds the 2026 default matrix (ARCHITECTURE.md §7).
+ * The probability band as displayed.
  *
- * All 25 cells and the four rating colours are reset exactly. Impact and
- * likelihood labels are PRESERVED from the current configuration: they are not
- * part of what "Restore defaults" resets, and the Phase 1 UI does not expose
- * them for editing anyway.
+ * The percentage band is optional: an organisation may express likelihood as
+ * text alone ("Once in 10 years"). When both are configured the percentage
+ * comes first and the text follows it (CR-003).
+ */
+export function likelihoodBand(
+  value: ScaleValue,
+  matrix: RatingMatrix,
+  language: 'en' | 'ka',
+): string {
+  const label = matrix.likelihoodLabels[value]
+  if (!label) return ''
+
+  const text = pickLanguage(label.textEn ?? '', label.textKa ?? '', language).trim()
+  const hasPercent = typeof label.percentFrom === 'number' && typeof label.percentTo === 'number'
+  const percent = hasPercent ? `${String(label.percentFrom)}%-${String(label.percentTo)}%` : ''
+
+  if (percent && text) return `${percent} · ${text}`
+  return percent || text
+}
+
+/** `2 — Unlikely (6%-35%)`, used by every likelihood dropdown. */
+export function likelihoodOptionLabel(
+  value: ScaleValue,
+  matrix: RatingMatrix,
+  language: 'en' | 'ka',
+): string {
+  const band = likelihoodBand(value, matrix, language)
+  const name = likelihoodLabel(value, matrix, language)
+  return band ? `${String(value)} — ${name} (${band})` : `${String(value)} — ${name}`
+}
+
+/** `5 — Critical`, used by every impact dropdown. */
+export function impactOptionLabel(
+  value: ScaleValue,
+  matrix: RatingMatrix,
+  language: 'en' | 'ka',
+): string {
+  return `${String(value)} — ${impactLabel(value, matrix, language)}`
+}
+
+/**
+ * Rebuilds the whole 2026 default configuration (ARCHITECTURE.md §7, CR-003).
+ *
+ * Everything resets: cells, colours, the scale name, the level names, the
+ * impact and likelihood names, descriptions and probability bands. The version
+ * is NOT reset — it keeps counting up, because restoring defaults is itself a
+ * new configuration that later snapshots must be able to point at.
  */
 export function restoreDefaultMatrix(current: RatingMatrix): RatingMatrix {
   const cells = []
@@ -126,26 +237,20 @@ export function restoreDefaultMatrix(current: RatingMatrix): RatingMatrix {
   }
 
   return {
+    version: current.version,
+    scaleNameEn: DEFAULT_SCALE_NAME_EN,
+    scaleNameKa: DEFAULT_SCALE_NAME_KA,
     cells,
+    levels: defaultRatingLevels(),
     colors: { ...DEFAULT_RATING_COLORS },
-    impactLabels: current.impactLabels,
-    likelihoodLabels: current.likelihoodLabels,
+    impactLabels: defaultImpactLabels(),
+    likelihoodLabels: defaultLikelihoodLabels(),
   }
 }
 
-/** Replaces one cell's rating, leaving the other 24 untouched. */
-export function setMatrixCell(
-  matrix: RatingMatrix,
-  impact: ScaleValue,
-  likelihood: ScaleValue,
-  rating: RatingLabel,
-): RatingMatrix {
-  return {
-    ...matrix,
-    cells: matrix.cells.map((cell) =>
-      cell.impact === impact && cell.likelihood === likelihood ? { ...cell, rating } : cell,
-    ),
-  }
-}
+/*
+ * Cell editing lives in `src/domain/matrix` with the rest of the
+ * configuration transforms — this module reads the matrix, it does not edit it.
+ */
 
 export * from './default-matrix.ts'

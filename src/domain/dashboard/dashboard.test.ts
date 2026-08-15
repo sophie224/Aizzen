@@ -1,13 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { buildRegisterIndex } from '../register/index.ts'
-import { DEFAULT_RATING_COLORS, defaultRatingFor } from '../risk-engine/default-matrix.ts'
-import { SCALE_VALUES } from '../types/enums.ts'
+import { createDefaultMatrix } from '../risk-engine/default-matrix.ts'
 import type {
   AssessmentHistoryItem,
   AuditEvent,
   BusinessUnit,
   Category,
-  MatrixCell,
   RatingMatrix,
   RemediationAction,
   Risk,
@@ -48,22 +46,7 @@ const USERS: User[] = [
 ]
 
 function makeMatrix(): RatingMatrix {
-  const cells: MatrixCell[] = []
-  for (const impact of SCALE_VALUES) {
-    for (const likelihood of SCALE_VALUES) {
-      cells.push({ impact, likelihood, rating: defaultRatingFor(impact, likelihood) })
-    }
-  }
-  return {
-    cells,
-    colors: { ...DEFAULT_RATING_COLORS },
-    impactLabels: { 1: { en: 'Minor', ka: '' }, 2: { en: 'Moderate', ka: '' }, 3: { en: 'Major', ka: '' }, 4: { en: 'Severe', ka: '' }, 5: { en: 'Critical', ka: '' } },
-    likelihoodLabels: {
-      1: { en: 'Remote', ka: '', probability: '' }, 2: { en: 'Unlikely', ka: '', probability: '' },
-      3: { en: 'Possible', ka: '', probability: '' }, 4: { en: 'Likely', ka: '', probability: '' },
-      5: { en: 'Almost Certain', ka: '', probability: '' },
-    },
-  }
+  return createDefaultMatrix()
 }
 
 function action(overrides: Partial<RemediationAction> = {}): RemediationAction {
@@ -88,6 +71,7 @@ function risk(overrides: Partial<Risk> = {}): Risk {
     categoryId: 'cat_cyber', businessUnitId: 'bu_tech', riskOwnerId: 'usr_a',
     originDate: '2026-01-01', reviewDate: '2027-01-01', targetDate: '2026-07-01',
     status: 'In Progress', responseType: 'Mitigate', outlook: 'Stable',
+    description: '',
     cause: 'c', event: 'e', consequence: 'q', statusNarrative: '',
     inherent: { impact: 4, likelihood: 4 },
     residual: { impact: 3, likelihood: 3 },

@@ -1,3 +1,4 @@
+import type { IsoDate } from './risk.ts'
 import type {
   AssessmentType,
   RatingLabel,
@@ -6,6 +7,7 @@ import type {
   Outlook,
   RiskStatus,
   RiskType,
+  ScaleValue,
   WidgetGrouping,
   WidgetMetric,
   WidgetSpan,
@@ -33,6 +35,35 @@ export interface RiskFilters {
   outlook?: Outlook
   riskType?: RiskType
   riskOwnerId?: string
+
+  /*
+   * --- dashboard drill-through (CR-004) -------------------------------------
+   *
+   * The dashboard and the Register share ONE predicate set, which is what
+   * makes a widget count and the register result reconcile exactly under the
+   * same filters. Every key below is optional and absent means "no
+   * constraint", exactly like the seven above.
+   */
+
+  /** Which assessment `impact` / `likelihood` refer to. Defaults to residual. */
+  basis?: AssessmentType
+  impact?: ScaleValue
+  likelihood?: ScaleValue
+
+  /** Target-date window, inclusive at both ends. */
+  targetFrom?: IsoDate
+  targetTo?: IsoDate
+
+  /** Still open: any status other than Completed. */
+  open?: boolean
+  /** Residual score above the target score. */
+  aboveTarget?: boolean
+  /** Residual rating sits at the most severe configured level. */
+  aboveAppetite?: boolean
+  /** Holds at least one action past its due date and not Completed. */
+  hasOverdueAction?: boolean
+  /** Review date falls within the next `REVIEW_SOON_DAYS`. */
+  reviewDueSoon?: boolean
 }
 
 export interface SortState {
@@ -56,6 +87,32 @@ export interface SavedView {
   visibleColumns: string[]
   viewMode: RegisterViewMode
   isDefault: boolean
+}
+
+/**
+ * A saved Dashboard view (CR-004).
+ *
+ * Mirrors the Register's saved views deliberately: private to its owner, at
+ * most one default each, and it captures the filter set plus the heat-map
+ * basis — the two things that change what every widget shows.
+ */
+export interface DashboardView {
+  id: string
+  name: string
+  /** Owning user — dashboard views are private, like the Register's. */
+  userId: string
+  filters: RiskFilters
+  basis: AssessmentType
+  isDefault: boolean
+}
+
+/** One user's widget arrangement, saved so the dashboard opens as they left it. */
+export interface DashboardLayout {
+  userId: string
+  /** Widget IDs in display order; unknown IDs are ignored on read. */
+  order: string[]
+  /** Widget IDs the user has hidden. */
+  hidden: string[]
 }
 
 export interface DashboardWidget {

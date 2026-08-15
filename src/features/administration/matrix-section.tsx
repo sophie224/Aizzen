@@ -1,89 +1,233 @@
+import { useState } from 'react'
 import { useAppData, useAppDataStore } from '../../data/app-data-context.ts'
+import {
+  diffMatrixConfiguration,
+  setImpactLevel,
+  setLikelihoodLevel,
+  setMatrixCell,
+  setRatingColor,
+  setRatingLevelName,
+  setScaleName,
+  validateMatrixConfiguration,
+  type MatrixConfigIssue,
+} from '../../domain/matrix/index.ts'
 import {
   impactLabel,
   likelihoodLabel,
   ratingColor,
+  ratingLevels,
+  ratingName,
   restoreDefaultMatrix,
   riskRating,
-  setMatrixCell,
+  scaleName,
 } from '../../domain/risk-engine/index.ts'
-import { RATING_LABELS, SCALE_VALUES } from '../../domain/types/enums.ts'
-import type { RatingLabel, ScaleValue } from '../../domain/types/index.ts'
-import { useTranslation } from '../../i18n/index.ts'
+import { SCALE_VALUES } from '../../domain/types/enums.ts'
+import type { RatingLabel, RatingMatrix, ScaleValue } from '../../domain/types/index.ts'
+import { useTranslation, type TranslationKey } from '../../i18n/index.ts'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
 
 /*
- * Rating Matrix configuration (ARCHITECTURE.md §8.5).
+ * Rating Matrix configuration (ARCHITECTURE.md §8.5, CR-003).
  *
- * All 25 cells are editable, plus the four rating colours. Score is always
- * Impact × Likelihood and is never configurable — only the RATING attached to
- * each intersection is.
+ * The WHOLE matrix is configurable: the name of the scale, the four level
+ * names, the impact and likelihood criteria with their descriptions and
+ * probability bands, the colours and all 25 cells.
+ *
+ * Editing happens on a local DRAFT. Nothing reaches AppState until Save
+ * configuration succeeds, so a half-finished rename never propagates to the
+ * Register, the assessments or the exports. Score is always Impact ×
+ * Likelihood and no edit here can change it.
  */
+
+/** Reads a percentage input back as a number, or null when it is cleared. */
+function parsePercent(raw: string): number | null {
+  if (raw.trim().length === 0) return null
+  const value = Number(raw)
+  return Number.isFinite(value) ? value : null
+}
+
 export function MatrixSection() {
   const { t, language } = useTranslation()
   const { state } = useAppData()
   const store = useAppDataStore()
   const { user: actor } = useCurrentUser()
 
+  // null = no unsaved edits; the live configuration is shown as-is.
+  const [draft, setDraft] = useState<RatingMatrix | null>(null)
+  const [confirmingRestore, setConfirmingRestore] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
   if (!state || !actor) return null
-  const matrix = state.matrix
 
-  const changeCell = async (impact: ScaleValue, likelihood: ScaleValue, rating: RatingLabel) => {
-    await store.update({
-      mutate: (next) => {
-        next.matrix = setMatrixCell(next.matrix, impact, likelihood, rating)
-      },
-      audit: {
-        actorId: actor.id,
-        action: 'matrix.updated',
-        entityType: 'Matrix',
-        entityId: 'rating-matrix',
-        summary: `Impact ${String(impact)} × likelihood ${String(likelihood)} set to ${rating}`,
-      },
-    })
+  const matrix = draft ?? state.matrix
+  const dirty = draft !== null
+  const { errors, warnings } = validateMatrixConfiguration(matrix)
+  const blocked = errors.length > 0
+
+  const edit = (next: RatingMatrix) => {
+    setDraft(next)
+    setSaved(false)
   }
 
-  const changeColor = async (rating: RatingLabel, color: string) => {
-    await store.update({
-      mutate: (next) => {
-        next.matrix = { ...next.matrix, colors: { ...next.matrix.colors, [rating]: color } }
-      },
-      audit: {
-        actorId: actor.id,
-        action: 'matrix.updated',
-        entityType: 'Matrix',
-        entityId: 'rating-matrix',
-        summary: `${rating} colour set to ${color}`,
-      },
-    })
+  const errorFor = (field: string): MatrixConfigIssue | undefined =>
+    errors.find((issue) => issue.field === field)
+
+  const save = async () => {
+    if (!dirty || blocked) return
+    setSaving(true)
+
+    const previous = state.matrix
+    const changes = diffMatrixConfiguration(previous, matrix)
+    const version = previous.version + 1
+    // Read the clock at the edge; the mutator itself stays deterministic.
+    const savedAt = new Date().toISOString()
+
+    try {
+      await store.update({
+        mutate: (next) => {
+          /*
+           * The superseded configuration is archived before the new one lands,
+           * so an assessment recorded against version N stays readable after
+           * version N+1 is saved (CR-003).
+           */
+          next.matrixVersions = [
+            { version: previous.version, savedAt, matrix: previous },
+            ...next.matrixVersions,
+          ]
+          next.matrix = { ...matrix, version }
+        },
+        audit: {
+          actorId: actor.id,
+          action: 'matrix.saved',
+          entityType: 'Matrix',
+          entityId: 'rating-matrix',
+          summary: `Configuration v${String(version)} saved`,
+          changes,
+        },
+      })
+      setDraft(null)
+      setSaved(true)
+    } finally {
+      setSaving(false)
+    }
   }
 
-  const restore = async () => {
-    await store.update({
-      mutate: (next) => {
-        next.matrix = restoreDefaultMatrix(next.matrix)
-      },
-      audit: {
-        actorId: actor.id,
-        action: 'matrix.restored',
-        entityType: 'Matrix',
-        entityId: 'rating-matrix',
-        summary: 'Risk Rating Matrix 2026 defaults applied.',
-      },
-    })
+  const restore = () => {
+    edit(restoreDefaultMatrix(matrix))
+    setConfirmingRestore(false)
   }
 
   // Impact descends so 5 sits at the top, matching the printed matrix.
   const impacts = [...SCALE_VALUES].reverse()
+  const levels = ratingLevels(matrix)
+  const scale = scaleName(matrix, language)
 
   return (
     <section aria-labelledby="matrix-title">
       <div className="admin-section__header">
-        <h2 id="matrix-title">{t('admin.section.matrix')}</h2>
-        <button type="button" onClick={() => void restore()}>{t('admin.matrix.restore')}</button>
+        <h2 id="matrix-title">
+          {scale} {t('admin.matrix.suffix')}
+        </h2>
+        <div className="admin-section__actions">
+          <span className="admin-matrix__version">
+            {t('admin.matrix.version')} {matrix.version}
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setConfirmingRestore(true)
+            }}
+          >
+            {t('admin.matrix.restore')}
+          </button>
+          <button
+            type="button"
+            className="admin-matrix__save"
+            disabled={!dirty || blocked || saving}
+            onClick={() => void save()}
+          >
+            {t('admin.matrix.save')}
+          </button>
+        </div>
       </div>
 
       <p className="panel__meta">{t('admin.matrix.intro')}</p>
+
+      {/* Dirty-state indicator: nothing is applied until Save configuration. */}
+      {dirty ? (
+        <p className="admin-matrix__dirty" role="status">
+          {t('admin.matrix.unsaved')}
+        </p>
+      ) : null}
+      {saved ? (
+        <p className="admin-matrix__saved" role="status">
+          {t('admin.matrix.savedNotice')}
+        </p>
+      ) : null}
+
+      {errors.length > 0 ? (
+        <div className="editor-errors" role="alert">
+          <p>{t('admin.matrix.blocked')}</p>
+          <ul>
+            {errors.map((issue) => (
+              <li key={`${issue.field}:${issue.messageKey}`}>
+                <code>{issue.field}</code> <span>{t(issue.messageKey as TranslationKey)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {warnings.map((issue) => (
+        <p key={issue.field} className="admin-matrix__warning" role="status">
+          {t(issue.messageKey as TranslationKey)}
+        </p>
+      ))}
+
+      {confirmingRestore ? (
+        <p className="admin-matrix__confirm" role="alert">
+          <span>{t('admin.matrix.restoreConfirm')}</span>
+          <button type="button" onClick={restore}>
+            {t('admin.matrix.restore')}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setConfirmingRestore(false)
+            }}
+          >
+            {t('action.cancel')}
+          </button>
+        </p>
+      ) : null}
+
+      {/* --- scale name -------------------------------------------------- */}
+
+      <fieldset className="admin-matrix__scale">
+        <legend>{t('admin.matrix.scaleName')}</legend>
+        <label>
+          <span>{t('admin.matrix.scaleNameEn')}</span>
+          <input
+            value={matrix.scaleNameEn}
+            aria-invalid={errorFor('scaleName') !== undefined}
+            onChange={(event) => {
+              edit(setScaleName(matrix, 'en', event.target.value))
+            }}
+          />
+        </label>
+        <label>
+          <span>{t('admin.matrix.scaleNameKa')}</span>
+          <input
+            value={matrix.scaleNameKa}
+            onChange={(event) => {
+              edit(setScaleName(matrix, 'ka', event.target.value))
+            }}
+          />
+        </label>
+      </fieldset>
+
+      {/* --- cells --------------------------------------------------------- */}
 
       <div className="scroll-x">
         <table className="matrix-editor">
@@ -123,11 +267,13 @@ export function MatrixSection() {
                         aria-label={label}
                         value={rating}
                         onChange={(event) => {
-                          void changeCell(impact, likelihood, event.target.value as RatingLabel)
+                          edit(setMatrixCell(matrix, impact, likelihood, event.target.value as RatingLabel))
                         }}
                       >
-                        {RATING_LABELS.map((option) => (
-                          <option key={option} value={option}>{option}</option>
+                        {levels.map((level) => (
+                          <option key={level.key} value={level.key}>
+                            {ratingName(matrix, level.key, language)}
+                          </option>
                         ))}
                       </select>
                       {/* Score is fixed arithmetic, shown for orientation only. */}
@@ -141,19 +287,201 @@ export function MatrixSection() {
         </table>
       </div>
 
-      <fieldset className="admin-colors">
-        <legend>{t('admin.matrix.colors')}</legend>
-        {RATING_LABELS.map((rating) => (
-          <label key={rating}>
-            <span>{rating}</span>
-            <input
-              type="color"
-              value={matrix.colors[rating]}
-              onChange={(event) => { void changeColor(rating, event.target.value) }}
-            />
-            <output>{matrix.colors[rating]}</output>
-          </label>
+      {/* --- rating levels ------------------------------------------------- */}
+
+      <fieldset className="admin-levels">
+        <legend>
+          {scale} {t('admin.matrix.levelsSuffix')}
+        </legend>
+        {levels.map((level) => (
+          <div key={level.key} className="admin-levels__row">
+            <label>
+              <span>{t('admin.matrix.levelNameEn')}</span>
+              <input
+                value={level.nameEn}
+                aria-invalid={errorFor(`level.${level.key}.name`) !== undefined}
+                onChange={(event) => {
+                  edit(setRatingLevelName(matrix, level.key, 'en', event.target.value))
+                }}
+              />
+            </label>
+            <label>
+              <span>{t('admin.matrix.levelNameKa')}</span>
+              <input
+                value={level.nameKa}
+                onChange={(event) => {
+                  edit(setRatingLevelName(matrix, level.key, 'ka', event.target.value))
+                }}
+              />
+            </label>
+            <label>
+              <span>{t('admin.matrix.levelColor')}</span>
+              <input
+                type="color"
+                value={matrix.colors[level.key]}
+                onChange={(event) => {
+                  edit(setRatingColor(matrix, level.key, event.target.value))
+                }}
+              />
+            </label>
+            <output>{matrix.colors[level.key]}</output>
+          </div>
         ))}
+      </fieldset>
+
+      {/* --- impact criteria ------------------------------------------------ */}
+
+      <fieldset className="admin-criteria">
+        <legend>{t('admin.matrix.impactCriteria')}</legend>
+        {SCALE_VALUES.map((value: ScaleValue) => {
+          const label = matrix.impactLabels[value]
+          return (
+            <div key={value} className="admin-criteria__row">
+              <span className="admin-criteria__value">{value}</span>
+              <label>
+                <span>{t('admin.matrix.criterionNameEn')}</span>
+                <input
+                  value={label.en}
+                  aria-invalid={errorFor(`impact.${String(value)}.name`) !== undefined}
+                  onChange={(event) => {
+                    edit(setImpactLevel(matrix, value, { en: event.target.value }))
+                  }}
+                />
+              </label>
+              <label>
+                <span>{t('admin.matrix.criterionNameKa')}</span>
+                <input
+                  value={label.ka}
+                  onChange={(event) => {
+                    edit(setImpactLevel(matrix, value, { ka: event.target.value }))
+                  }}
+                />
+              </label>
+              <label className="admin-criteria__description">
+                <span>{t('admin.matrix.criterionDescriptionEn')}</span>
+                <textarea
+                  value={label.descriptionEn}
+                  aria-invalid={errorFor(`impact.${String(value)}.description`) !== undefined}
+                  onChange={(event) => {
+                    edit(setImpactLevel(matrix, value, { descriptionEn: event.target.value }))
+                  }}
+                />
+              </label>
+              <label className="admin-criteria__description">
+                <span>{t('admin.matrix.criterionDescriptionKa')}</span>
+                <textarea
+                  value={label.descriptionKa}
+                  onChange={(event) => {
+                    edit(setImpactLevel(matrix, value, { descriptionKa: event.target.value }))
+                  }}
+                />
+              </label>
+            </div>
+          )
+        })}
+      </fieldset>
+
+      {/* --- likelihood criteria -------------------------------------------- */}
+
+      <fieldset className="admin-criteria">
+        <legend>{t('admin.matrix.likelihoodCriteria')}</legend>
+        <p className="panel__meta">{t('admin.matrix.likelihoodIntro')}</p>
+        {SCALE_VALUES.map((value: ScaleValue) => {
+          const label = matrix.likelihoodLabels[value]
+          return (
+            <div key={value} className="admin-criteria__row">
+              <span className="admin-criteria__value">{value}</span>
+              <label>
+                <span>{t('admin.matrix.criterionNameEn')}</span>
+                <input
+                  value={label.en}
+                  aria-invalid={errorFor(`likelihood.${String(value)}.name`) !== undefined}
+                  onChange={(event) => {
+                    edit(setLikelihoodLevel(matrix, value, { en: event.target.value }))
+                  }}
+                />
+              </label>
+              <label>
+                <span>{t('admin.matrix.criterionNameKa')}</span>
+                <input
+                  value={label.ka}
+                  onChange={(event) => {
+                    edit(setLikelihoodLevel(matrix, value, { ka: event.target.value }))
+                  }}
+                />
+              </label>
+              <label className="admin-criteria__percent">
+                <span>{t('admin.matrix.percentFrom')}</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={label.percentFrom ?? ''}
+                  aria-invalid={
+                    errorFor(`likelihood.${String(value)}.percentFrom`) !== undefined ||
+                    errorFor(`likelihood.${String(value)}.percent`) !== undefined
+                  }
+                  onChange={(event) => {
+                    edit(setLikelihoodLevel(matrix, value, { percentFrom: parsePercent(event.target.value) }))
+                  }}
+                />
+              </label>
+              <label className="admin-criteria__percent">
+                <span>{t('admin.matrix.percentTo')}</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={label.percentTo ?? ''}
+                  aria-invalid={
+                    errorFor(`likelihood.${String(value)}.percentTo`) !== undefined ||
+                    errorFor(`likelihood.${String(value)}.percent`) !== undefined
+                  }
+                  onChange={(event) => {
+                    edit(setLikelihoodLevel(matrix, value, { percentTo: parsePercent(event.target.value) }))
+                  }}
+                />
+              </label>
+              <label>
+                <span>{t('admin.matrix.textValueEn')}</span>
+                <input
+                  value={label.textEn}
+                  onChange={(event) => {
+                    edit(setLikelihoodLevel(matrix, value, { textEn: event.target.value }))
+                  }}
+                />
+              </label>
+              <label>
+                <span>{t('admin.matrix.textValueKa')}</span>
+                <input
+                  value={label.textKa}
+                  onChange={(event) => {
+                    edit(setLikelihoodLevel(matrix, value, { textKa: event.target.value }))
+                  }}
+                />
+              </label>
+              <label className="admin-criteria__description">
+                <span>{t('admin.matrix.criterionDescriptionEn')}</span>
+                <textarea
+                  value={label.descriptionEn}
+                  aria-invalid={errorFor(`likelihood.${String(value)}.description`) !== undefined}
+                  onChange={(event) => {
+                    edit(setLikelihoodLevel(matrix, value, { descriptionEn: event.target.value }))
+                  }}
+                />
+              </label>
+              <label className="admin-criteria__description">
+                <span>{t('admin.matrix.criterionDescriptionKa')}</span>
+                <textarea
+                  value={label.descriptionKa}
+                  onChange={(event) => {
+                    edit(setLikelihoodLevel(matrix, value, { descriptionKa: event.target.value }))
+                  }}
+                />
+              </label>
+            </div>
+          )
+        })}
       </fieldset>
     </section>
   )

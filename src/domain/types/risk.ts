@@ -97,6 +97,12 @@ export interface AssessmentHistoryItem {
   target: Score
   note: string
   actorId: string
+  /**
+   * The rating-matrix version this snapshot was recorded against (CR-003).
+   * Absent on snapshots taken before the matrix was versioned — the history
+   * view says so rather than claiming a version it cannot know.
+   */
+  matrixVersion?: number
 }
 
 /** Values for dynamic custom attributes, keyed by attribute ID. */
@@ -122,6 +128,15 @@ export interface Risk {
   responseType: ResponseType
   /** Manual management judgement, never auto-computed. */
   outlook: Outlook
+
+  /**
+   * Manual free-text summary (CR-002).
+   *
+   * Optional, plain text, capped at `RISK_DESCRIPTION_MAX_LENGTH`. It is a
+   * STANDALONE STORED VALUE: never auto-generated, and never derived from or
+   * overwritten by cause / event / consequence.
+   */
+  description: string
 
   /** Cause, event and consequence are all mandatory (ARCHITECTURE.md §8.2). */
   cause: string

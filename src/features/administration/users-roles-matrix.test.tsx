@@ -346,6 +346,10 @@ describe('rating matrix editor', () => {
     const user = await openSection('Rating matrix')
 
     await user.selectOptions(screen.getByLabelText('Impact 1, likelihood 1'), 'Significant')
+    // Nothing is applied until the configuration is saved (CR-003).
+    expect(persisted().matrix.cells.find((c) => c.impact === 1 && c.likelihood === 1)?.rating).toBe('Low')
+
+    await user.click(screen.getByRole('button', { name: 'Save configuration' }))
 
     await waitFor(() => {
       const cell = persisted().matrix.cells.find((c) => c.impact === 1 && c.likelihood === 1)
@@ -359,14 +363,22 @@ describe('rating matrix editor', () => {
     expect(cells).toHaveLength(25)
   })
 
-  it('audits a cell change', async () => {
+  it('audits a saved configuration and archives the previous version', async () => {
     renderAdmin()
     const user = await openSection('Rating matrix')
     await user.selectOptions(screen.getByLabelText('Impact 2, likelihood 2'), 'High')
+    await user.click(screen.getByRole('button', { name: 'Save configuration' }))
 
     await waitFor(() => {
-      expect(persisted().auditEvents.some((event) => event.action === 'matrix.updated')).toBe(true)
+      expect(persisted().auditEvents.some((event) => event.action === 'matrix.saved')).toBe(true)
     })
+
+    const event = persisted().auditEvents.find((candidate) => candidate.action === 'matrix.saved')
+    expect(event?.changes).toContain('Cell ratings: 1 changed')
+
+    // The version advances and the superseded configuration is archived.
+    expect(persisted().matrix.version).toBe(2)
+    expect(persisted().matrixVersions[0].version).toBe(1)
   })
 
   it('restores the 2026 defaults exactly, cells and colours', async () => {
@@ -379,6 +391,9 @@ describe('rating matrix editor', () => {
     renderAdmin()
     const user = await openSection('Rating matrix')
     await user.click(screen.getByRole('button', { name: 'Restore 2026 defaults' }))
+    // Restoring is itself a draft edit, confirmed and then saved.
+    await user.click(screen.getAllByRole('button', { name: 'Restore 2026 defaults' })[1])
+    await user.click(screen.getByRole('button', { name: 'Save configuration' }))
 
     await waitFor(() => {
       expect(persisted().matrix.colors).toEqual({
@@ -400,31 +415,41 @@ describe('rating matrix editor', () => {
     }
   })
 
-  it('preserves the impact and likelihood labels through a restore', async () => {
+  it('resets the criteria as well as the cells on a restore', async () => {
+    await seed((state) => {
+      state.matrix.impactLabels[5] = { ...state.matrix.impactLabels[5], en: 'Renamed' }
+      state.matrix.scaleNameEn = 'Severity'
+    })
+
     renderAdmin()
     const user = await openSection('Rating matrix')
     await user.click(screen.getByRole('button', { name: 'Restore 2026 defaults' }))
+    await user.click(screen.getAllByRole('button', { name: 'Restore 2026 defaults' })[1])
+    await user.click(screen.getByRole('button', { name: 'Save configuration' }))
 
     await waitFor(() => {
       expect(persisted().matrix.impactLabels[5].en).toBe('Critical')
     })
-    expect(persisted().matrix.likelihoodLabels[3].probability).toBe('36%-65%')
+    expect(persisted().matrix.scaleNameEn).toBe('Rating')
+    expect(persisted().matrix.likelihoodLabels[3].percentFrom).toBe(36)
   })
 
-  it('audits the restore', async () => {
+  it('asks for confirmation before restoring the defaults', async () => {
     renderAdmin()
     const user = await openSection('Rating matrix')
     await user.click(screen.getByRole('button', { name: 'Restore 2026 defaults' }))
 
-    await waitFor(() => {
-      expect(persisted().auditEvents.some((event) => event.action === 'matrix.restored')).toBe(true)
-    })
+    // The confirmation appears; nothing has been applied yet.
+    expect(await screen.findByRole('alert')).toHaveTextContent(/Restore every name/)
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(persisted().matrix.version).toBe(1)
   })
 
   it('keeps the score as Impact × Likelihood however cells are rated', async () => {
     renderAdmin()
     const user = await openSection('Rating matrix')
     await user.selectOptions(screen.getByLabelText('Impact 1, likelihood 1'), 'Significant')
+    await user.click(screen.getByRole('button', { name: 'Save configuration' }))
 
     await waitFor(() => {
       const cell = persisted().matrix.cells.find((c) => c.impact === 1 && c.likelihood === 1)
@@ -435,5 +460,99 @@ describe('rating matrix editor', () => {
     const table = screen.getByRole('table')
     expect(within(table).getByText('25')).toBeInTheDocument()
     expect(within(table).getAllByText('1').length).toBeGreaterThan(0)
+  })
+})
+
+// --- configurable matrix (CR-003) -------------------------------------------
+
+describe('matrix configuration', () => {
+  it('saves the scale name, level names and criteria as the tenant default', async () => {
+    renderAdmin()
+    const user = await openSection('Rating matrix')
+
+    await user.clear(screen.getByLabelText('Scale name (English)'))
+    await user.type(screen.getByLabelText('Scale name (English)'), 'Severity')
+
+    const levels = screen.getByRole('group', { name: /levels$/ })
+    const levelNames = within(levels).getAllByLabelText('Name (English)')
+    await user.clear(levelNames[3])
+    await user.type(levelNames[3], 'Extreme')
+
+    const impact = screen.getByRole('group', { name: 'Impact criteria' })
+    const impactNames = within(impact).getAllByLabelText('Name (English)')
+    await user.clear(impactNames[0])
+    await user.type(impactNames[0], 'Negligible')
+    await user.type(within(impact).getAllByLabelText('Description (English)')[0], ' Extra guidance.')
+
+    await user.click(screen.getByRole('button', { name: 'Save configuration' }))
+
+    await waitFor(() => {
+      expect(persisted().matrix.scaleNameEn).toBe('Severity')
+    })
+    const saved = persisted().matrix
+    expect(saved.levels.find((level) => level.key === 'Significant')?.nameEn).toBe('Extreme')
+    expect(saved.impactLabels[1].en).toBe('Negligible')
+    expect(saved.impactLabels[1].descriptionEn).toContain('Extra guidance.')
+    // Renaming never touches the stable key the cells are stored against.
+    expect(saved.cells.some((cell) => cell.rating === 'Significant')).toBe(true)
+  })
+
+  it('applies nothing until the configuration is saved', async () => {
+    renderAdmin()
+    const user = await openSection('Rating matrix')
+
+    await user.clear(screen.getByLabelText('Scale name (English)'))
+    await user.type(screen.getByLabelText('Scale name (English)'), 'Severity')
+
+    expect(screen.getByText(/Unsaved changes/)).toBeInTheDocument()
+    expect(persisted().matrix.scaleNameEn).toBe('Rating')
+  })
+
+  it('blocks saving while a name is invalid and says why', async () => {
+    renderAdmin()
+    const user = await openSection('Rating matrix')
+
+    const impact = screen.getByRole('group', { name: 'Impact criteria' })
+    const names = within(impact).getAllByLabelText('Name (English)')
+    await user.clear(names[2])
+    await user.type(names[2], 'Minor')
+
+    // Both clashing levels are flagged, not just the one that was typed into.
+    const alert = await screen.findByRole('alert')
+    expect(within(alert).getAllByText('Names must be unique.')).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Save configuration' })).toBeDisabled()
+  })
+
+  it('blocks saving when likelihood bands overlap', async () => {
+    renderAdmin()
+    const user = await openSection('Rating matrix')
+
+    const likelihood = screen.getByRole('group', { name: 'Likelihood criteria' })
+    const to = within(likelihood).getAllByLabelText('To %')
+    await user.clear(to[0])
+    await user.type(to[0], '20')
+
+    const alert = await screen.findByRole('alert')
+    expect(within(alert).getByText('Percentage bands must not overlap.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save configuration' })).toBeDisabled()
+  })
+
+  it('accepts a text-only likelihood level, warning about the gap', async () => {
+    renderAdmin()
+    const user = await openSection('Rating matrix')
+
+    const likelihood = screen.getByRole('group', { name: 'Likelihood criteria' })
+    await user.clear(within(likelihood).getAllByLabelText('From %')[0])
+    await user.clear(within(likelihood).getAllByLabelText('To %')[0])
+    await user.type(within(likelihood).getAllByLabelText('Text value (English)')[0], 'Once in 10 years')
+
+    expect(screen.getByText(/leave a gap/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Save configuration' }))
+
+    await waitFor(() => {
+      expect(persisted().matrix.likelihoodLabels[1].textEn).toBe('Once in 10 years')
+    })
+    expect(persisted().matrix.likelihoodLabels[1].percentFrom).toBeNull()
   })
 })

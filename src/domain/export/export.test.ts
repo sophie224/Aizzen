@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_RATING_COLORS, defaultRatingFor } from '../risk-engine/default-matrix.ts'
-import { SCALE_VALUES } from '../types/enums.ts'
+import { createDefaultMatrix } from '../risk-engine/default-matrix.ts'
 import type {
   AssessmentHistoryItem,
   BusinessUnit,
   Category,
   CustomAttribute,
-  MatrixCell,
   RatingMatrix,
   Risk,
   Score,
@@ -43,23 +41,9 @@ const ATTRIBUTES: CustomAttribute[] = [
   { id: 'attr_off', labelEn: 'Retired field', labelKa: '', type: 'text', options: [], active: false, showInRegister: true },
 ]
 
+/** The saved configuration, straight from the one default builder. */
 function makeMatrix(): RatingMatrix {
-  const cells: MatrixCell[] = []
-  for (const impact of SCALE_VALUES) {
-    for (const likelihood of SCALE_VALUES) {
-      cells.push({ impact, likelihood, rating: defaultRatingFor(impact, likelihood) })
-    }
-  }
-  return {
-    cells,
-    colors: { ...DEFAULT_RATING_COLORS },
-    impactLabels: { 1: { en: 'Minor', ka: '' }, 2: { en: 'Moderate', ka: '' }, 3: { en: 'Major', ka: '' }, 4: { en: 'Severe', ka: '' }, 5: { en: 'Critical', ka: '' } },
-    likelihoodLabels: {
-      1: { en: 'Remote', ka: '', probability: '' }, 2: { en: 'Unlikely', ka: '', probability: '' },
-      3: { en: 'Possible', ka: '', probability: '' }, 4: { en: 'Likely', ka: '', probability: '' },
-      5: { en: 'Almost Certain', ka: '', probability: '' },
-    },
-  }
+  return createDefaultMatrix()
 }
 
 function snapshot(residual: Score, date: string): AssessmentHistoryItem {
@@ -75,6 +59,7 @@ function risk(overrides: Partial<Risk> = {}): Risk {
     categoryId: 'cat_cyber', businessUnitId: 'bu_tech', riskOwnerId: 'usr_a',
     originDate: '2026-01-01', reviewDate: '2027-01-01', targetDate: '2026-07-01',
     status: 'In Progress', responseType: 'Mitigate', outlook: 'Stable',
+    description: '',
     cause: 'A cause', event: 'An event', consequence: 'A consequence', statusNarrative: '',
     inherent: { impact: 4, likelihood: 4 },
     residual: { impact: 3, likelihood: 3 },
@@ -98,8 +83,8 @@ describe('export rows', () => {
   it('carries the documented columns in order', () => {
     const [row] = buildExportRows([risk()], context)
 
-    expect(Object.keys(row).slice(0, 10)).toEqual([
-      'Risk ID', 'Risk Name', 'Category L1', 'Category L2', 'Business Unit',
+    expect(Object.keys(row).slice(0, 11)).toEqual([
+      'Risk ID', 'Risk Name', 'Description', 'Category L1', 'Category L2', 'Business Unit',
       'Business Unit Path', 'Risk Owner', 'Cause', 'Event', 'Consequence',
     ])
   })
@@ -111,6 +96,23 @@ describe('export rows', () => {
     expect(row['Residual Rating']).toBe('Medium')
     expect(row['Inherent Score']).toBe(16)
     expect(row['Target Score']).toBe(4)
+  })
+
+  it('exports the CONFIGURED rating, impact and likelihood names (CR-003)', () => {
+    const renamed = makeMatrix()
+    renamed.levels = renamed.levels.map((level) =>
+      level.key === 'Medium' ? { ...level, nameEn: 'Watch' } : level,
+    )
+    renamed.impactLabels[3] = { ...renamed.impactLabels[3], en: 'Substantial' }
+    renamed.likelihoodLabels[3] = { ...renamed.likelihoodLabels[3], en: 'Even chance' }
+
+    const [row] = buildExportRows([risk()], { ...context, matrix: renamed })
+
+    expect(row['Residual Rating']).toBe('Watch')
+    expect(row['Residual Impact Level']).toBe('Substantial')
+    expect(row['Residual Likelihood Level']).toBe('Even chance')
+    // The numeric score is untouched by any rename.
+    expect(row['Residual Score']).toBe(9)
   })
 
   it('follows a reconfigured matrix', () => {

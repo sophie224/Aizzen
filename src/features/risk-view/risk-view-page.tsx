@@ -2,23 +2,28 @@ import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAppData } from '../../data/app-data-context.ts'
 import { hierarchyPath } from '../../domain/business-units/index.ts'
-import { isActionOverdue } from '../../domain/actions/index.ts'
+import { displayActionStatus, isActionOverdue } from '../../domain/actions/index.ts'
 import { canEditRisk, canSeeRisk } from '../../domain/permissions/index.ts'
-import { assess } from '../../domain/risk-engine/index.ts'
+import { assess, impactLabel, likelihoodLabel } from '../../domain/risk-engine/index.ts'
+import { isRiskOverdue } from '../../domain/risks/index.ts'
 import { directionToTarget, historicalTrend } from '../../domain/trend/index.ts'
-import type { Risk } from '../../domain/types/index.ts'
+import type { AssessmentType, Outlook, RatingMatrix, Risk, Trend } from '../../domain/types/index.ts'
 import { pickNamed, useTranslation, type TranslationKey } from '../../i18n/index.ts'
+import { IconChevronLeft, IconList, IconPencil, IconTrend } from '../../ui/icons.tsx'
+import { initialsOf } from '../../ui/initials.ts'
+import { StatusPill } from '../../ui/status-pill.tsx'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
 import { RatingChip } from '../register/rating-chip.tsx'
 import { RiskEditorModal } from '../risk-editor/risk-editor-modal.tsx'
 import { AssessmentMatrix } from './assessment-matrix.tsx'
+import { MatrixGuidance } from './matrix-guidance.tsx'
 import { ResidualTrendChart } from './residual-trend-chart.tsx'
 import './risk-view.css'
 
 /*
  * Individual Risk View (ARCHITECTURE.md §8.2).
  *
- * Header band plus five tabs: Overview, Assessment, Controls, Actions,
+ * Dark hero band plus five tabs: Overview, Assessment, Controls, Actions,
  * Trend & Audit. Record-level visibility is enforced here, not just at the
  * route: a risk outside the user's scope resolves to the same not-found state
  * as one that does not exist, so the view cannot confirm its existence.
@@ -33,6 +38,33 @@ const TABS = [
 ] as const satisfies readonly { id: string; labelKey: TranslationKey }[]
 
 type TabId = (typeof TABS)[number]['id']
+
+const ASSESSMENTS = ['inherent', 'residual', 'target'] as const
+
+const TREND_DIRECTION: Record<Trend, 'up' | 'down' | 'flat'> = {
+  New: 'flat',
+  Improving: 'down',
+  Worsening: 'up',
+  Stable: 'flat',
+}
+
+const OUTLOOK_DIRECTION: Record<Outlook, 'up' | 'down' | 'flat'> = {
+  Increasing: 'up',
+  Stable: 'flat',
+  Decreasing: 'down',
+}
+
+/** Icon-based empty state, so an empty collection never reads as a broken panel. */
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="empty-state">
+      <span className="empty-state__icon" aria-hidden="true">
+        <IconList />
+      </span>
+      <p>{message}</p>
+    </div>
+  )
+}
 
 export function RiskViewPage() {
   const { t, language } = useTranslation()
@@ -71,18 +103,35 @@ export function RiskViewPage() {
   const editable = canEditRisk(context, risk)
 
   return (
-    <section aria-labelledby="risk-title">
-      <RiskHeader
+    <section aria-labelledby="risk-title" className="risk-view">
+      <div className="risk-view__top">
+        <Link to="/app/register" className="risk-view__back">
+          <IconChevronLeft size={14} />
+          {t('view.backToRegister')}
+        </Link>
+
+        {editable ? (
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => {
+              setEditing(true)
+            }}
+          >
+            <IconPencil size={14} />
+            {t('view.edit')}
+          </button>
+        ) : null}
+      </div>
+
+      <RiskHero
         risk={risk}
         categoryLabel={category ? `${pickNamed(category, 'level1', language)} / ${pickNamed(category, 'level2', language)}` : '—'}
         businessUnitPath={hierarchyPath(state.businessUnits, risk.businessUnitId, language)}
         ownerName={userName(risk.riskOwnerId)}
         actionOwnerNames={actionOwners.map(userName)}
         matrix={state.matrix}
-        editable={editable}
-        onEdit={() => {
-          setEditing(true)
-        }}
+        today={today}
       />
 
       <div className="risk-view__tabs" role="tablist" aria-label={t('page.risk.title')}>
@@ -131,74 +180,133 @@ export function RiskViewPage() {
   )
 }
 
-// --- header -----------------------------------------------------------------
+// --- hero band --------------------------------------------------------------
 
-function RiskHeader(props: {
+/** One KPI column of the strip under the hero band. */
+function ScoreKpi({
+  kind,
+  risk,
+  matrix,
+}: {
+  kind: AssessmentType
+  risk: Risk
+  matrix: RatingMatrix
+}) {
+  const { t } = useTranslation()
+  const label = t(`editor.assessment.${kind}` as TranslationKey)
+  const view = assess(risk[kind], matrix)
+
+  return (
+    <div className="risk-hero__kpi risk-hero__kpi--score" style={{ borderTopColor: view.color }}>
+      <dt>{label}</dt>
+      <dd>
+        <span className="risk-hero__score-line">
+          <span className="risk-hero__score">{view.score}</span>
+          <span className="risk-hero__breakdown">
+            {view.impact} × {view.likelihood}
+          </span>
+        </span>
+        <RatingChip score={risk[kind]} matrix={matrix} variant="pill" label={label} />
+      </dd>
+    </div>
+  )
+}
+
+function RiskHero(props: {
   risk: Risk
   categoryLabel: string
   businessUnitPath: string
   ownerName: string
   actionOwnerNames: string[]
-  matrix: Parameters<typeof assess>[1]
-  editable: boolean
-  onEdit: () => void
+  matrix: RatingMatrix
+  today: string
 }) {
   const { t } = useTranslation()
   const { risk } = props
+  const overdue = isRiskOverdue(risk, props.today)
 
   return (
-    <header className="risk-header">
-      <div className="risk-header__identity">
-        <p className="risk-header__ref">{risk.ref}</p>
-        <h1 id="risk-title">{risk.title}</h1>
-        <p className="risk-header__context">
-          {props.categoryLabel} · {props.businessUnitPath}
-        </p>
+    <header className="risk-hero">
+      <div className="risk-hero__band">
+        <span className="risk-hero__code">{risk.ref}</span>
+        <div className="risk-hero__identity">
+          <h1 id="risk-title">{risk.title}</h1>
+          <p className="risk-hero__context">
+            {props.categoryLabel} · {props.businessUnitPath}
+          </p>
+        </div>
+        <StatusPill status={risk.status} className="risk-hero__status" />
       </div>
 
-      <dl className="risk-header__meta">
-        <div>
+      <dl className="risk-hero__kpis">
+        <div className="risk-hero__kpi">
           <dt>{t('view.header.owner')}</dt>
-          <dd>{props.ownerName}</dd>
+          <dd>
+            <span className="risk-hero__person">
+              <span className="avatar" aria-hidden="true">
+                {initialsOf(props.ownerName)}
+              </span>
+              {props.ownerName}
+            </span>
+          </dd>
         </div>
-        <div>
+
+        <div className="risk-hero__kpi">
           <dt>{t('view.header.actionOwners')}</dt>
-          <dd>{props.actionOwnerNames.length > 0 ? props.actionOwnerNames.join(', ') : t('view.header.none')}</dd>
+          <dd>
+            {props.actionOwnerNames.length > 0 ? (
+              <>
+                <span className="risk-hero__person">
+                  <span className="avatar" aria-hidden="true">
+                    {initialsOf(props.actionOwnerNames[0])}
+                  </span>
+                  {props.actionOwnerNames.join(', ')}
+                </span>
+                <span className="risk-hero__meta">
+                  {props.actionOwnerNames.length} {t('view.header.actorCount')}
+                </span>
+              </>
+            ) : (
+              t('view.header.none')
+            )}
+          </dd>
         </div>
-        <div>
+
+        {ASSESSMENTS.map((kind) => (
+          <ScoreKpi key={kind} kind={kind} risk={risk} matrix={props.matrix} />
+        ))}
+
+        <div className="risk-hero__kpi">
           <dt>{t('view.header.targetDate')}</dt>
-          <dd>{risk.targetDate}</dd>
-        </div>
-        <div>
-          <dt>{t('view.header.status')}</dt>
-          <dd>{risk.status}</dd>
+          <dd>
+            <span className="risk-hero__date">{risk.targetDate}</span>
+            {overdue ? <span className="risk-view__overdue">{t('view.overdue')}</span> : null}
+          </dd>
         </div>
       </dl>
-
-      <div className="risk-header__scores">
-        {(['inherent', 'residual', 'target'] as const).map((kind) => (
-          <div key={kind} className="risk-header__score">
-            <span className="risk-header__score-label">{t(`editor.assessment.${kind}` as TranslationKey)}</span>
-            <RatingChip
-              score={risk[kind]}
-              matrix={props.matrix}
-              variant="detailed"
-              label={t(`editor.assessment.${kind}` as TranslationKey)}
-            />
-          </div>
-        ))}
-      </div>
-
-      {props.editable ? (
-        <button type="button" className="risk-header__edit" onClick={props.onEdit}>
-          {t('view.edit')}
-        </button>
-      ) : null}
     </header>
   )
 }
 
 // --- overview ---------------------------------------------------------------
+
+/** Trend chip. The label is part of the accessible name, never colour alone. */
+function SignalChip({
+  label,
+  value,
+  direction,
+}: {
+  label: string
+  value: string
+  direction: 'up' | 'down' | 'flat'
+}) {
+  return (
+    <span className={`signal-chip signal-chip--${direction}`} aria-label={`${label}: ${value}`}>
+      <IconTrend direction={direction} size={14} />
+      {value}
+    </span>
+  )
+}
 
 function OverviewTab({
   risk,
@@ -213,65 +321,104 @@ function OverviewTab({
 
   const trend = historicalTrend(risk.history)
   const direction = directionToTarget(risk.residual, risk.target)
+  const directionArrow = direction === 'decreasingToTarget' ? 'down' : direction === 'increasing' ? 'up' : 'flat'
 
   return (
     <div className="risk-view__stack">
-      <div className="risk-view__cards">
-        {(['cause', 'event', 'consequence'] as const).map((field) => (
-          <article key={field} className="panel">
-            <h2>{t(`risk.${field}` as TranslationKey)}</h2>
-            <p>{risk[field]}</p>
-          </article>
-        ))}
-      </div>
+      <div className="risk-view__split">
+        <article className="panel risk-structured">
+          <header className="risk-structured__head">
+            <h2>{t('view.overview.structured')}</h2>
+            <p className="panel__meta">{t('view.overview.structuredHint')}</p>
+          </header>
 
-      {risk.statusNarrative.trim().length > 0 ? (
-        <article className="panel">
-          <h2>{t('view.overview.narrative')}</h2>
-          <p>{risk.statusNarrative}</p>
-        </article>
-      ) : null}
+          {/*
+            * The manual description, in full: never clamped here, and the
+            * line breaks the author typed are preserved (CR-002).
+            */}
+          <div className="risk-structured__description">
+            <h3>{t('view.overview.description')}</h3>
+            {risk.description.trim().length > 0 ? (
+              <p>{risk.description}</p>
+            ) : (
+              <p className="risk-structured__empty">{t('view.overview.noDescription')}</p>
+            )}
+          </div>
 
-      <dl className="risk-view__facts">
-        <div>
-          <dt>{t('view.overview.response')}</dt>
-          <dd>{risk.responseType}</dd>
-        </div>
-        <div>
-          <dt>{t('view.overview.reviewDate')}</dt>
-          <dd>{risk.reviewDate}</dd>
-        </div>
-        <div>
-          <dt>{t('view.overview.riskType')}</dt>
-          <dd>{risk.type}</dd>
-        </div>
-      </dl>
+          <div className="risk-structured__cards">
+            {(['cause', 'event', 'consequence'] as const).map((field, position) => (
+              <section key={field} className="risk-structured__card">
+                <span className="risk-structured__step" aria-hidden="true">
+                  {String(position + 1).padStart(2, '0')}
+                </span>
+                <h3>{t(`risk.${field}` as TranslationKey)}</h3>
+                <p>{risk[field]}</p>
+              </section>
+            ))}
+          </div>
+        </article>
 
-      {/*
-       * Three separate indicators. Historical Trend and Direction to Target are
-       * computed; Outlook is management judgement and is never overwritten by
-       * either of them (ARCHITECTURE.md §7.1).
-       */}
-      <div className="risk-view__indicators">
-        <article className="panel">
-          <h2>{t('view.indicator.historicalTrend')}</h2>
-          <p className="risk-view__indicator-value">{t(`trend.${trend}` as TranslationKey)}</p>
-        </article>
-        <article className="panel">
-          <h2>{t('view.indicator.directionToTarget')}</h2>
-          <p className="risk-view__indicator-value">{t(`direction.${direction}` as TranslationKey)}</p>
-        </article>
-        <article className="panel">
-          <h2>{t('view.indicator.outlook')}</h2>
-          <p className="risk-view__indicator-value">{risk.outlook}</p>
-          <p className="panel__meta">{t('view.indicator.outlookHint')}</p>
+        <article className="panel risk-narrative">
+          <header className="risk-narrative__head">
+            <h2>{t('view.overview.narrative')}</h2>
+            <p className="panel__meta">{risk.updatedAt.slice(0, 10)}</p>
+          </header>
+
+          <p className="risk-narrative__body">
+            {risk.statusNarrative.trim().length > 0
+              ? risk.statusNarrative
+              : t('view.overview.narrativeEmpty')}
+          </p>
+
+          {/*
+           * Three separate indicators. Historical Trend and Direction to Target
+           * are computed; Outlook is management judgement and is never
+           * overwritten by either of them (ARCHITECTURE.md §7.1).
+           */}
+          <div className="risk-narrative__chips">
+            <SignalChip
+              label={t('view.indicator.historicalTrend')}
+              value={t(`trend.${trend}` as TranslationKey)}
+              direction={TREND_DIRECTION[trend]}
+            />
+            <SignalChip
+              label={t('view.indicator.directionToTarget')}
+              value={t(`direction.${direction}` as TranslationKey)}
+              direction={directionArrow}
+            />
+            <SignalChip
+              label={t('view.indicator.outlook')}
+              value={risk.outlook}
+              direction={OUTLOOK_DIRECTION[risk.outlook]}
+            />
+          </div>
+
+          <dl className="risk-narrative__facts">
+            <div>
+              <dt>{t('view.overview.response')}</dt>
+              <dd>{risk.responseType}</dd>
+            </div>
+            <div>
+              <dt>{t('view.overview.reviewDate')}</dt>
+              <dd>{risk.reviewDate}</dd>
+            </div>
+            <div>
+              <dt>{t('view.overview.riskType')}</dt>
+              <dd>{risk.type}</dd>
+            </div>
+          </dl>
         </article>
       </div>
 
       <article className="panel">
-        <h2>{t('view.overview.controlsSummary')}</h2>
+        <header className="risk-view__card-head">
+          <h2>{t('view.overview.controlsSummary')}</h2>
+          <p className="panel__meta">
+            {risk.controls.length} {t('view.overview.controlsCount')}
+          </p>
+        </header>
         {risk.controls.length === 0 ? (
-          <p className="panel__meta">{t('view.overview.noControls')}</p>
+          <EmptyState message={t('view.overview.noControls')} />
         ) : (
           <ul className="risk-view__control-summary">
             {risk.controls.map((control) => (
@@ -290,7 +437,7 @@ function OverviewTab({
       <article className="panel">
         <h2>{t('view.overview.actionsSummary')}</h2>
         {risk.actions.length === 0 ? (
-          <p className="panel__meta">{t('view.overview.noActions')}</p>
+          <EmptyState message={t('view.overview.noActions')} />
         ) : (
           <div className="scroll-x">
             <table className="risk-view__table">
@@ -311,10 +458,7 @@ function OverviewTab({
                     <td>{action.description}</td>
                     <td>{action.deliverable}</td>
                     <td>
-                      {action.status}
-                      {isActionOverdue(action, today) ? (
-                        <span className="risk-view__overdue"> {t('view.actions.overdue')}</span>
-                      ) : null}
+                      <StatusPill status={displayActionStatus(action, today)} />
                     </td>
                     <td>{action.dueDate}</td>
                     <td>{userName(action.ownerId)}</td>
@@ -367,25 +511,35 @@ function AssessmentTab({
   userName,
 }: {
   risk: Risk
-  matrix: Parameters<typeof assess>[1]
+  matrix: RatingMatrix
   userName: (id: string) => string
 }) {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
 
   return (
     <div className="risk-view__stack">
       <div className="risk-view__assessments">
-        {(['inherent', 'residual', 'target'] as const).map((kind) => {
+        {ASSESSMENTS.map((kind) => {
           const label = t(`editor.assessment.${kind}` as TranslationKey)
+          const view = assess(risk[kind], matrix)
+
           return (
-            <article key={kind} className="panel">
-              <h2>{label}</h2>
-              <RatingChip score={risk[kind]} matrix={matrix} variant="detailed" label={label} />
+            <article key={kind} className="panel assessment-card">
+              <header className="assessment-card__head">
+                <h2>{label}</h2>
+                <RatingChip score={risk[kind]} matrix={matrix} variant="pill" label={label} />
+              </header>
+              <p className="assessment-card__score">{view.score}</p>
+              <p className="assessment-card__descriptor">
+                {impactLabel(view.impact, matrix, language)} × {likelihoodLabel(view.likelihood, matrix, language)}
+              </p>
               <AssessmentMatrix score={risk[kind]} matrix={matrix} label={label} />
             </article>
           )
         })}
       </div>
+
+      <MatrixGuidance matrix={matrix} />
 
       <article className="panel">
         <h2>{t('view.assessment.residualTrend')}</h2>
@@ -395,7 +549,7 @@ function AssessmentTab({
       <article className="panel">
         <h2>{t('view.assessment.history')}</h2>
         {risk.history.length === 0 ? (
-          <p className="panel__meta">{t('view.assessment.noHistory')}</p>
+          <EmptyState message={t('view.assessment.noHistory')} />
         ) : (
           <div className="scroll-x">
             <table className="risk-view__table">
@@ -406,6 +560,7 @@ function AssessmentTab({
                   <th scope="col">{t('editor.assessment.residual')}</th>
                   <th scope="col">{t('editor.assessment.target')}</th>
                   <th scope="col">{t('view.assessment.actor')}</th>
+                  <th scope="col">{t('view.assessment.matrixVersion')}</th>
                   <th scope="col">{t('view.assessment.note')}</th>
                 </tr>
               </thead>
@@ -417,6 +572,11 @@ function AssessmentTab({
                     <td>{assess(item.residual, matrix).score}</td>
                     <td>{assess(item.target, matrix).score}</td>
                     <td>{userName(item.actorId)}</td>
+                    {/*
+                      * The configuration this snapshot was recorded against.
+                      * Older snapshots predate versioning and say so (CR-003).
+                      */}
+                    <td>{item.matrixVersion === undefined ? '—' : `v${String(item.matrixVersion)}`}</td>
                     <td>{item.note}</td>
                   </tr>
                 ))}
@@ -435,7 +595,7 @@ function ControlsTab({ risk, userName }: { risk: Risk; userName: (id: string) =>
   const { t } = useTranslation()
 
   if (risk.controls.length === 0) {
-    return <p className="panel__meta">{t('view.overview.noControls')}</p>
+    return <EmptyState message={t('view.overview.noControls')} />
   }
 
   return (
@@ -498,7 +658,7 @@ function ActionsTab({
   const { t } = useTranslation()
 
   if (risk.actions.length === 0) {
-    return <p className="panel__meta">{t('view.overview.noActions')}</p>
+    return <EmptyState message={t('view.overview.noActions')} />
   }
 
   return (
@@ -558,7 +718,7 @@ function TrendAuditTab({ risk, userName }: { risk: Risk; userName: (id: string) 
       <article className="panel">
         <h2>{t('view.audit.title')}</h2>
         {risk.audit.length === 0 ? (
-          <p className="panel__meta">{t('view.audit.noEvents')}</p>
+          <EmptyState message={t('view.audit.noEvents')} />
         ) : (
           <div className="scroll-x">
             {/* Newest first — the store prepends (ARCHITECTURE.md §3.6). */}

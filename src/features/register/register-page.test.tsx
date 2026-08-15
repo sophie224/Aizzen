@@ -32,6 +32,7 @@ function baseRisk(overrides: Partial<Risk> = {}): Risk {
     categoryId: 'cat_16', businessUnitId: 'bu_technology', riskOwnerId: 'usr_owner',
     originDate: '2026-01-01', reviewDate: '2027-01-01', targetDate: '2026-07-01',
     status: 'In Progress', responseType: 'Mitigate', outlook: 'Stable',
+    description: '',
     cause: 'Deferred modernisation', event: 'A core service fails', consequence: 'Customer outage',
     statusNarrative: '',
     inherent: { impact: 4, likelihood: 4 },
@@ -50,6 +51,7 @@ const RISKS: Risk[] = [
     id: 'risk_2', ref: 'SEC-001', title: 'Phishing exposure',
     businessUnitId: 'bu_security', riskOwnerId: 'usr_owner', status: 'Monitoring',
     residual: { impact: 5, likelihood: 4 },
+    description: '',
     cause: 'Limited awareness training', event: 'Credentials are harvested', consequence: 'Data loss',
     actions: [{
       id: 'act_1', title: 'Roll out simulated phishing', description: '', deliverable: '',
@@ -63,6 +65,7 @@ const RISKS: Risk[] = [
     categoryId: 'cat_35', businessUnitId: 'bu_finance', riskOwnerId: 'usr_manager',
     status: 'Monitoring', outlook: 'Increasing',
     residual: { impact: 1, likelihood: 1 },
+    description: '',
     cause: 'Concentrated funding', event: 'A facility is withdrawn', consequence: 'Payment delay',
   }),
 ]
@@ -99,6 +102,14 @@ function renderRegister(signedInAs: string): RenderResult {
   )
 }
 
+/** Opens the Filters popover, which is where the filter controls live. */
+async function openFilters(): Promise<ReturnType<typeof userEvent.setup>> {
+  const user = userEvent.setup()
+  await user.click(screen.getByRole('button', { name: /^Filters/ }))
+  await screen.findByRole('group', { name: 'Filters' })
+  return user
+}
+
 /**
  * Filter controls, scoped to the Filters group. "Business unit" names both a
  * filter and a column, so an unscoped query is ambiguous.
@@ -107,10 +118,10 @@ function filterControl(name: string): HTMLElement {
   return within(screen.getByRole('group', { name: 'Filters' })).getByLabelText(name)
 }
 
-/** Reference cells, in the order the table renders them. */
+/** Risk references, read from the code shown under each risk name. */
 function renderedRefs(): string[] {
   const rows = screen.getAllByRole('row').slice(1)
-  return rows.map((row) => within(row).getAllByRole('cell')[0].textContent ?? '')
+  return rows.map((row) => row.querySelector('.register-table__code')?.textContent ?? '')
 }
 
 beforeEach(async () => {
@@ -217,7 +228,7 @@ describe('filters', () => {
     renderRegister('usr_admin')
     await screen.findByRole('table')
 
-    const user = userEvent.setup()
+    const user = await openFilters()
     await user.selectOptions(filterControl('Business unit'), 'bu_technology')
 
     await waitFor(() => {
@@ -230,7 +241,7 @@ describe('filters', () => {
     renderRegister('usr_admin')
     await screen.findByRole('table')
 
-    const user = userEvent.setup()
+    const user = await openFilters()
     await user.selectOptions(filterControl('Risk status'), 'Monitoring')
 
     await waitFor(() => {
@@ -242,7 +253,7 @@ describe('filters', () => {
     renderRegister('usr_admin')
     await screen.findByRole('table')
 
-    const user = userEvent.setup()
+    const user = await openFilters()
     // SEC-001 is 5x4 = 20 -> Significant.
     await user.selectOptions(filterControl('Residual rating'), 'Significant')
 
@@ -255,7 +266,7 @@ describe('filters', () => {
     renderRegister('usr_admin')
     await screen.findByRole('table')
 
-    const user = userEvent.setup()
+    const user = await openFilters()
     await user.selectOptions(filterControl('Risk outlook'), 'Increasing')
 
     await waitFor(() => {
@@ -267,8 +278,9 @@ describe('filters', () => {
     renderRegister('usr_admin')
     await screen.findByRole('table')
 
-    const user = userEvent.setup()
+    const user = await openFilters()
     await user.selectOptions(filterControl('Risk status'), 'Monitoring')
+    await user.keyboard('{Escape}')
     await user.type(screen.getByLabelText('Search risks'), 'Liquidity')
 
     await waitFor(() => {
@@ -306,12 +318,12 @@ describe('sorting', () => {
     await screen.findByRole('table')
     const user = userEvent.setup()
 
-    await user.click(screen.getByRole('button', { name: /Reference/ }))
+    await user.click(screen.getByRole('button', { name: 'N' }))
     await waitFor(() => {
       expect(renderedRefs()).toEqual(['TECH-001', 'SEC-001', 'FIN-001'])
     })
 
-    await user.click(screen.getByRole('button', { name: /Reference/ }))
+    await user.click(screen.getByRole('button', { name: 'N' }))
     await waitFor(() => {
       expect(renderedRefs()).toEqual(['FIN-001', 'SEC-001', 'TECH-001'])
     })
@@ -335,10 +347,10 @@ describe('sorting', () => {
     await screen.findByRole('table')
 
     const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: /Risk title/ }))
+    await user.click(screen.getByRole('button', { name: /Risk name/ }))
 
     await waitFor(() => {
-      const header = screen.getByRole('columnheader', { name: /Risk title/ })
+      const header = screen.getByRole('columnheader', { name: /Risk name/ })
       expect(header).toHaveAttribute('aria-sort', 'ascending')
     })
   })
@@ -351,11 +363,18 @@ describe('view modes', () => {
     renderRegister('usr_admin')
     await screen.findByRole('table')
 
-    expect(screen.getAllByText('Deferred modernisation').length).toBeGreaterThan(0)
+    // Compact is the default: even row heights, no structured description.
+    expect(screen.getByRole('radio', { name: 'Compact' })).toBeChecked()
+    expect(screen.queryByText('Deferred modernisation')).toBeNull()
 
     const user = userEvent.setup()
-    await user.click(screen.getByRole('radio', { name: 'Compact' }))
+    await user.click(screen.getByRole('radio', { name: 'Detailed' }))
 
+    await waitFor(() => {
+      expect(screen.getAllByText('Deferred modernisation').length).toBeGreaterThan(0)
+    })
+
+    await user.click(screen.getByRole('radio', { name: 'Compact' }))
     await waitFor(() => {
       expect(screen.queryByText('Deferred modernisation')).toBeNull()
     })
@@ -496,6 +515,227 @@ describe('create permission', () => {
   })
 })
 
+// --- target column set ------------------------------------------------------
+
+describe('the columns of the target design', () => {
+  const TARGET_COLUMNS = [
+    'N', 'Risk name', 'Description', 'Owner', 'Inherent', 'Existing controls',
+    'Residual', 'Target', 'Response', 'Action plan', 'Target date', 'Status',
+    'Risk trend', 'Risk outlook', 'Appetite status',
+  ]
+
+  it('offers every one of them in the column picker', async () => {
+    renderRegister('usr_admin')
+    await screen.findByRole('table')
+
+    const user = userEvent.setup()
+    await user.click(screen.getByText('Columns'))
+
+    for (const label of TARGET_COLUMNS) {
+      expect(screen.getByRole('checkbox', { name: label }), label).toBeInTheDocument()
+    }
+  })
+
+  it('renders the derived cells: controls, action plan, trend and overdue', async () => {
+    renderRegister('usr_admin')
+    await screen.findByRole('table')
+
+    // TECH-001 and FIN-001 carry no controls; SEC-001 carries one action.
+    expect(screen.getAllByText('No controls documented.').length).toBeGreaterThan(0)
+    expect(screen.getByText('Roll out simulated phishing')).toBeInTheDocument()
+
+    // No history on any fixture risk, so every trend reads New.
+    expect(screen.getAllByText('New').length).toBe(3)
+
+    // Target date 2026-07-01 with a non-Completed status is derived Overdue.
+    expect(screen.getAllByText('Overdue').length).toBeGreaterThan(0)
+  })
+})
+
+// --- manual description column (CR-002) -------------------------------------
+
+describe('the Description column', () => {
+  const SUMMARY = 'A manually written summary of the phishing exposure.'
+
+  async function seedWithDescription() {
+    await seedState((state) => {
+      const risk = state.risks.find((candidate) => candidate.id === 'risk_2')
+      if (risk) risk.description = SUMMARY
+    })
+  }
+
+  it('renders the manually entered text, with the full value as a tooltip', async () => {
+    await seedWithDescription()
+    renderRegister('usr_admin')
+    await screen.findByRole('table')
+
+    const cell = screen.getByText(SUMMARY)
+    expect(cell).toHaveAttribute('title', SUMMARY)
+  })
+
+  it('shows a muted placeholder instead of falling back to derived text', async () => {
+    renderRegister('usr_admin')
+    await screen.findByRole('table')
+
+    // No fixture carries a description, and no cell borrows the Event text.
+    expect(screen.getAllByText('No description.')).toHaveLength(3)
+    expect(screen.queryByText('Credentials are harvested')).toBeNull()
+  })
+
+  it('finds a risk by a word that appears only in its description', async () => {
+    await seedWithDescription()
+    renderRegister('usr_admin')
+    await screen.findByRole('table')
+
+    const user = userEvent.setup()
+    await user.type(screen.getByLabelText('Search risks'), 'manually written')
+
+    await waitFor(() => {
+      expect(renderedRefs()).toEqual(['SEC-001'])
+    })
+  })
+})
+
+// --- configured rating names (CR-003) ---------------------------------------
+
+describe('the configured rating scale', () => {
+  it('shows renamed levels on the badges and in the filter, still filtering by key', async () => {
+    await seedState((state) => {
+      state.matrix.scaleNameEn = 'Severity'
+      state.matrix.levels = state.matrix.levels.map((level) =>
+        level.key === 'Significant' ? { ...level, nameEn: 'Extreme' } : level,
+      )
+    })
+
+    renderRegister('usr_admin')
+    await screen.findByRole('table')
+
+    // SEC-001 is 5 x 4 = 20, the Significant cell.
+    expect(
+      screen.getByLabelText('Residual: Extreme, score 20, impact 5 by likelihood 4'),
+    ).toBeInTheDocument()
+    expect(screen.getAllByText('Extreme').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Significant')).toBeNull()
+
+    // The filter shows the configured name and the scale rename.
+    const user = await openFilters()
+    const filter = filterControl('Residual severity')
+    expect(within(filter).getByRole('option', { name: 'Extreme' })).toBeInTheDocument()
+
+    await user.selectOptions(filter, 'Significant')
+    await waitFor(() => {
+      expect(renderedRefs()).toEqual(['SEC-001'])
+    })
+  })
+})
+
+// --- saved views ------------------------------------------------------------
+
+function persisted(): AppState {
+  return JSON.parse(storage.map.get(STATE_KEY) ?? '{}') as AppState
+}
+
+describe('saved views', () => {
+  it('saves the current search, columns and sort as a named view', async () => {
+    renderRegister('usr_admin')
+    await screen.findByRole('table')
+
+    const user = userEvent.setup()
+    await user.type(screen.getByLabelText('Search risks'), 'phishing')
+    await user.click(screen.getByRole('button', { name: 'Save view' }))
+    await user.type(screen.getByLabelText('Name this view'), 'Phishing watch')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => {
+      expect(persisted().savedViews).toHaveLength(1)
+    })
+
+    const [saved] = persisted().savedViews
+    expect(saved.name).toBe('Phishing watch')
+    expect(saved.search).toBe('phishing')
+    expect(saved.userId).toBe('usr_admin')
+    expect(saved.visibleColumns.length).toBeGreaterThan(0)
+    // Every mutation is audited (ARCHITECTURE.md §3.6).
+    expect(persisted().auditEvents.some((event) => event.action === 'savedView.created')).toBe(true)
+  })
+
+  it('loads the default view when the register opens', async () => {
+    await seedState((state) => {
+      state.savedViews = [{
+        id: 'view_default', name: 'Liquidity only', userId: 'usr_admin',
+        search: 'Liquidity', filters: {}, sort: { field: 'ref', direction: 'asc' },
+        visibleColumns: ['n', 'title', 'residual'], viewMode: 'compact', isDefault: true,
+      }]
+    })
+
+    renderRegister('usr_admin')
+    await screen.findByRole('table')
+
+    expect(renderedRefs()).toEqual(['FIN-001'])
+    expect(screen.getByRole('radio', { name: 'Compact' })).toBeChecked()
+  })
+
+  it('never loads another user’s default view', async () => {
+    await seedState((state) => {
+      state.savedViews = [{
+        id: 'view_other', name: 'Someone else', userId: 'usr_manager',
+        search: 'Liquidity', filters: {}, sort: { field: 'ref', direction: 'asc' },
+        visibleColumns: ['n', 'title'], viewMode: 'compact', isDefault: true,
+      }]
+    })
+
+    renderRegister('usr_admin')
+    await screen.findByRole('table')
+
+    expect(renderedRefs()).toHaveLength(3)
+    expect(screen.getByText('No saved views yet.')).toBeInTheDocument()
+  })
+
+  it('marks a view as default and clears the flag again', async () => {
+    await seedState((state) => {
+      state.savedViews = [{
+        id: 'view_1', name: 'Watchlist', userId: 'usr_admin',
+        search: '', filters: {}, sort: { field: 'ref', direction: 'asc' },
+        visibleColumns: ['n', 'title'], viewMode: 'detailed', isDefault: false,
+      }]
+    })
+
+    renderRegister('usr_admin')
+    await screen.findByRole('table')
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'Set as default view: Watchlist' }))
+    await waitFor(() => {
+      expect(persisted().savedViews[0].isDefault).toBe(true)
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Default view: Watchlist' }))
+    await waitFor(() => {
+      expect(persisted().savedViews[0].isDefault).toBe(false)
+    })
+  })
+
+  it('deletes a saved view', async () => {
+    await seedState((state) => {
+      state.savedViews = [{
+        id: 'view_1', name: 'Watchlist', userId: 'usr_admin',
+        search: '', filters: {}, sort: { field: 'ref', direction: 'asc' },
+        visibleColumns: ['n', 'title'], viewMode: 'detailed', isDefault: false,
+      }]
+    })
+
+    renderRegister('usr_admin')
+    await screen.findByRole('table')
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'Delete view: Watchlist' }))
+
+    await waitFor(() => {
+      expect(persisted().savedViews).toHaveLength(0)
+    })
+  })
+})
+
 describe('bilingual register', () => {
   it('renders labels in Georgian', async () => {
     resetSessionStore()
@@ -518,7 +758,7 @@ describe('bilingual register', () => {
     )
 
     expect(await screen.findByLabelText('რისკების ძებნა')).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: /ნომერი/ })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: /რისკის სახელი/ })).toBeInTheDocument()
   })
 })
 

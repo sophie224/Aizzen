@@ -92,7 +92,7 @@ Every master-data label is a pair: `*En` (required) and `*Ka` (optional). When t
 ### Persistence
 
 - Storage key is `erm-risk-management-v3-state` — **retained deliberately for backward compatibility. Do not rename it.**
-- Current `schemaVersion = 8`. The legacy `app.html` is at 7; the migration must handle it.
+- Current `schemaVersion = 11`. The legacy `app.html` is at 7; the migration must handle it.
 - Migration is **idempotent**, never intentionally deletes valid risk data, fills missing collections with defaults, repairs invalid references conservatively, and persists only after success.
 
 ### Audit and history are separate mechanisms
@@ -129,9 +129,11 @@ Default 2026 matrix (Impact rows 5→1, Likelihood columns 1→5):
 Colours: Low `#00B050` · Medium `#FFF200` · High `#FFB900` · Significant `#F32121`.
 Likelihood horizon is **next 12 months** (2026 matrix), not LEG-POL-001's older 3-year table.
 
+The whole matrix is **administrator-configurable** (CR-003): the scale name, the four level display names, the impact and likelihood criterion names, descriptions and percentage bands, the colours and all 25 cells. `Low | Medium | High | Significant` remain the **stable stored keys** — renaming a level never touches cells, filters, saved views or exports. Every screen reads these through `src/domain/risk-engine` (`scaleName`, `ratingName`, `impactLabel`, `likelihoodBand`, …); no component may hold its own copy of a label, band or colour. Saving is explicit, versioned and audited, and assessment snapshots record the matrix version they were taken against.
+
 ### Required fields
 
-`title`, `categoryId`, `riskOwnerId`, and **all three of `cause`, `event`, `consequence`**. Response `Accept` requires an acceptance rationale; status `Accepted` requires approver, approval date and valid-until.
+`title`, `categoryId`, `riskOwnerId`, and **all three of `cause`, `event`, `consequence`**. `description` is a separate optional free-text field — manual only, never derived from the structured three. Response `Accept` requires an acceptance rationale; status `Accepted` requires approver, approval date and valid-until.
 
 ### Three indicators that must stay distinct
 
@@ -154,6 +156,8 @@ AND Field-level role rule
 ```
 
 `risks: edit` alone never means "may edit every risk."
+
+The **Dashboard module** (CR-004) is one aggregation — `src/domain/dashboard/analytics.ts` — over the register set the user may see, filtered through the SAME `matchesFilters` predicate the Register uses, so a widget total and the register result under identical filters are the same computation. Filter state lives in the URL; every tile, cell and segment links into the Register with the filters that reproduce it. Widget labels and colours come from the matrix configuration only.
 
 Modules: `dashboard`, `register`, `risks`, `controls`, `actions`, `reports`, `audit`, `administration`. Website Administration sits **outside** this matrix behind a Super Admin–only guard.
 

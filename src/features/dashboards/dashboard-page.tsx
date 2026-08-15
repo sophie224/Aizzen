@@ -9,10 +9,10 @@ import {
   type DashboardContext,
 } from '../../domain/dashboard/index.ts'
 import { canAccess, visibleRisks } from '../../domain/permissions/index.ts'
+import { ratingLevels, ratingName } from '../../domain/risk-engine/index.ts'
 import { buildRegisterIndex, level1Groups } from '../../domain/register/index.ts'
 import {
   OUTLOOKS,
-  RATING_LABELS,
   RISK_STATUSES,
   RISK_TYPES,
   WIDGET_GROUPINGS,
@@ -20,9 +20,10 @@ import {
   WIDGET_SPANS,
   WIDGET_TYPES,
 } from '../../domain/types/enums.ts'
-import type { Dashboard, DashboardWidget, RiskFilters } from '../../domain/types/index.ts'
+import type { Dashboard, DashboardWidget, RiskFilters, RatingMatrix } from '../../domain/types/index.ts'
 import { pickNamed, useTranslation, type TranslationKey } from '../../i18n/index.ts'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
+import { AnalyticsDashboard } from './analytics-dashboard.tsx'
 import { WidgetBody } from './dashboard-widget.tsx'
 import './dashboards.css'
 
@@ -48,7 +49,14 @@ function blankDashboard(id: string): Dashboard {
   }
 }
 
-export function DashboardPage() {
+/**
+ * The configurable dashboard builder (ARCHITECTURE.md §8.3).
+ *
+ * Retained alongside the CR-004 analytics dashboard: report templates bind
+ * their dashboard sections to these definitions, so removing the builder would
+ * break Reports.
+ */
+export function ConfigurableDashboards() {
   const { t, language } = useTranslation()
   const { state } = useAppData()
   const store = useAppDataStore()
@@ -228,6 +236,7 @@ export function DashboardPage() {
           categories={level1Groups(state.categories)}
           units={flattenTree(state.businessUnits, { includeInactive: false })}
           owners={state.users.filter((candidate) => candidate.status === 'Active')}
+          matrix={state.matrix}
           language={language}
         />
       ) : null}
@@ -300,6 +309,8 @@ function DashboardSettings(props: {
   categories: readonly string[]
   units: readonly { unit: { id: string; nameEn: string; nameKa: string }; depth: number }[]
   owners: readonly { id: string; name: string }[]
+  /** Rating filter options read their names from the saved configuration. */
+  matrix: RatingMatrix
   language: 'en' | 'ka'
 }) {
   const { t } = useTranslation()
@@ -364,7 +375,12 @@ function DashboardSettings(props: {
           <span>{t('register.filter.residualRating')}</span>
           <select value={dashboard.filters.residualRating ?? ''} onChange={(event) => { props.onFilter('residualRating', event.target.value) }}>
             <option value="">{t('register.filter.all')}</option>
-            {RATING_LABELS.map((rating) => <option key={rating} value={rating}>{rating}</option>)}
+            {/* Keyed by the stable rating key; the label is configured (CR-003). */}
+            {ratingLevels(props.matrix).map((level) => (
+              <option key={level.key} value={level.key}>
+                {ratingName(props.matrix, level.key, props.language)}
+              </option>
+            ))}
           </select>
         </label>
 
@@ -530,5 +546,41 @@ function WidgetSettings(props: {
         <button type="button" onClick={props.onRemove}>{t('editor.remove')}</button>
       </div>
     </div>
+  )
+}
+
+
+/*
+ * Dashboard module shell (CR-004).
+ *
+ * Analytics is the module's front door: a fixed widget set over the Risk
+ * Register. The configurable dashboards stay one tab away because report
+ * templates render them.
+ */
+export function DashboardPage() {
+  const { t } = useTranslation()
+  const [tab, setTab] = useState<'analytics' | 'custom'>('analytics')
+
+  return (
+    <>
+      <div className="dash-tabs" role="tablist" aria-label={t('page.dashboard.title')}>
+        {(['analytics', 'custom'] as const).map((id) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={tab === id}
+            className="dash-tabs__tab"
+            onClick={() => {
+              setTab(id)
+            }}
+          >
+            {t(id === 'analytics' ? 'dash.tab.analytics' : 'dash.tab.custom')}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'analytics' ? <AnalyticsDashboard /> : <ConfigurableDashboards />}
+    </>
   )
 }

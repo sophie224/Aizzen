@@ -57,10 +57,14 @@ export function createSeedState(): AppState {
     businessUnits: createSeedBusinessUnits(),
     customAttributes: createSeedCustomAttributes(),
     matrix: createSeedMatrix(),
+    // No superseded configurations yet — version 1 is the live one.
+    matrixVersions: [],
 
     risks: [],
 
     savedViews: [],
+    dashboardViews: [],
+    dashboardLayouts: [],
     dashboards: createSeedDashboards(),
     reportTemplates: createSeedReportTemplates(),
     auditEvents: [],

@@ -22,6 +22,14 @@ export * from './defaults.ts'
 
 // --- validation -------------------------------------------------------------
 
+/**
+ * Cap on the manual risk description (CR-002).
+ *
+ * Enforced in two places on purpose: the textarea stops typing at the limit,
+ * and `cleanRisk` clamps on save so a programmatic payload cannot exceed it.
+ */
+export const RISK_DESCRIPTION_MAX_LENGTH = 2000
+
 /** Field key plus a message key the UI resolves through i18n. */
 export interface ValidationError {
   field: string
@@ -85,6 +93,11 @@ export function cleanRisk(risk: Risk, options: CleanOptions): Risk {
   return {
     ...risk,
     title: risk.title.trim(),
+    /*
+     * Ends are trimmed, the interior is not: the description is free text and
+     * the line breaks the user typed are part of what they wrote (CR-002).
+     */
+    description: risk.description.trim().slice(0, RISK_DESCRIPTION_MAX_LENGTH),
     ref: risk.ref.trim().length > 0 ? risk.ref.trim() : options.generatedRef,
     controls: risk.controls.filter((control) => control.title.trim().length > 0),
     actions: risk.actions.filter((action) => action.title.trim().length > 0),
@@ -115,6 +128,7 @@ export function assessmentsChanged(before: Risk, after: Risk): boolean {
 /** Master fields whose change is named individually in the audit trail. */
 const TRACKED_FIELDS: readonly [keyof Risk, string][] = [
   ['title', 'Title'],
+  ['description', 'Description'],
   ['status', 'Status'],
   ['riskOwnerId', 'Risk owner'],
   ['categoryId', 'Category'],
@@ -164,6 +178,8 @@ export interface PrepareSaveInput {
   /** Generated outside the domain, so the result stays deterministic. */
   historyId: string
   generatedRef: string
+  /** The live matrix version, recorded on any snapshot this save appends. */
+  matrixVersion: number
 }
 
 export type PrepareSaveResult =
@@ -177,7 +193,14 @@ export type PrepareSaveResult =
     }
   | { readonly ok: false; readonly errors: ValidationError[] }
 
-function snapshot(risk: Risk, id: string, date: IsoDate, actorId: string, note: string): AssessmentHistoryItem {
+function snapshot(
+  risk: Risk,
+  id: string,
+  date: IsoDate,
+  actorId: string,
+  note: string,
+  matrixVersion: number,
+): AssessmentHistoryItem {
   return {
     id,
     date,
@@ -186,6 +209,8 @@ function snapshot(risk: Risk, id: string, date: IsoDate, actorId: string, note: 
     target: { ...risk.target },
     note,
     actorId,
+    // Binds the snapshot to the configuration in force when it was taken.
+    matrixVersion,
   }
 }
 
@@ -204,7 +229,14 @@ export function prepareSave(input: PrepareSaveInput): PrepareSaveResult {
 
   if (original === null) {
     // A new risk always opens its history with an initial snapshot.
-    const initial = snapshot(cleaned, input.historyId, input.today, input.actorId, 'Initial assessment')
+    const initial = snapshot(
+      cleaned,
+      input.historyId,
+      input.today,
+      input.actorId,
+      'Initial assessment',
+      input.matrixVersion,
+    )
     return {
       ok: true,
       risk: { ...cleaned, history: [...cleaned.history, initial] },
@@ -221,7 +253,14 @@ export function prepareSave(input: PrepareSaveInput): PrepareSaveResult {
         ...cleaned,
         history: [
           ...cleaned.history,
-          snapshot(cleaned, input.historyId, input.today, input.actorId, 'Assessment updated'),
+          snapshot(
+            cleaned,
+            input.historyId,
+            input.today,
+            input.actorId,
+            'Assessment updated',
+            input.matrixVersion,
+          ),
         ],
       }
     : cleaned

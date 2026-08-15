@@ -33,11 +33,11 @@ function countNested(state: AppState, key: 'controls' | 'actions' | 'history' | 
   return state.risks.reduce((total, risk) => total + risk[key].length, 0)
 }
 
-describe('legacy v7 -> v8 migration', () => {
+describe('legacy v7 -> current migration', () => {
   it('produces state that satisfies canonical validation', () => {
     const { state } = migrate(baseline)
     expect(validateAppState(state).ok).toBe(true)
-    expect(state.schemaVersion).toBe(8)
+    expect(state.schemaVersion).toBe(11)
   })
 
   it('preserves every collection count', () => {
@@ -306,6 +306,105 @@ describe('repair: dangling references', () => {
     const { state, notes } = migrate(seeded)
     expect(state.roles[2].permissions.administration).toBe('none')
     expect(notes.join(' ')).toContain('module permissions')
+  })
+})
+
+describe('repair: matrix configuration (CR-003)', () => {
+  it('adds the configuration fields to a pre-CR-003 matrix', () => {
+    const seeded = createSeedState()
+    // A matrix as stored before the configuration fields existed.
+    const legacy = {
+      cells: seeded.matrix.cells,
+      colors: seeded.matrix.colors,
+      impactLabels: {
+        1: { en: 'Minor', ka: 'მცირე' }, 2: { en: 'Moderate', ka: '' },
+        3: { en: 'Major', ka: '' }, 4: { en: 'Severe', ka: '' }, 5: { en: 'Critical', ka: '' },
+      },
+      likelihoodLabels: {
+        1: { en: 'Remote', ka: '', probability: '0%-5%' },
+        2: { en: 'Unlikely', ka: '', probability: '6%-35%' },
+        3: { en: 'Possible', ka: '', probability: '36%-65%' },
+        4: { en: 'Likely', ka: '', probability: '66%-95%' },
+        5: { en: 'Almost Certain', ka: '', probability: 'Once in 10 years' },
+      },
+    }
+    seeded.matrix = legacy as unknown as AppState['matrix']
+
+    const { state } = migrate(seeded)
+
+    expect(state.matrix.version).toBe(1)
+    expect(state.matrix.scaleNameEn).toBe('Rating')
+    expect(state.matrix.levels.map((level) => level.key)).toEqual([
+      'Low', 'Medium', 'High', 'Significant',
+    ])
+    // The legacy display band is parsed into a real percentage band…
+    expect(state.matrix.likelihoodLabels[2].percentFrom).toBe(6)
+    expect(state.matrix.likelihoodLabels[2].percentTo).toBe(35)
+    // …and an unparseable one is preserved as the free-text value.
+    expect(state.matrix.likelihoodLabels[5].percentFrom).toBeNull()
+    expect(state.matrix.likelihoodLabels[5].textEn).toBe('Once in 10 years')
+    // A configured name is never overwritten.
+    expect(state.matrix.impactLabels[1].ka).toBe('მცირე')
+  })
+
+  it('keeps a configured matrix untouched and stays idempotent', () => {
+    const seeded = createSeedState()
+    seeded.matrix = {
+      ...seeded.matrix,
+      version: 4,
+      scaleNameEn: 'Severity',
+      levels: seeded.matrix.levels.map((level) =>
+        level.key === 'High' ? { ...level, nameEn: 'Elevated' } : level,
+      ),
+    }
+
+    const once = migrate(seeded).state
+    const twice = migrate(once).state
+
+    expect(once.matrix.version).toBe(4)
+    expect(once.matrix.scaleNameEn).toBe('Severity')
+    expect(twice.matrix.levels.find((level) => level.key === 'High')?.nameEn).toBe('Elevated')
+    expect(JSON.stringify(twice.matrix)).toBe(JSON.stringify(once.matrix))
+  })
+})
+
+describe('repair: manual risk description', () => {
+  /** A risk record as stored before CR-002 added the field. */
+  function riskWithoutDescription(): AppState['risks'][number] {
+    return {
+      id: 'risk_old', ref: 'TECH-001', title: 'Legacy record', type: 'Current',
+      categoryId: 'cat_16', businessUnitId: 'bu_technology', riskOwnerId: 'usr_owner',
+      originDate: '2026-01-01', reviewDate: '2027-01-01', targetDate: '2026-07-01',
+      status: 'In Progress', responseType: 'Mitigate', outlook: 'Stable',
+      cause: 'A cause', event: 'An event', consequence: 'A consequence', statusNarrative: '',
+      inherent: { impact: 3, likelihood: 3 }, residual: { impact: 3, likelihood: 3 },
+      target: { impact: 2, likelihood: 2 }, controls: [], actions: [],
+      acceptance: { rationale: '', initiatorId: '', approverId: '', approvalDate: '', validUntil: '', reviewDate: '' },
+      custom: {}, history: [], audit: [], updatedAt: '2026-01-01T00:00:00.000Z',
+    } as unknown as AppState['risks'][number]
+  }
+
+  it('adds an empty description to a risk that predates the field', () => {
+    const seeded = createSeedState()
+    seeded.risks = [riskWithoutDescription()]
+
+    const { state, notes } = migrate(seeded)
+
+    // Filled with an empty string — never back-filled from the event text.
+    expect(state.risks[0].description).toBe('')
+    expect(state.risks[0].event).toBe('An event')
+    expect(notes.join(' ')).toContain('description')
+  })
+
+  it('leaves a stored description untouched and stays idempotent', () => {
+    const seeded = createSeedState()
+    seeded.risks = [{ ...riskWithoutDescription(), description: 'Written by hand.' }]
+
+    const once = migrate(seeded).state
+    const twice = migrate(once).state
+
+    expect(once.risks[0].description).toBe('Written by hand.')
+    expect(twice.risks[0].description).toBe('Written by hand.')
   })
 })
 

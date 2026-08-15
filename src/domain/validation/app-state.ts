@@ -50,7 +50,10 @@ const REQUIRED_COLLECTIONS = [
   'customAttributes',
   'risks',
   'savedViews',
+  'matrixVersions',
   'dashboards',
+  'dashboardViews',
+  'dashboardLayouts',
   'reportTemplates',
   'auditEvents',
 ] as const
@@ -190,6 +193,18 @@ function validateCustomAttributes(attributes: unknown[], bag: ErrorBag): void {
 function validateMatrix(matrix: unknown, bag: ErrorBag): void {
   if (!isRecord(matrix)) return void bag.add('matrix', 'expected an object')
 
+  // Configuration envelope (CR-003) — repair fills these before validation.
+  bag.require(isFiniteNumber(matrix.version), 'matrix.version', 'expected a number')
+  bag.require(isNonEmptyString(matrix.scaleNameEn), 'matrix.scaleNameEn', 'required')
+  if (bag.require(Array.isArray(matrix.levels), 'matrix.levels', 'expected an array')) {
+    const keys = new Set(
+      (matrix.levels as unknown[]).filter(isRecord).map((level) => level.key),
+    )
+    for (const rating of ['Low', 'Medium', 'High', 'Significant'] as const) {
+      bag.require(keys.has(rating), 'matrix.levels', `missing level ${rating}`)
+    }
+  }
+
   if (!Array.isArray(matrix.cells)) {
     bag.add('matrix.cells', 'expected an array')
   } else {
@@ -296,6 +311,9 @@ function validateRisks(risks: unknown[], bag: ErrorBag): void {
     bag.require(isRiskStatus(risk.status), `${path}.status`, 'unknown risk status')
     bag.require(isResponseType(risk.responseType), `${path}.responseType`, 'unknown response type')
     bag.require(isOutlook(risk.outlook), `${path}.outlook`, 'unknown outlook')
+
+    // Optional free text, but the key must exist — repair fills it (CR-002).
+    bag.require(isString(risk.description), `${path}.description`, 'expected a string')
 
     // Cause, event and consequence are mandatory (ARCHITECTURE.md §8.2).
     bag.require(isNonEmptyString(risk.cause), `${path}.cause`, 'required')
