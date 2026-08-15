@@ -1,0 +1,280 @@
+/* Dashboard Builder (ARCHITECTURE.md §8.3). */
+
+.dash-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.dash-header__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.dash-header__controls select,
+.dash-header__controls button {
+  font: inherit;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  cursor: pointer;
+}
+
+.dash-settings {
+  margin: var(--space-4) 0;
+  padding: var(--space-4);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+/* Twelve-column grid; each widget declares its own span. */
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.dash-widget {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-top-width: 3px;
+  border-top-style: solid;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow-x: auto;
+}
+
+.dash-widget h2 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.dash-widget__settings {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--color-border);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-2);
+}
+
+.dash-widget__settings label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--text-xs);
+}
+
+.dash-widget__settings input,
+.dash-widget__settings select {
+  font: inherit;
+  font-size: var(--text-sm);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.dash-widget__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.dash-widget__actions button {
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-page);
+  cursor: pointer;
+}
+
+.dash-add-widget {
+  margin-top: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: transparent;
+  cursor: pointer;
+}
+
+/* --- widget bodies ---------------------------------------------------------- */
+
+.widget-metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.widget-metric__value {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.widget-metric__label {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.widget-heatmap {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.widget-heatmap th {
+  padding: 2px var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.widget-heatmap td {
+  width: 2rem;
+  height: 2rem;
+  text-align: center;
+  border: 1px solid var(--color-card);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-surface-deep);
+}
+
+.widget-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.widget-bars li {
+  display: grid;
+  grid-template-columns: minmax(6rem, 10rem) 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.widget-bars__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.widget-bars__track {
+  height: 0.75rem;
+  background: var(--color-page);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.widget-bars__fill {
+  display: block;
+  height: 100%;
+}
+
+.widget-bars__count {
+  font-variant-numeric: tabular-nums;
+}
+
+.widget-top {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.widget-top li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.widget-top__ref {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.widget-top__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.widget-top__score {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--color-surface-deep);
+}
+
+.widget-progress dl,
+.widget-trend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+  gap: var(--space-3);
+  margin: 0 0 var(--space-3);
+}
+
+.widget-progress dt,
+.widget-trend dt {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.widget-progress dd,
+.widget-trend dd {
+  margin: 2px 0 0;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.widget-progress progress {
+  width: 100%;
+}
+
+.widget-activity {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.widget-activity__action {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-right: var(--space-2);
+}
+
+.widget-activity__summary {
+  font-weight: 600;
+}
+
+@media (max-width: 60rem) {
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+  .dash-widget {
+    grid-column: 1 / -1 !important;
+  }
+}

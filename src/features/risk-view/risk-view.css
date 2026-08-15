@@ -1,0 +1,253 @@
+/* Individual Risk View (ARCHITECTURE.md §8.2). */
+
+.risk-header {
+  display: grid;
+  grid-template-columns: minmax(16rem, 2fr) minmax(14rem, 1fr);
+  gap: var(--space-4) var(--space-5);
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.risk-header__ref {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.risk-header__identity h1 {
+  margin: var(--space-1) 0 var(--space-2);
+}
+
+.risk-header__context {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.risk-header__meta,
+.risk-view__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.risk-header__meta dt,
+.risk-view__facts dt {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.risk-header__meta dd,
+.risk-view__facts dd {
+  margin: var(--space-1) 0 0;
+  font-weight: 600;
+}
+
+.risk-header__scores {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.risk-header__score {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.risk-header__score-label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.risk-header__edit {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* --- tabs ------------------------------------------------------------------ */
+
+.risk-view__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-5);
+}
+
+.risk-view__tab {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.risk-view__tab[aria-selected='true'] {
+  background: var(--color-card);
+  border-color: var(--color-border);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* --- panels ---------------------------------------------------------------- */
+
+.risk-view__stack {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.risk-view__cards,
+.risk-view__indicators,
+.risk-view__assessments {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--space-4);
+}
+
+.risk-view__panel h2 {
+  font-size: var(--text-base);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.risk-view__indicator-value {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.risk-view__control-summary {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.risk-view__control-summary li {
+  display: grid;
+  gap: 2px;
+}
+
+.risk-view__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.risk-view__table th,
+.risk-view__table td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+  font-size: var(--text-sm);
+}
+
+.risk-view__table thead th {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.risk-view__overdue {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.risk-view__changes {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+
+/* --- assessment matrix ------------------------------------------------------ */
+
+.assessment-matrix {
+  border-collapse: collapse;
+  margin-top: var(--space-3);
+}
+
+.assessment-matrix th {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.assessment-matrix__cell {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-card);
+  text-align: center;
+  vertical-align: middle;
+  color: var(--color-surface-deep);
+  font-size: var(--text-sm);
+}
+
+/*
+ * The selected cell carries a visible ring as well as the marker glyph, so it
+ * is never identified by colour alone.
+ */
+.assessment-matrix__cell.is-selected {
+  outline: 3px solid var(--color-surface-deep);
+  outline-offset: -3px;
+  font-weight: 700;
+}
+
+/* --- trend chart ------------------------------------------------------------ */
+
+.trend-chart {
+  margin: 0;
+}
+
+.trend-chart svg {
+  width: 100%;
+  max-width: 30rem;
+  height: auto;
+}
+
+.trend-chart__data {
+  width: auto;
+  margin-top: var(--space-3);
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.trend-chart__data th,
+.trend-chart__data td {
+  padding: var(--space-1) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+@media (max-width: 55rem) {
+  .risk-header {
+    grid-template-columns: 1fr;
+  }
+}

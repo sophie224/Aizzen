@@ -1,0 +1,78 @@
+/* Website Administration — public site CMS (ARCHITECTURE.md §8.5). */
+
+.site-fields {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.site-field {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.site-field label,
+.site-list__item label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.site-field label > span,
+.site-list__item label > span {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.site-field input,
+.site-field textarea,
+.site-list__item input,
+.site-list__item select,
+.site-list__item textarea {
+  font: inherit;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+}
+
+.site-field textarea,
+.site-list__item textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.site-list {
+  list-style: none;
+  margin: var(--space-4) 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.site-list__item {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-3);
+  align-items: end;
+  padding: var(--space-4);
+  background: var(--color-page);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.site-list__wide {
+  grid-column: 1 / -1;
+}
+
+.site-list__item > button {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  cursor: pointer;
+}

@@ -1,0 +1,180 @@
+/*
+ * Aizzen design tokens and base styles (ARCHITECTURE.md §9).
+ *
+ * Brand palette: primary navy #1A2151, surface dark navy #0D1128, accent white.
+ *
+ * RATING COLOURS ARE DELIBERATELY ABSENT. Low / Medium / High / Significant are
+ * read from the configured rating matrix at runtime so an administrator's
+ * change propagates everywhere at once. Hard-coding them here would fork that
+ * configuration — see src/domain/risk-engine.
+ */
+
+:root {
+  /* Brand */
+  --color-primary: #1a2151;
+  --color-primary-hover: #232c6b;
+  --color-surface-deep: #0d1128;
+  --color-accent: #ffffff;
+
+  /* Neutrals, biased slightly toward the brand navy so greys read as chosen */
+  --color-page: #f6f7fb;
+  --color-card: #ffffff;
+  --color-border: #dcdfea;
+  --color-border-strong: #b9bfd4;
+  --color-text: #1c2033;
+  --color-text-muted: #5b6180;
+  --color-text-inverse: #ffffff;
+  --color-text-on-primary: #eef0f8;
+
+  /* Feedback — semantic, and distinct from risk-rating colours */
+  --color-danger: #b3261e;
+  --color-danger-surface: #fdecea;
+  --color-warning-surface: #fff6e0;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* Type */
+  --font-sans: 'Segoe UI', system-ui, -apple-system, 'Noto Sans Georgian', 'BPG Nino Mtavruli',
+    sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --shadow-card: 0 1px 2px rgba(13, 17, 40, 0.06), 0 4px 12px rgba(13, 17, 40, 0.05);
+  --shadow-raised: 0 8px 24px rgba(13, 17, 40, 0.14);
+
+  --header-height: 4rem;
+  --sidebar-width: 15rem;
+
+  --transition-fast: 120ms;
+  --transition-page: 220ms;
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-page);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0 0 var(--space-3);
+  line-height: 1.25;
+  text-wrap: balance;
+  color: var(--color-primary);
+}
+
+h1 {
+  font-size: var(--text-2xl);
+}
+h2 {
+  font-size: var(--text-xl);
+}
+h3 {
+  font-size: var(--text-lg);
+}
+
+p {
+  margin: 0 0 var(--space-4);
+  max-width: 68ch;
+}
+
+a {
+  color: var(--color-primary);
+}
+
+button {
+  font: inherit;
+}
+
+/*
+ * Accessibility baseline (ARCHITECTURE.md §9).
+ * Keyboard focus must always be visible; colour alone never carries meaning.
+ */
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Visible only when focused — the first tab stop on every page. */
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: -4rem;
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-accent);
+  color: var(--color-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-raised);
+  transition: top var(--transition-fast) ease;
+}
+
+.skip-link:focus-visible {
+  top: var(--space-4);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Wide content scrolls inside its own container, never the page body. */
+.scroll-x {
+  overflow-x: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

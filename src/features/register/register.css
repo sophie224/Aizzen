@@ -1,0 +1,275 @@
+/* Risk Register (ARCHITECTURE.md §8.2). */
+
+.register-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.register-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.register-header__actions > button:not(.register-header__create) {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  cursor: pointer;
+}
+
+.register-header__create {
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* --- toolbar --------------------------------------------------------------- */
+
+.register-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.register-toolbar__search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 16rem;
+  flex: 1 1 16rem;
+}
+
+.register-toolbar__search label,
+.register-toolbar legend,
+.register-toolbar__filters label span,
+.register-toolbar__view label span {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.register-toolbar__search input {
+  font: inherit;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+
+.register-toolbar__filters,
+.register-toolbar__view {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.register-toolbar__filters label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.register-toolbar__filters select {
+  font: inherit;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+}
+
+.register-toolbar__view label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.register-toolbar__columns summary {
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.register-toolbar__columns ul {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-1);
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.register-toolbar__columns label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.register-count {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- table ----------------------------------------------------------------- */
+
+.register-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.register-table th,
+.register-table td {
+  text-align: left;
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.register-table thead th {
+  background: var(--color-page);
+  /* +25% header size was an explicit change request for the detailed view. */
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.register-table--detailed thead th {
+  font-size: calc(var(--text-sm) * 1.25);
+}
+
+.register-table--compact td {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.register-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.register-table td[data-column='targetDate'] {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.register-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.register-table__sort-mark {
+  opacity: 0.55;
+  font-size: 0.75em;
+}
+
+.register-table__title {
+  font-weight: 600;
+}
+
+.register-table__description {
+  margin: var(--space-2) 0 0;
+  display: grid;
+  gap: var(--space-1);
+  max-width: 46rem;
+}
+
+.register-table__description div {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: var(--space-2);
+}
+
+.register-table__description dt {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.register-table__description dd {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+/* --- rating chips ----------------------------------------------------------- */
+
+/*
+ * Inherent, Residual and Target chips share one size in detailed mode, so the
+ * three read as directly comparable (explicit change request).
+ */
+.rating-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rating-chip--compact {
+  min-width: 6.5rem;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.rating-chip--detailed {
+  min-width: 12.5rem;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.rating-chip__score {
+  font-size: 1.15em;
+}
+
+.rating-chip__breakdown {
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+.rating-swatch {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+.register-clear {
+  margin-top: var(--space-4);
+}

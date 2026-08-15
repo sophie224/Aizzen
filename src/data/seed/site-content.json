@@ -1,0 +1,152 @@
+{
+  "brandName": "AIZEN",
+  "brandDescriptor": "Risk & Compliance",
+  "brandDescriptorKa": "რისკები და შესაბამისობა",
+  "heroEyebrow": "Governance technology that grows with you",
+  "heroEyebrowKa": "მმართველობის ტექნოლოგია, რომელიც თქვენთან ერთად ვითარდება",
+  "heroTitle": "Turn risk decisions into visible, accountable action.",
+  "heroTitleKa": "გადააქციეთ რისკის გადაწყვეტილებები გამჭვირვალე და ანგარიშვალდებულ ქმედებებად.",
+  "heroDescription": "A clear workspace for risk identification, 5×5 assessment, controls, remediation, dashboards and management reporting — ready today in the Risk Management solution.",
+  "heroDescriptionKa": "ერთიანი სამუშაო სივრცე რისკების იდენტიფიკაციისთვის, 5×5 შეფასებისთვის, კონტროლებისთვის, რემედიაციისთვის, დეშბორდებისა და მენეჯმენტის ანგარიშგებისთვის — Risk Management გადაწყვეტა უკვე ხელმისაწვდომია.",
+  "heroPrimaryCta": "Explore Risk Management",
+  "heroPrimaryCtaKa": "Risk Management-ის ნახვა",
+  "heroSecondaryCta": "Watch product demo",
+  "heroSecondaryCtaKa": "პროდუქტის დემოს ნახვა",
+  "solutionsTitle": "One platform. A growing governance suite.",
+  "solutionsTitleKa": "ერთი პლატფორმა. განვითარებადი მმართველობის ეკოსისტემა.",
+  "solutionsDescription": "Start with enterprise risk management today. Compliance and audit workspaces are presented transparently as planned modules.",
+  "solutionsDescriptionKa": "დაიწყეთ საწარმოს რისკების მართვით დღესვე. შესაბამისობისა და აუდიტის სამუშაო სივრცეები გამჭვირვალედ არის წარმოდგენილი, როგორც დაგეგმილი მოდულები.",
+  "aboutTitle": "About AIZEN Risk & Compliance",
+  "aboutTitleKa": "AIZEN Risk & Compliance-ის შესახებ",
+  "aboutDescription": "AIZEN Risk & Compliance is a technology-driven risk and compliance platform, built to help organizations strengthen governance, manage risk, and meet regulatory requirements with confidence.",
+  "aboutDescriptionKa": "AIZEN Risk & Compliance არის ტექნოლოგიაზე დაფუძნებული რისკებისა და შესაბამისობის პლატფორმა, რომელიც ორგანიზაციებს ეხმარება მმართველობის გაძლიერებაში, რისკების მართვასა და რეგულაციური მოთხოვნების თავდაჯერებულად შესრულებაში.",
+  "aboutReachTitle": "Our reach",
+  "aboutReachTitleKa": "ჩვენი მასშტაბი",
+  "aboutReachDescription": "We currently operate in one market, with a focused approach that enables us to understand local business needs, regulatory requirements, and industry challenges in depth.",
+  "aboutReachDescriptionKa": "ამ ეტაპზე ერთ ბაზარზე ვოპერირებთ. ფოკუსირებული მიდგომა საშუალებას გვაძლევს სიღრმისეულად გავიგოთ ადგილობრივი ბიზნესის საჭიროებები, რეგულაციური მოთხოვნები და ინდუსტრიის გამოწვევები.",
+  "aboutPeopleTitle": "Our people",
+  "aboutPeopleTitleKa": "ჩვენი გუნდი",
+  "aboutPeopleDescription": "Our team brings together some of the market’s leading technology professionals, combining deep expertise in innovation, risk management, compliance, and digital transformation.",
+  "aboutPeopleDescriptionKa": "ჩვენი გუნდი აერთიანებს ბაზრის წამყვან ტექნოლოგიურ პროფესიონალებს და ღრმა გამოცდილებას ინოვაციებში, რისკების მართვაში, შესაბამისობასა და ციფრულ ტრანსფორმაციაში.",
+  "aboutClientsTitle": "Our clients",
+  "aboutClientsTitleKa": "ჩვენი კლიენტები",
+  "aboutClientsDescription": "We help organizations streamline their risk and compliance processes through practical, intelligent, and scalable technology solutions.",
+  "aboutClientsDescriptionKa": "ორგანიზაციებს ვეხმარებით რისკებისა და შესაბამისობის პროცესების გამარტივებაში პრაქტიკული, ინტელექტუალური და მასშტაბირებადი ტექნოლოგიური გადაწყვეტილებებით.",
+  "aboutVisionTitle": "Our vision",
+  "aboutVisionTitleKa": "ჩვენი ხედვა",
+  "aboutVisionDescription": "We aim to make risk and compliance management simpler, more transparent, and more effective—empowering businesses to make informed decisions and grow with confidence.",
+  "aboutVisionDescriptionKa": "ჩვენი მიზანია რისკებისა და შესაბამისობის მართვა გავხადოთ უფრო მარტივი, გამჭვირვალე და ეფექტური, რათა ბიზნესებმა მიიღონ ინფორმირებული გადაწყვეტილებები და თავდაჯერებულად გაიზარდონ.",
+  "teamTitle": "The people behind AIZEN",
+  "teamTitleKa": "ადამიანები AIZEN-ის უკან",
+  "teamDescription": "Meet the specialists shaping our products, customer experience and practical governance outcomes.",
+  "teamDescriptionKa": "გაიცანით სპეციალისტები, რომლებიც ქმნიან ჩვენს პროდუქტებს, მომხმარებლის გამოცდილებასა და პრაქტიკული მმართველობის შედეგებს.",
+  "aboutHighlights": [
+    "Practical by design",
+    "Configurable for each organisation",
+    "Clear ownership and reporting"
+  ],
+  "aboutHighlightsKa": [
+    "პრაქტიკული დიზაინი",
+    "ორგანიზაციაზე მორგებადი",
+    "მკაფიო პასუხისმგებლობა და ანგარიშგება"
+  ],
+  "videoTitle": "See the Risk Management workspace in action",
+  "videoTitleKa": "იხილეთ Risk Management სამუშაო პროცესში",
+  "videoDescription": "A concise walkthrough of configurable dashboards, the risk register, individual risk records, controls, remediation actions and management reports.",
+  "videoDescriptionKa": "მოკლე მიმოხილვა კონფიგურირებადი დეშბორდების, რისკ-რეესტრის, ინდივიდუალური რისკების, კონტროლების, რემედიაციის ქმედებებისა და მენეჯმენტის ანგარიშების შესახებ.",
+  "videoHighlights": [
+    "Configure dashboards from register data",
+    "Assess inherent, residual and target risk",
+    "Track controls, actions, owners and deadlines",
+    "Build reusable management reports"
+  ],
+  "videoHighlightsKa": [
+    "ააწყვეთ დეშბორდები რეესტრის მონაცემებიდან",
+    "შეაფასეთ თავდაპირველი, არსებული და სამიზნე რისკი",
+    "აკონტროლეთ კონტროლები, ქმედებები, მფლობელები და ვადები",
+    "შექმენით მრავალჯერადი მენეჯმენტის ანგარიშები"
+  ],
+  "videoUrl": "",
+  "videoData": "",
+  "contactEmail": "hello@aizen.local",
+  "footerText": "Plan clearly. Manage accountably. Grow with confidence.",
+  "footerTextKa": "დაგეგმეთ მკაფიოდ. მართეთ პასუხისმგებლობით. გაიზარდეთ თავდაჯერებით.",
+  "solutions": [
+    {
+      "id": "solution_risk",
+      "name": "Risk Management",
+      "nameKa": "რისკების მართვა",
+      "description": "Maintain a governed risk register, assess inherent/residual/target exposure, document controls and drive remediation to closure.",
+      "descriptionKa": "მართეთ რისკ-რეესტრი, შეაფასეთ თავდაპირველი/არსებული/სამიზნე რისკი, აღწერეთ კონტროლები და მიიყვანეთ რემედიაცია დასრულებამდე.",
+      "status": "available",
+      "route": "/dashboard",
+      "accentColor": "#5868B7",
+      "order": 1,
+      "features": [
+        "Unlimited risk registers",
+        "Adaptive assessment matrix",
+        "Control and remediation tracking",
+        "Live, flexible dashboards and reports",
+        "AI assistance for assessments and control mapping",
+        "Unlimited users"
+      ],
+      "featuresKa": [
+        "შეუზღუდავი რისკ-რეესტრები",
+        "ადაპტირებადი შეფასების მატრიცა",
+        "კონტროლებისა და რემედიაციის მონიტორინგი",
+        "ცოცხალი, მოქნილი დეშბორდები და ანგარიშები",
+        "AI დახმარება შეფასებებსა და კონტროლების დაკავშირებაში",
+        "შეუზღუდავი მომხმარებლები"
+      ]
+    },
+    {
+      "id": "solution_compliance",
+      "name": "Compliance Management",
+      "nameKa": "შესაბამისობის მართვა",
+      "description": "A planned workspace for obligations, regulatory change, internal standards, monitoring, evidence and compliance issues.",
+      "descriptionKa": "დაგეგმილი სამუშაო სივრცე ვალდებულებების, რეგულაციური ცვლილებების, შიდა სტანდარტების, მონიტორინგის, მტკიცებულებებისა და შესაბამისობის საკითხებისთვის.",
+      "status": "coming-soon",
+      "route": "",
+      "accentColor": "#8A94B8",
+      "order": 2,
+      "features": [
+        "Regulatory Compliance Management",
+        "Internal policy and standards compliance management",
+        "Continuous compliance monitoring and automation",
+        "Issue and control deficiency tracking"
+      ],
+      "featuresKa": [
+        "რეგულაციური შესაბამისობის მართვა",
+        "შიდა პოლიტიკებისა და სტანდარტების შესაბამისობის მართვა",
+        "შესაბამისობის უწყვეტი მონიტორინგი და ავტომატიზაცია",
+        "საკითხებისა და კონტროლის ხარვეზების მონიტორინგი"
+      ]
+    },
+    {
+      "id": "solution_audit",
+      "name": "Audit Management",
+      "nameKa": "აუდიტის მართვა",
+      "description": "A planned workspace for evidence, audit delivery, intelligent review, reporting, findings and follow-up.",
+      "descriptionKa": "დაგეგმილი სამუშაო სივრცე მტკიცებულებების, აუდიტის შესრულების, ინტელექტუალური შემოწმების, ანგარიშგების, მიგნებებისა და შემდგომი კონტროლისთვის.",
+      "status": "coming-soon",
+      "route": "",
+      "accentColor": "#9AA2BD",
+      "order": 3,
+      "features": [
+        "Evidence collection and centralized repository",
+        "AI-powered evidence checks and recommendations",
+        "Engagement delivery and reporting",
+        "Findings follow-up"
+      ],
+      "featuresKa": [
+        "მტკიცებულებების შეგროვება და ცენტრალიზებული საცავი",
+        "AI-ზე დაფუძნებული მტკიცებულებების შემოწმება და რეკომენდაციები",
+        "აუდიტის შესრულება და ანგარიშგება",
+        "მიგნებების შემდგომი კონტროლი"
+      ]
+    }
+  ],
+  "team": [],
+  "updatedAt": "2026-08-13T12:00:00Z",
+  "updatedBy": "usr_super_admin"
+}

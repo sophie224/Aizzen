@@ -1,0 +1,210 @@
+/* Application shell: header, sidebar, content region (ARCHITECTURE.md §9). */
+
+.shell {
+  display: grid;
+  grid-template-rows: var(--header-height) 1fr;
+  min-height: 100%;
+}
+
+/* --- header --------------------------------------------------------------- */
+
+.shell__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 0 var(--space-5);
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+}
+
+/* Top-left: the AIZEN cotton-flower mark. */
+.shell__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.shell__brand-mark {
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+}
+
+.shell__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* Top-right: the uploadable client company logo. */
+.shell__client-logo {
+  max-height: 2.25rem;
+  max-width: 10rem;
+  object-fit: contain;
+}
+
+.shell__client-logo-placeholder {
+  font-size: var(--text-xs);
+  color: var(--color-text-on-primary);
+  opacity: 0.7;
+}
+
+.shell__language {
+  background: transparent;
+  color: var(--color-accent);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  transition: background var(--transition-fast) ease;
+}
+
+.shell__language:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.shell__user {
+  font-size: var(--text-sm);
+  color: var(--color-text-on-primary);
+}
+
+/* --- body ----------------------------------------------------------------- */
+
+.shell__body {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  min-height: 0;
+}
+
+.shell__sidebar {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface-deep);
+  padding: var(--space-4) var(--space-3);
+}
+
+.shell__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.shell__nav-link {
+  display: block;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-on-primary);
+  text-decoration: none;
+  transition: background var(--transition-fast) ease;
+}
+
+.shell__nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.shell__nav-link[aria-current='page'] {
+  background: var(--color-accent);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/*
+ * Bottom-left ADMINISTRATION entry point — placement is a product requirement
+ * (ARCHITECTURE.md §9), so the sidebar pushes it to the end of the column.
+ */
+.shell__admin-entry {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.shell__admin-link {
+  display: block;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-accent);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: background var(--transition-fast) ease;
+}
+
+.shell__admin-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.shell__main {
+  min-width: 0;
+  padding: var(--space-6);
+  overflow-y: auto;
+}
+
+/* --- route transition ----------------------------------------------------- */
+
+.route-enter {
+  animation: route-fade var(--transition-page) ease-out;
+}
+
+@keyframes route-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- panels --------------------------------------------------------------- */
+
+.panel {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+}
+
+.panel--notice {
+  border-color: var(--color-border-strong);
+  background: var(--color-warning-surface);
+}
+
+.panel--denied {
+  border-color: var(--color-danger);
+  background: var(--color-danger-surface);
+}
+
+.panel__meta {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 60rem) {
+  .shell__body {
+    grid-template-columns: 1fr;
+  }
+
+  .shell__sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .shell__admin-entry {
+    margin-top: 0;
+    border-top: 0;
+    padding-top: 0;
+  }
+}

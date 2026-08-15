@@ -1,0 +1,221 @@
+/* Report Template Builder (ARCHITECTURE.md §8.4). */
+
+.report-settings {
+  margin: var(--space-4) 0;
+  padding: var(--space-4);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.report-add-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.report-add-sections button {
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: transparent;
+  cursor: pointer;
+}
+
+.report-document {
+  margin-top: var(--space-5);
+  padding: var(--space-6);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.report-document__header {
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.report-section {
+  margin-bottom: var(--space-6);
+}
+
+.report-section h2 {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-2);
+}
+
+.report-widgets {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-3);
+}
+
+.report-widget {
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-top-width: 3px;
+  border-top-style: solid;
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+.report-widget h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.report-table th,
+.report-table td {
+  text-align: left;
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.report-table thead th {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* --- section editor --------------------------------------------------------- */
+
+.report-section__editor {
+  margin: var(--space-3) 0 var(--space-5);
+  padding: var(--space-4);
+  background: var(--color-page);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--space-3);
+}
+
+.report-section__kind {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.report-section__editor label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.report-section__editor input,
+.report-section__editor select,
+.report-section__editor textarea {
+  font: inherit;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-card);
+}
+
+.report-section__editor textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.report-columns,
+.report-filters {
+  grid-column: 1 / -1;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-2);
+}
+
+.report-columns legend,
+.report-filters legend {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  padding: 0 var(--space-2);
+}
+
+.report-columns label {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.report-section__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.report-section__actions button {
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-card);
+  cursor: pointer;
+}
+
+/*
+ * Print view: the document alone, with sections kept whole so a rating chip
+ * or table row is never split across a page break.
+ */
+@media print {
+  .shell__header,
+  .shell__sidebar,
+  .report-controls,
+  .report-settings,
+  .report-section__editor,
+  .skip-link {
+    display: none !important;
+  }
+
+  .shell,
+  .shell__body,
+  .shell__main {
+    display: block;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .report-document {
+    border: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .report-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .report-widget,
+  .report-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .report-table thead {
+    display: table-header-group;
+  }
+}

@@ -1,0 +1,2061 @@
+{
+  "exportedAt": "2026-01-05T10:00:00.000Z",
+  "app": "AIZEN Risk & Compliance",
+  "schemaVersion": 7,
+  "state": {
+    "version": 7,
+    "language": "en",
+    "currentUserId": null,
+    "clientLogo": null,
+    "users": [
+      {
+        "id": "usr_super_admin",
+        "name": "AIZEN Super Admin",
+        "email": "superadmin@aizen.local",
+        "password": "Aizen#2026",
+        "roles": [
+          "role_super_admin",
+          "role_admin"
+        ],
+        "status": "Active",
+        "businessUnitIds": [
+          "bu_enterprise"
+        ],
+        "title": "Platform Owner"
+      },
+      {
+        "id": "usr_admin",
+        "name": "ERM Administrator",
+        "email": "admin@erm.local",
+        "password": "Admin#2026",
+        "roles": [
+          "role_admin"
+        ],
+        "status": "Active",
+        "businessUnitIds": [
+          "bu_enterprise"
+        ],
+        "title": "Platform Administrator"
+      },
+      {
+        "id": "usr_admin_db",
+        "name": "D. Baghdavadze",
+        "email": "d.baghdavadze@outlook.com",
+        "password": "Admin#2026",
+        "roles": [
+          "role_admin"
+        ],
+        "status": "Active",
+        "businessUnitIds": [
+          "bu_enterprise"
+        ],
+        "title": "Administration"
+      },
+      {
+        "id": "usr_manager",
+        "name": "D. Bagdavadze",
+        "email": "d.bagdavadze@outlook.com",
+        "password": "Test#2026",
+        "roles": [
+          "role_risk_manager"
+        ],
+        "status": "Active",
+        "businessUnitIds": [
+          "bu_enterprise"
+        ],
+        "title": "Risk Manager"
+      },
+      {
+        "id": "usr_owner",
+        "name": "Nino Kapanadze",
+        "email": "risk.owner@erm.local",
+        "password": "Owner#2026",
+        "roles": [
+          "role_risk_owner"
+        ],
+        "status": "Active",
+        "businessUnitIds": [
+          "bu_technology"
+        ],
+        "title": "Technology Risk Owner"
+      },
+      {
+        "id": "usr_control",
+        "name": "Giorgi Maisuradze",
+        "email": "control.owner@erm.local",
+        "password": "Control#2026",
+        "roles": [
+          "role_control_owner"
+        ],
+        "status": "Active",
+        "businessUnitIds": [
+          "bu_security"
+        ],
+        "title": "Security Control Owner"
+      },
+      {
+        "id": "usr_action",
+        "name": "Mariam Lomidze",
+        "email": "action.owner@erm.local",
+        "password": "Action#2026",
+        "roles": [
+          "role_action_owner"
+        ],
+        "status": "Active",
+        "businessUnitIds": [
+          "bu_enterprise"
+        ],
+        "title": "Remediation Lead"
+      },
+      {
+        "id": "usr_auditor",
+        "name": "Internal Auditor",
+        "email": "auditor@erm.local",
+        "password": "Audit#2026",
+        "roles": [
+          "role_auditor"
+        ],
+        "status": "Active",
+        "businessUnitIds": [
+          "bu_enterprise"
+        ],
+        "title": "Internal Audit"
+      }
+    ],
+    "roles": [
+      {
+        "id": "role_super_admin",
+        "name": "Super Administrator",
+        "nameKa": "სუპერ ადმინისტრატორი",
+        "system": true,
+        "description": "Manages the public AIZEN website and has full access to the Risk Management solution.",
+        "permissions": {
+          "dashboard": "edit",
+          "register": "edit",
+          "risks": "edit",
+          "controls": "edit",
+          "actions": "edit",
+          "reports": "edit",
+          "audit": "edit",
+          "administration": "edit"
+        }
+      },
+      {
+        "id": "role_admin",
+        "name": "Administrator",
+        "nameKa": "ადმინისტრატორი",
+        "system": true,
+        "description": "Full access to all modules, master data, users, roles, matrix and settings.",
+        "permissions": {
+          "dashboard": "edit",
+          "register": "edit",
+          "risks": "edit",
+          "controls": "edit",
+          "actions": "edit",
+          "reports": "edit",
+          "audit": "edit",
+          "administration": "edit"
+        }
+      },
+      {
+        "id": "role_risk_manager",
+        "name": "Risk Manager",
+        "nameKa": "რისკების მენეჯერი",
+        "system": true,
+        "description": "Administers the risk module and may manage all risk records, assessments, owners, controls and actions.",
+        "permissions": {
+          "dashboard": "read",
+          "register": "edit",
+          "risks": "edit",
+          "controls": "edit",
+          "actions": "edit",
+          "reports": "edit",
+          "audit": "read",
+          "administration": "none"
+        }
+      },
+      {
+        "id": "role_risk_owner",
+        "name": "Risk Owner",
+        "nameKa": "რისკის მფლობელი",
+        "system": true,
+        "description": "Owns assigned risks and may update assigned risk assessments, controls and remediation plans.",
+        "permissions": {
+          "dashboard": "read",
+          "register": "read",
+          "risks": "edit",
+          "controls": "edit",
+          "actions": "edit",
+          "reports": "read",
+          "audit": "read",
+          "administration": "none"
+        }
+      },
+      {
+        "id": "role_control_owner",
+        "name": "Control Owner",
+        "nameKa": "კონტროლის მფლობელი",
+        "system": true,
+        "description": "Maintains controls assigned to them and records design/operating effectiveness information.",
+        "permissions": {
+          "dashboard": "read",
+          "register": "read",
+          "risks": "read",
+          "controls": "edit",
+          "actions": "read",
+          "reports": "none",
+          "audit": "read",
+          "administration": "none"
+        }
+      },
+      {
+        "id": "role_action_owner",
+        "name": "Action Owner",
+        "nameKa": "ქმედების მფლობელი",
+        "system": true,
+        "description": "Updates assigned remediation actions, progress and delivery dates.",
+        "permissions": {
+          "dashboard": "read",
+          "register": "read",
+          "risks": "read",
+          "controls": "read",
+          "actions": "edit",
+          "reports": "none",
+          "audit": "read",
+          "administration": "none"
+        }
+      },
+      {
+        "id": "role_auditor",
+        "name": "Auditor",
+        "nameKa": "აუდიტორი",
+        "system": true,
+        "description": "Read-only access across the platform.",
+        "permissions": {
+          "dashboard": "read",
+          "register": "read",
+          "risks": "read",
+          "controls": "read",
+          "actions": "read",
+          "reports": "read",
+          "audit": "read",
+          "administration": "none"
+        }
+      }
+    ],
+    "categories": [
+      {
+        "id": "cat_01",
+        "level1": "Strategic",
+        "level1Ka": "სტრატეგიული",
+        "level2": "Business Model",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_02",
+        "level1": "Strategic",
+        "level1Ka": "სტრატეგიული",
+        "level2": "Competition",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_03",
+        "level1": "Strategic",
+        "level1Ka": "სტრატეგიული",
+        "level2": "External Environment",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_04",
+        "level1": "Strategic",
+        "level1Ka": "სტრატეგიული",
+        "level2": "Geopolitical",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_05",
+        "level1": "Strategic",
+        "level1Ka": "სტრატეგიული",
+        "level2": "Merger and Acquisition",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_06",
+        "level1": "Strategic",
+        "level1Ka": "სტრატეგიული",
+        "level2": "Transformation",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_07",
+        "level1": "Strategic",
+        "level1Ka": "სტრატეგიული",
+        "level2": "Product Innovation",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_08",
+        "level1": "Strategic",
+        "level1Ka": "სტრატეგიული",
+        "level2": "AI",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_09",
+        "level1": "Reputational",
+        "level1Ka": "რეპუტაციული",
+        "level2": "Stakeholder",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_10",
+        "level1": "Reputational",
+        "level1Ka": "რეპუტაციული",
+        "level2": "Social Licence/Public relations & Crisis",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_11",
+        "level1": "Reputational",
+        "level1Ka": "რეპუტაციული",
+        "level2": "Responsible Gaming",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_12",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Property",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_13",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Third Party & Vendor Management",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_14",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Change Management",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_15",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Cyber Security",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_16",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Data Governance",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_17",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Payments",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_18",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "People & Talent",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_19",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Product Development",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_20",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Service Delivery & Operations",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_21",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Technology Infrastructure & Platforms",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_22",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Business Continuity & Resilience",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_23",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Sports Trading Operations",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_24",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Business Process Failures",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_25",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Fraud (Internal/External)",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_26",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Customer Operations",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_27",
+        "level1": "Operational",
+        "level1Ka": "ოპერაციული",
+        "level2": "Governance & Oversight",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_28",
+        "level1": "Legal and Compliance",
+        "level1Ka": "იურიდიული და შესაბამისობა",
+        "level2": "Ethics, Conduct & Integrity",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_29",
+        "level1": "Legal and Compliance",
+        "level1Ka": "იურიდიული და შესაბამისობა",
+        "level2": "Claims & Litigation",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_30",
+        "level1": "Legal and Compliance",
+        "level1Ka": "იურიდიული და შესაბამისობა",
+        "level2": "Regulatory (incl. reporting)",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_31",
+        "level1": "Legal and Compliance",
+        "level1Ka": "იურიდიული და შესაბამისობა",
+        "level2": "Data Privacy & Protection",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_32",
+        "level1": "Legal and Compliance",
+        "level1Ka": "იურიდიული და შესაბამისობა",
+        "level2": "Financial Crime",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_33",
+        "level1": "Legal and Compliance",
+        "level1Ka": "იურიდიული და შესაბამისობა",
+        "level2": "ESG",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_34",
+        "level1": "Financial",
+        "level1Ka": "ფინანსური",
+        "level2": "Credit",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_35",
+        "level1": "Financial",
+        "level1Ka": "ფინანსური",
+        "level2": "Liquidity & Funding (Treasury)",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_36",
+        "level1": "Financial",
+        "level1Ka": "ფინანსური",
+        "level2": "Market",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_37",
+        "level1": "Financial",
+        "level1Ka": "ფინანსური",
+        "level2": "Tax",
+        "level2Ka": "",
+        "active": true
+      },
+      {
+        "id": "cat_38",
+        "level1": "Financial",
+        "level1Ka": "ფინანსური",
+        "level2": "Financial Reporting & Accounting",
+        "level2Ka": "",
+        "active": true
+      }
+    ],
+    "businessUnits": [
+      {
+        "id": "bu_enterprise",
+        "code": "ENT",
+        "name": "Enterprise",
+        "nameKa": "საწარმო",
+        "parentId": null,
+        "active": true
+      },
+      {
+        "id": "bu_technology",
+        "code": "TECH",
+        "name": "Technology Division",
+        "nameKa": "ტექნოლოგიების დივიზია",
+        "parentId": "bu_enterprise",
+        "active": true
+      },
+      {
+        "id": "bu_operations",
+        "code": "OPS",
+        "name": "IT Operations Department",
+        "nameKa": "IT ოპერაციების დეპარტამენტი",
+        "parentId": "bu_technology",
+        "active": true
+      },
+      {
+        "id": "bu_security",
+        "code": "SEC",
+        "name": "Information Security",
+        "nameKa": "ინფორმაციული უსაფრთხოება",
+        "parentId": "bu_technology",
+        "active": true
+      },
+      {
+        "id": "bu_finance",
+        "code": "FIN",
+        "name": "Finance",
+        "nameKa": "ფინანსები",
+        "parentId": "bu_enterprise",
+        "active": true
+      },
+      {
+        "id": "bu_legal",
+        "code": "LRC",
+        "name": "Legal, Risk & Compliance",
+        "nameKa": "იურიდიული, რისკები და შესაბამისობა",
+        "parentId": "bu_enterprise",
+        "active": true
+      },
+      {
+        "id": "bu_people",
+        "code": "PPL",
+        "name": "People",
+        "nameKa": "ადამიანური რესურსები",
+        "parentId": "bu_enterprise",
+        "active": true
+      }
+    ],
+    "attributes": [
+      {
+        "id": "attr_appetite",
+        "nameEn": "Appetite status",
+        "nameKa": "აპეტიტის სტატუსი",
+        "type": "select",
+        "options": [
+          "Within Appetite",
+          "Watch Trigger",
+          "Limit"
+        ],
+        "active": true,
+        "showInRegister": true
+      },
+      {
+        "id": "attr_kri",
+        "nameEn": "Primary KRI",
+        "nameKa": "ძირითადი KRI",
+        "type": "text",
+        "options": [],
+        "active": true,
+        "showInRegister": false
+      },
+      {
+        "id": "attr_review_cycle",
+        "nameEn": "Review cycle",
+        "nameKa": "გადახედვის ციკლი",
+        "type": "select",
+        "options": [
+          "Monthly",
+          "Quarterly",
+          "Bi-annual",
+          "Annual"
+        ],
+        "active": true,
+        "showInRegister": false
+      }
+    ],
+    "matrix": {
+      "cells": [
+        {
+          "impact": 1,
+          "likelihood": 1,
+          "rating": "Low"
+        },
+        {
+          "impact": 1,
+          "likelihood": 2,
+          "rating": "Low"
+        },
+        {
+          "impact": 1,
+          "likelihood": 3,
+          "rating": "Low"
+        },
+        {
+          "impact": 1,
+          "likelihood": 4,
+          "rating": "Low"
+        },
+        {
+          "impact": 1,
+          "likelihood": 5,
+          "rating": "Medium"
+        },
+        {
+          "impact": 2,
+          "likelihood": 1,
+          "rating": "Low"
+        },
+        {
+          "impact": 2,
+          "likelihood": 2,
+          "rating": "Low"
+        },
+        {
+          "impact": 2,
+          "likelihood": 3,
+          "rating": "Medium"
+        },
+        {
+          "impact": 2,
+          "likelihood": 4,
+          "rating": "Medium"
+        },
+        {
+          "impact": 2,
+          "likelihood": 5,
+          "rating": "High"
+        },
+        {
+          "impact": 3,
+          "likelihood": 1,
+          "rating": "Low"
+        },
+        {
+          "impact": 3,
+          "likelihood": 2,
+          "rating": "Medium"
+        },
+        {
+          "impact": 3,
+          "likelihood": 3,
+          "rating": "Medium"
+        },
+        {
+          "impact": 3,
+          "likelihood": 4,
+          "rating": "High"
+        },
+        {
+          "impact": 3,
+          "likelihood": 5,
+          "rating": "High"
+        },
+        {
+          "impact": 4,
+          "likelihood": 1,
+          "rating": "Low"
+        },
+        {
+          "impact": 4,
+          "likelihood": 2,
+          "rating": "Medium"
+        },
+        {
+          "impact": 4,
+          "likelihood": 3,
+          "rating": "High"
+        },
+        {
+          "impact": 4,
+          "likelihood": 4,
+          "rating": "High"
+        },
+        {
+          "impact": 4,
+          "likelihood": 5,
+          "rating": "Significant"
+        },
+        {
+          "impact": 5,
+          "likelihood": 1,
+          "rating": "Medium"
+        },
+        {
+          "impact": 5,
+          "likelihood": 2,
+          "rating": "High"
+        },
+        {
+          "impact": 5,
+          "likelihood": 3,
+          "rating": "High"
+        },
+        {
+          "impact": 5,
+          "likelihood": 4,
+          "rating": "Significant"
+        },
+        {
+          "impact": 5,
+          "likelihood": 5,
+          "rating": "Significant"
+        }
+      ],
+      "colors": {
+        "Low": "#00B050",
+        "Medium": "#FFF200",
+        "High": "#FFB900",
+        "Significant": "#F32121"
+      },
+      "impactLabels": {
+        "1": {
+          "en": "Minor",
+          "ka": "მცირე"
+        },
+        "2": {
+          "en": "Moderate",
+          "ka": "საშუალო"
+        },
+        "3": {
+          "en": "Major",
+          "ka": "დიდი"
+        },
+        "4": {
+          "en": "Severe",
+          "ka": "მწვავე"
+        },
+        "5": {
+          "en": "Critical",
+          "ka": "კრიტიკული"
+        }
+      },
+      "likelihoodLabels": {
+        "1": {
+          "en": "Remote",
+          "ka": "არასავარაუდო",
+          "probability": "0%-5%"
+        },
+        "2": {
+          "en": "Unlikely",
+          "ka": "ნაკლებად სავარაუდო",
+          "probability": "6%-35%"
+        },
+        "3": {
+          "en": "Possible",
+          "ka": "შესაძლო",
+          "probability": "36%-65%"
+        },
+        "4": {
+          "en": "Likely",
+          "ka": "სავარაუდო",
+          "probability": "66%-95%"
+        },
+        "5": {
+          "en": "Almost Certain",
+          "ka": "თითქმის უდავო",
+          "probability": "96%-100%"
+        }
+      }
+    },
+    "risks": [
+      {
+        "id": "risk_001",
+        "ref": "IT-001",
+        "title": "Sensitive information assets are mixed with information assets of lesser criticality",
+        "type": "Current",
+        "categoryId": "cat_16",
+        "businessUnitId": "bu_technology",
+        "riskOwnerId": "usr_owner",
+        "originDate": "2025-01-15",
+        "reviewDate": "2026-09-30",
+        "targetDate": "2026-05-30",
+        "status": "Rescheduled",
+        "responseType": "Mitigate",
+        "outlook": "Decreasing",
+        "cause": "Lack of a documented methodology and process for data classification across environments.",
+        "event": "Sensitive information may be processed or stored together with lower-criticality assets without appropriate protection.",
+        "consequence": "Confidentiality breaches, regulatory fines, licence impact, revenue loss and reputational damage.",
+        "statusNarrative": "The information architecture methodology is being formalised. Delivery is dependent on the cloud migration programme.",
+        "inherent": {
+          "impact": 5,
+          "likelihood": 5
+        },
+        "residual": {
+          "impact": 5,
+          "likelihood": 5
+        },
+        "target": {
+          "impact": 2,
+          "likelihood": 2
+        },
+        "controls": [],
+        "actions": [
+          {
+            "id": "act_001",
+            "title": "Data classification methodology",
+            "description": "Document the methodology and apply it to priority environments.",
+            "deliverable": "Approved data classification standard and labelled priority datasets.",
+            "ownerId": "usr_action",
+            "dueDate": "2026-05-30",
+            "status": "Rescheduled",
+            "priority": "Critical",
+            "progress": 55,
+            "notes": "Dependent on AWS migration project."
+          }
+        ],
+        "custom": {
+          "attr_appetite": "Limit",
+          "attr_kri": "Percentage of classified critical assets",
+          "attr_review_cycle": "Quarterly"
+        },
+        "history": [
+          {
+            "id": "hist_001a",
+            "date": "2025-09-30",
+            "inherent": {
+              "impact": 5,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 5,
+              "likelihood": 5
+            },
+            "target": {
+              "impact": 2,
+              "likelihood": 2
+            },
+            "note": "Initial assessment",
+            "actorId": "usr_manager"
+          },
+          {
+            "id": "hist_001b",
+            "date": "2026-06-30",
+            "inherent": {
+              "impact": 5,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 5,
+              "likelihood": 5
+            },
+            "target": {
+              "impact": 2,
+              "likelihood": 2
+            },
+            "note": "Residual exposure unchanged; action rescheduled",
+            "actorId": "usr_owner"
+          }
+        ],
+        "audit": [],
+        "updatedAt": "2026-06-30T10:00:00Z"
+      },
+      {
+        "id": "risk_002",
+        "ref": "IT-002",
+        "title": "Lack of security monitoring",
+        "type": "Current",
+        "categoryId": "cat_15",
+        "businessUnitId": "bu_security",
+        "riskOwnerId": "usr_owner",
+        "originDate": "2024-11-01",
+        "reviewDate": "2026-10-01",
+        "targetDate": "2026-02-28",
+        "status": "In Progress",
+        "responseType": "Mitigate",
+        "outlook": "Decreasing",
+        "cause": "Not all sensitive assets and critical services are integrated with monitoring solutions.",
+        "event": "A security incident may remain undetected or may not be investigated promptly.",
+        "consequence": "Confidentiality, integrity or availability loss, fines and licence impact.",
+        "statusNarrative": "Priority integrations are in progress and exception ownership is being formalised.",
+        "inherent": {
+          "impact": 4,
+          "likelihood": 5
+        },
+        "residual": {
+          "impact": 2,
+          "likelihood": 3
+        },
+        "target": {
+          "impact": 2,
+          "likelihood": 2
+        },
+        "controls": [
+          {
+            "id": "ctrl_002a",
+            "title": "Central SIEM monitoring",
+            "ownerId": "usr_control",
+            "performer": "Security Operations",
+            "description": "Priority security telemetry is integrated into central SIEM with on-call triage.",
+            "frequency": "Weekly",
+            "intendedOutcome": "Known vulnerabilities are identified early and assigned for remediation.",
+            "evidenceLocation": "Vulnerability platform dashboards",
+            "keyControl": true,
+            "type": "Detective",
+            "automation": "Automated",
+            "status": "Needs Improvement"
+          }
+        ],
+        "actions": [
+          {
+            "id": "act_002",
+            "title": "Integrate exception assets into SIEM",
+            "description": "Assess and integrate remaining high-priority exceptions.",
+            "deliverable": "All critical assets covered or formally risk accepted.",
+            "ownerId": "usr_action",
+            "dueDate": "2026-02-28",
+            "status": "In Progress",
+            "priority": "High",
+            "progress": 70,
+            "notes": "Cloud-native sources are in the final onboarding wave."
+          }
+        ],
+        "custom": {
+          "attr_appetite": "Watch Trigger",
+          "attr_kri": "Critical assets without monitoring",
+          "attr_review_cycle": "Quarterly"
+        },
+        "history": [
+          {
+            "id": "hist_002a",
+            "date": "2025-06-30",
+            "inherent": {
+              "impact": 4,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 3,
+              "likelihood": 4
+            },
+            "target": {
+              "impact": 2,
+              "likelihood": 2
+            },
+            "note": "Initial monitoring gap",
+            "actorId": "usr_manager"
+          },
+          {
+            "id": "hist_002b",
+            "date": "2026-06-30",
+            "inherent": {
+              "impact": 4,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 2,
+              "likelihood": 3
+            },
+            "target": {
+              "impact": 2,
+              "likelihood": 2
+            },
+            "note": "Coverage increased",
+            "actorId": "usr_owner"
+          }
+        ],
+        "audit": [],
+        "updatedAt": "2026-06-30T11:00:00Z"
+      },
+      {
+        "id": "risk_003",
+        "ref": "PPL-001",
+        "title": "Insufficient cyber security awareness",
+        "type": "Current",
+        "categoryId": "cat_18",
+        "businessUnitId": "bu_people",
+        "riskOwnerId": "usr_manager",
+        "originDate": "2025-02-12",
+        "reviewDate": "2026-12-15",
+        "targetDate": "2025-12-25",
+        "status": "In Progress",
+        "responseType": "Mitigate",
+        "outlook": "Stable",
+        "cause": "Cyber security training and communication do not consistently reach all staff populations.",
+        "event": "Employees may not identify or respond appropriately to phishing and social engineering.",
+        "consequence": "Confidential information loss, operational disruption, regulatory fines and reputational harm.",
+        "statusNarrative": "Training completion is improving; targeted campaigns remain in progress.",
+        "inherent": {
+          "impact": 3,
+          "likelihood": 5
+        },
+        "residual": {
+          "impact": 2,
+          "likelihood": 3
+        },
+        "target": {
+          "impact": 2,
+          "likelihood": 2
+        },
+        "controls": [
+          {
+            "id": "ctrl_003",
+            "title": "Mandatory cyber awareness programme",
+            "ownerId": "usr_manager",
+            "performer": "Information Security Training",
+            "description": "Mandatory onboarding and annual refresher training, supported by phishing simulations.",
+            "frequency": "Annual plus quarterly simulations",
+            "intendedOutcome": "Employees identify and report suspicious activity.",
+            "evidenceLocation": "Learning management system and phishing platform",
+            "keyControl": true,
+            "type": "Directive",
+            "automation": "Semi-Automated",
+            "status": "Effective"
+          }
+        ],
+        "actions": [
+          {
+            "id": "act_003",
+            "title": "Increase completion to 90%",
+            "description": "Follow up overdue participants and repeat failed simulations.",
+            "deliverable": "At least 90% completion and improved simulation results.",
+            "ownerId": "usr_action",
+            "dueDate": "2025-12-25",
+            "status": "In Progress",
+            "priority": "Medium",
+            "progress": 82,
+            "notes": ""
+          }
+        ],
+        "custom": {
+          "attr_appetite": "Within Appetite",
+          "attr_kri": "Training completion rate",
+          "attr_review_cycle": "Quarterly"
+        },
+        "history": [
+          {
+            "id": "hist_003a",
+            "date": "2025-12-15",
+            "inherent": {
+              "impact": 3,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 2,
+              "likelihood": 3
+            },
+            "target": {
+              "impact": 2,
+              "likelihood": 2
+            },
+            "note": "Annual assessment",
+            "actorId": "usr_manager"
+          }
+        ],
+        "audit": [],
+        "updatedAt": "2026-01-15T09:00:00Z"
+      },
+      {
+        "id": "risk_004",
+        "ref": "IT-003",
+        "title": "Sensitive data is not consistently encrypted at rest",
+        "type": "Current",
+        "categoryId": "cat_31",
+        "businessUnitId": "bu_technology",
+        "riskOwnerId": "usr_owner",
+        "originDate": "2025-03-05",
+        "reviewDate": "2026-11-30",
+        "targetDate": "2026-05-30",
+        "status": "Rescheduled",
+        "responseType": "Mitigate",
+        "outlook": "Decreasing",
+        "cause": "Legacy systems were implemented without consistent encryption baselines.",
+        "event": "Sensitive information may be exposed if storage is compromised.",
+        "consequence": "Privacy breach, legal and regulatory penalties, customer harm and reputation loss.",
+        "statusNarrative": "Encryption design is approved; implementation is aligned to platform modernisation.",
+        "inherent": {
+          "impact": 5,
+          "likelihood": 5
+        },
+        "residual": {
+          "impact": 4,
+          "likelihood": 4
+        },
+        "target": {
+          "impact": 2,
+          "likelihood": 3
+        },
+        "controls": [],
+        "actions": [
+          {
+            "id": "act_004",
+            "title": "Implement encryption baseline",
+            "description": "Enable encryption and complete risk-based exceptions.",
+            "deliverable": "Encrypted priority systems and approved exceptions.",
+            "ownerId": "usr_action",
+            "dueDate": "2026-05-30",
+            "status": "Rescheduled",
+            "priority": "Critical",
+            "progress": 45,
+            "notes": ""
+          }
+        ],
+        "custom": {
+          "attr_appetite": "Limit",
+          "attr_kri": "Unencrypted sensitive stores",
+          "attr_review_cycle": "Monthly"
+        },
+        "history": [
+          {
+            "id": "hist_004a",
+            "date": "2025-11-30",
+            "inherent": {
+              "impact": 5,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 4,
+              "likelihood": 4
+            },
+            "target": {
+              "impact": 2,
+              "likelihood": 3
+            },
+            "note": "Baseline assessment",
+            "actorId": "usr_manager"
+          }
+        ],
+        "audit": [],
+        "updatedAt": "2026-05-20T12:00:00Z"
+      },
+      {
+        "id": "risk_005",
+        "ref": "LRC-001",
+        "title": "Data is retained beyond approved retention periods",
+        "type": "Current",
+        "categoryId": "cat_31",
+        "businessUnitId": "bu_legal",
+        "riskOwnerId": "usr_manager",
+        "originDate": "2024-08-20",
+        "reviewDate": "2026-10-31",
+        "targetDate": "2026-05-30",
+        "status": "Rescheduled",
+        "responseType": "Mitigate",
+        "outlook": "Stable",
+        "cause": "Some systems do not have automated retention and deletion mechanisms.",
+        "event": "Data may remain available beyond its lawful or business retention period.",
+        "consequence": "Regulatory non-compliance, privacy harm, increased breach exposure and fines.",
+        "statusNarrative": "Data mapping is progressing; deletion automation depends on system capabilities.",
+        "inherent": {
+          "impact": 5,
+          "likelihood": 5
+        },
+        "residual": {
+          "impact": 4,
+          "likelihood": 4
+        },
+        "target": {
+          "impact": 2,
+          "likelihood": 3
+        },
+        "controls": [],
+        "actions": [
+          {
+            "id": "act_005",
+            "title": "Implement retention controls",
+            "description": "Map in-scope data and automate deletion where possible.",
+            "deliverable": "Approved retention inventory and disposal controls.",
+            "ownerId": "usr_action",
+            "dueDate": "2026-05-30",
+            "status": "Rescheduled",
+            "priority": "High",
+            "progress": 40,
+            "notes": ""
+          }
+        ],
+        "custom": {
+          "attr_appetite": "Limit",
+          "attr_kri": "Systems without retention automation",
+          "attr_review_cycle": "Quarterly"
+        },
+        "history": [
+          {
+            "id": "hist_005a",
+            "date": "2025-10-31",
+            "inherent": {
+              "impact": 5,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 4,
+              "likelihood": 4
+            },
+            "target": {
+              "impact": 2,
+              "likelihood": 3
+            },
+            "note": "Annual review",
+            "actorId": "usr_manager"
+          }
+        ],
+        "audit": [],
+        "updatedAt": "2026-04-28T14:00:00Z"
+      },
+      {
+        "id": "risk_006",
+        "ref": "IT-004",
+        "title": "Insufficient pre-production patch testing",
+        "type": "Current",
+        "categoryId": "cat_14",
+        "businessUnitId": "bu_technology",
+        "riskOwnerId": "usr_owner",
+        "originDate": "2025-04-01",
+        "reviewDate": "2026-09-15",
+        "targetDate": "2026-05-30",
+        "status": "Rescheduled",
+        "responseType": "Mitigate",
+        "outlook": "Decreasing",
+        "cause": "Representative testing environments and release criteria are incomplete for some products.",
+        "event": "A patch may cause service instability or fail to remediate the intended vulnerability.",
+        "consequence": "Availability loss, operational disruption and extended security exposure.",
+        "statusNarrative": "Testing requirements are approved and environment build-out is underway.",
+        "inherent": {
+          "impact": 4,
+          "likelihood": 5
+        },
+        "residual": {
+          "impact": 4,
+          "likelihood": 4
+        },
+        "target": {
+          "impact": 2,
+          "likelihood": 2
+        },
+        "controls": [
+          {
+            "id": "ctrl_006",
+            "title": "Patch testing and release approval",
+            "ownerId": "usr_owner",
+            "performer": "Vulnerability Management Team",
+            "description": "Documented patch management process covering identification, prioritisation, testing, deployment, exception handling and closure.",
+            "frequency": "Continuous with monthly governance review",
+            "intendedOutcome": "Critical and high vulnerabilities are remediated within the approved SLA.",
+            "evidenceLocation": "Security governance workspace / patch compliance reports",
+            "keyControl": true,
+            "type": "Preventative",
+            "automation": "Semi-Automated",
+            "status": "Needs Improvement"
+          }
+        ],
+        "actions": [
+          {
+            "id": "act_006",
+            "title": "Establish representative test environments",
+            "description": "Define, build and document pre-production environments.",
+            "deliverable": "Test coverage and release evidence for all critical products.",
+            "ownerId": "usr_action",
+            "dueDate": "2026-05-30",
+            "status": "Rescheduled",
+            "priority": "High",
+            "progress": 60,
+            "notes": ""
+          }
+        ],
+        "custom": {
+          "attr_appetite": "Watch Trigger",
+          "attr_kri": "Critical products without patch test coverage",
+          "attr_review_cycle": "Monthly"
+        },
+        "history": [
+          {
+            "id": "hist_006a",
+            "date": "2025-09-15",
+            "inherent": {
+              "impact": 4,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 4,
+              "likelihood": 4
+            },
+            "target": {
+              "impact": 2,
+              "likelihood": 2
+            },
+            "note": "Initial review",
+            "actorId": "usr_manager"
+          }
+        ],
+        "audit": [],
+        "updatedAt": "2026-05-01T08:00:00Z"
+      },
+      {
+        "id": "risk_007",
+        "ref": "IT-005",
+        "title": "Critical vulnerabilities are not remediated within agreed timescales",
+        "type": "Current",
+        "categoryId": "cat_15",
+        "businessUnitId": "bu_security",
+        "riskOwnerId": "usr_owner",
+        "originDate": "2024-05-12",
+        "reviewDate": "2026-08-31",
+        "targetDate": "2026-08-31",
+        "status": "Overdue",
+        "responseType": "Mitigate",
+        "outlook": "Decreasing",
+        "cause": "The patch management workflow is fragmented and some maintenance windows, ownership rules and exception paths are not standardised.",
+        "event": "Threat actors may exploit known vulnerabilities during extended remediation windows.",
+        "consequence": "System compromise, unauthorised access, ransomware, service disruption, financial loss, regulatory exposure and reputational damage.",
+        "statusNarrative": "An enterprise remediation programme is addressing the overdue backlog, strengthening the security baseline and introducing consistent prioritisation and verification.",
+        "inherent": {
+          "impact": 5,
+          "likelihood": 5
+        },
+        "residual": {
+          "impact": 3,
+          "likelihood": 4
+        },
+        "target": {
+          "impact": 2,
+          "likelihood": 2
+        },
+        "controls": [
+          {
+            "id": "ctrl_patch",
+            "title": "Signed-off Patch Management Process & Technical Workflows",
+            "ownerId": "usr_control",
+            "performer": "Vulnerability Management Team",
+            "description": "Documented patch management process covering identification, prioritisation, testing, deployment, exception handling and closure.",
+            "frequency": "Continuous with monthly governance review",
+            "intendedOutcome": "Critical and high vulnerabilities are remediated within the approved SLA.",
+            "evidenceLocation": "Security governance workspace / patch compliance reports",
+            "keyControl": true,
+            "type": "Preventative",
+            "automation": "Semi-Automated",
+            "status": "Needs Improvement"
+          },
+          {
+            "id": "ctrl_scan",
+            "title": "Authenticated Vulnerability Scanning",
+            "ownerId": "usr_control",
+            "performer": "Security Operations",
+            "description": "Authenticated scans of server and cloud estate with prioritised reporting and tracked exceptions.",
+            "frequency": "Weekly",
+            "intendedOutcome": "Known vulnerabilities are identified early and assigned for remediation.",
+            "evidenceLocation": "Vulnerability platform dashboards",
+            "keyControl": true,
+            "type": "Detective",
+            "automation": "Automated",
+            "status": "Effective"
+          }
+        ],
+        "actions": [
+          {
+            "id": "act_007a",
+            "title": "Visibility & Governance",
+            "description": "Establish unified authenticated scanning and reporting for on-premise and cloud environments.",
+            "deliverable": "Automated dashboard reporting on SLA breaches and unresolved critical vulnerabilities.",
+            "ownerId": "usr_action",
+            "dueDate": "2026-08-31",
+            "status": "In Progress",
+            "priority": "Critical",
+            "progress": 72,
+            "notes": "Reporting model agreed; integrations continue."
+          },
+          {
+            "id": "act_007b",
+            "title": "Process & Flow",
+            "description": "Implement the standard patch management process, maintenance windows, testing cycles and deployment pipelines.",
+            "deliverable": "Signed-off patch management process and technical workflows.",
+            "ownerId": "usr_action",
+            "dueDate": "2026-06-30",
+            "status": "Completed",
+            "priority": "High",
+            "progress": 100,
+            "notes": "Completed; likelihood reduced from 4 to 3 in the previous assessment."
+          },
+          {
+            "id": "act_007c",
+            "title": "Execution & Remediation",
+            "description": "Remediate the vulnerability backlog within the approved SLA timeframes.",
+            "deliverable": "90%+ SLA compliance with no unresolved critical vulnerabilities outside approved exceptions.",
+            "ownerId": "usr_action",
+            "dueDate": "2026-12-31",
+            "status": "In Progress",
+            "priority": "Critical",
+            "progress": 58,
+            "notes": ""
+          }
+        ],
+        "custom": {
+          "attr_appetite": "Limit",
+          "attr_kri": "Critical vulnerabilities outside SLA",
+          "attr_review_cycle": "Monthly"
+        },
+        "history": [
+          {
+            "id": "hist_007a",
+            "date": "2025-03-31",
+            "inherent": {
+              "impact": 5,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 4,
+              "likelihood": 4
+            },
+            "target": {
+              "impact": 2,
+              "likelihood": 2
+            },
+            "note": "Backlog at peak level",
+            "actorId": "usr_manager"
+          },
+          {
+            "id": "hist_007b",
+            "date": "2025-12-31",
+            "inherent": {
+              "impact": 5,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 4,
+              "likelihood": 3
+            },
+            "target": {
+              "impact": 2,
+              "likelihood": 2
+            },
+            "note": "Process improvements implemented",
+            "actorId": "usr_owner"
+          },
+          {
+            "id": "hist_007c",
+            "date": "2026-07-31",
+            "inherent": {
+              "impact": 5,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 3,
+              "likelihood": 4
+            },
+            "target": {
+              "impact": 2,
+              "likelihood": 2
+            },
+            "note": "Impact reassessed; backlog reducing",
+            "actorId": "usr_owner"
+          }
+        ],
+        "audit": [
+          {
+            "id": "audit_baseline_0001",
+            "actorId": "usr_owner",
+            "action": "assessment.updated",
+            "entityType": "Risk",
+            "entityId": "risk_007",
+            "summary": "Residual assessment changed from 12 to 12 with revised impact/likelihood rationale.",
+            "date": "2026-07-31T16:30:00Z"
+          },
+          {
+            "id": "audit_baseline_0002",
+            "actorId": "usr_action",
+            "action": "action.completed",
+            "entityType": "Action",
+            "entityId": "act_007b",
+            "summary": "Process & Flow remediation action marked Completed.",
+            "date": "2026-06-30T11:20:00Z"
+          }
+        ],
+        "updatedAt": "2026-07-31T16:30:00Z"
+      },
+      {
+        "id": "risk_008",
+        "ref": "LRC-002",
+        "title": "Data leakage through communication channels",
+        "type": "Emerging",
+        "categoryId": "cat_31",
+        "businessUnitId": "bu_legal",
+        "riskOwnerId": "usr_manager",
+        "originDate": "2025-08-01",
+        "reviewDate": "2026-09-30",
+        "targetDate": "2026-04-30",
+        "status": "In Progress",
+        "responseType": "Mitigate",
+        "outlook": "Decreasing",
+        "cause": "The current DLP coverage does not consistently include all communication channels.",
+        "event": "Sensitive data may be transferred outside approved destinations.",
+        "consequence": "Personal or confidential data exposure, legal obligations, customer harm and reputational loss.",
+        "statusNarrative": "A replacement DLP solution is being implemented and high-risk channels are prioritised.",
+        "inherent": {
+          "impact": 5,
+          "likelihood": 5
+        },
+        "residual": {
+          "impact": 2,
+          "likelihood": 3
+        },
+        "target": {
+          "impact": 3,
+          "likelihood": 2
+        },
+        "controls": [
+          {
+            "id": "ctrl_008",
+            "title": "DLP monitoring for priority channels",
+            "ownerId": "usr_manager",
+            "performer": "Security Operations",
+            "description": "DLP policies monitor priority communication channels and generate alerts.",
+            "frequency": "Continuous",
+            "intendedOutcome": "Sensitive transfers are blocked or investigated.",
+            "evidenceLocation": "DLP console",
+            "keyControl": true,
+            "type": "Detective",
+            "automation": "Automated",
+            "status": "Needs Improvement"
+          }
+        ],
+        "actions": [
+          {
+            "id": "act_008",
+            "title": "Implement modern DLP",
+            "description": "Deploy and tune the replacement DLP platform.",
+            "deliverable": "Coverage of all priority communication channels.",
+            "ownerId": "usr_action",
+            "dueDate": "2026-04-30",
+            "status": "In Progress",
+            "priority": "High",
+            "progress": 68,
+            "notes": "Implementation underway."
+          }
+        ],
+        "custom": {
+          "attr_appetite": "Watch Trigger",
+          "attr_kri": "Unmonitored communication channels",
+          "attr_review_cycle": "Quarterly"
+        },
+        "history": [
+          {
+            "id": "hist_008a",
+            "date": "2025-09-30",
+            "inherent": {
+              "impact": 5,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 3,
+              "likelihood": 3
+            },
+            "target": {
+              "impact": 3,
+              "likelihood": 2
+            },
+            "note": "Initial assessment",
+            "actorId": "usr_manager"
+          },
+          {
+            "id": "hist_008b",
+            "date": "2026-06-30",
+            "inherent": {
+              "impact": 5,
+              "likelihood": 5
+            },
+            "residual": {
+              "impact": 2,
+              "likelihood": 3
+            },
+            "target": {
+              "impact": 3,
+              "likelihood": 2
+            },
+            "note": "High-risk channels remediated",
+            "actorId": "usr_manager"
+          }
+        ],
+        "audit": [
+          {
+            "id": "audit_baseline_0003",
+            "actorId": "usr_manager",
+            "action": "risk.created",
+            "entityType": "Risk",
+            "entityId": "risk_008",
+            "summary": "Emerging risk added to the register.",
+            "date": "2025-08-01T09:00:00Z"
+          }
+        ],
+        "updatedAt": "2026-06-30T15:00:00Z"
+      }
+    ],
+    "globalAudit": [
+      {
+        "id": "audit_baseline_0001",
+        "actorId": "usr_owner",
+        "action": "assessment.updated",
+        "entityType": "Risk",
+        "entityId": "risk_007",
+        "summary": "Residual assessment changed from 12 to 12 with revised impact/likelihood rationale.",
+        "date": "2026-07-31T16:30:00Z"
+      },
+      {
+        "id": "audit_baseline_0002",
+        "actorId": "usr_action",
+        "action": "action.completed",
+        "entityType": "Action",
+        "entityId": "act_007b",
+        "summary": "Process & Flow remediation action marked Completed.",
+        "date": "2026-06-30T11:20:00Z"
+      },
+      {
+        "id": "audit_baseline_0003",
+        "actorId": "usr_manager",
+        "action": "risk.created",
+        "entityType": "Risk",
+        "entityId": "risk_008",
+        "summary": "Emerging risk added to the register.",
+        "date": "2025-08-01T09:00:00Z"
+      },
+      {
+        "id": "audit_baseline_0004",
+        "actorId": "usr_admin",
+        "action": "matrix.restored",
+        "entityType": "Matrix",
+        "entityId": "matrix_2026",
+        "summary": "Risk Rating Matrix 2026 defaults applied.",
+        "date": "2026-01-05T10:00:00Z"
+      }
+    ],
+    "savedFilters": [],
+    "dashboards": [
+      {
+        "id": "dashboard_enterprise_overview",
+        "name": "Enterprise risk overview",
+        "nameKa": "საწარმოს რისკების მიმოხილვა",
+        "description": "Monitor exposure, controls, action plans and movement toward target risk.",
+        "descriptionKa": "რისკის დონის, კონტროლების, სამოქმედო გეგმებისა და სამიზნე რისკისკენ მოძრაობის მონიტორინგი.",
+        "accentColor": "#1A2151",
+        "createdBy": "usr_admin",
+        "shared": true,
+        "createdAt": "2026-08-12T09:00:00Z",
+        "updatedAt": "2026-08-12T09:00:00Z",
+        "filters": {
+          "businessUnitId": "",
+          "categoryL1": "",
+          "status": "",
+          "rating": "",
+          "riskType": "",
+          "ownerId": "",
+          "outlook": ""
+        },
+        "widgets": [
+          {
+            "id": "widget_open_risks",
+            "type": "metric",
+            "title": "Open risks",
+            "titleKa": "ღია რისკები",
+            "span": 3,
+            "color": "#1A2151",
+            "backgroundColor": "#ffffff",
+            "metric": "openRisks",
+            "scoreBasis": "residual",
+            "groupBy": "rating",
+            "limit": 5
+          },
+          {
+            "id": "widget_significant",
+            "type": "metric",
+            "title": "Significant residual",
+            "titleKa": "მნიშვნელოვანი არსებული რისკები",
+            "span": 3,
+            "color": "#F32121",
+            "backgroundColor": "#ffffff",
+            "metric": "significantResidual",
+            "scoreBasis": "residual",
+            "groupBy": "rating",
+            "limit": 5
+          },
+          {
+            "id": "widget_overdue",
+            "type": "metric",
+            "title": "Overdue actions",
+            "titleKa": "ვადაგადაცილებული ქმედებები",
+            "span": 3,
+            "color": "#FFB900",
+            "backgroundColor": "#ffffff",
+            "metric": "overdueActions",
+            "scoreBasis": "residual",
+            "groupBy": "rating",
+            "limit": 5
+          },
+          {
+            "id": "widget_emerging",
+            "type": "metric",
+            "title": "Emerging risks",
+            "titleKa": "ახალი/წარმოშობადი რისკები",
+            "span": 3,
+            "color": "#3977FF",
+            "backgroundColor": "#ffffff",
+            "metric": "emergingRisks",
+            "scoreBasis": "residual",
+            "groupBy": "rating",
+            "limit": 5
+          },
+          {
+            "id": "widget_heatmap",
+            "type": "heatmap",
+            "title": "Residual risk heatmap",
+            "titleKa": "არსებული რისკების სითბური რუკა",
+            "span": 8,
+            "color": "#1A2151",
+            "backgroundColor": "#ffffff",
+            "metric": "openRisks",
+            "scoreBasis": "residual",
+            "groupBy": "rating",
+            "limit": 5
+          },
+          {
+            "id": "widget_top_risks",
+            "type": "top-risks",
+            "title": "Top residual risks",
+            "titleKa": "უმაღლესი არსებული რისკები",
+            "span": 4,
+            "color": "#1A2151",
+            "backgroundColor": "#ffffff",
+            "metric": "openRisks",
+            "scoreBasis": "residual",
+            "groupBy": "rating",
+            "limit": 5
+          },
+          {
+            "id": "widget_action_progress",
+            "type": "action-progress",
+            "title": "Action plan progress",
+            "titleKa": "სამოქმედო გეგმის პროგრესი",
+            "span": 6,
+            "color": "#1A2151",
+            "backgroundColor": "#ffffff",
+            "metric": "openRisks",
+            "scoreBasis": "residual",
+            "groupBy": "rating",
+            "limit": 5
+          },
+          {
+            "id": "widget_recent_activity",
+            "type": "recent-activity",
+            "title": "Recent activity",
+            "titleKa": "ბოლო აქტივობა",
+            "span": 6,
+            "color": "#5363A6",
+            "backgroundColor": "#ffffff",
+            "metric": "openRisks",
+            "scoreBasis": "residual",
+            "groupBy": "rating",
+            "limit": 6
+          }
+        ]
+      }
+    ],
+    "reportTemplates": [
+      {
+        "id": "report_executive_risk",
+        "name": "Executive risk report",
+        "nameKa": "აღმასრულებელი რისკების ანგარიში",
+        "description": "A reusable management report combining the enterprise dashboard, commentary and a compact risk register.",
+        "descriptionKa": "ხელახლა გამოყენებადი მენეჯმენტის ანგარიში, რომელიც აერთიანებს დეშბორდს, კომენტარსა და რისკ-რეესტრის კომპაქტურ ვერსიას.",
+        "createdBy": "usr_admin",
+        "createdAt": "2026-08-12T09:00:00Z",
+        "updatedAt": "2026-08-12T09:00:00Z",
+        "sections": [
+          {
+            "id": "report_section_dashboard",
+            "type": "dashboard",
+            "title": "Enterprise dashboard",
+            "titleKa": "საწარმოს დეშბორდი",
+            "text": "",
+            "textKa": "",
+            "dashboardId": "dashboard_enterprise_overview",
+            "columns": [],
+            "filters": {
+              "businessUnitId": "",
+              "categoryL1": "",
+              "status": "",
+              "rating": "",
+              "riskType": "",
+              "ownerId": "",
+              "outlook": ""
+            }
+          },
+          {
+            "id": "report_section_text",
+            "type": "text",
+            "title": "Management commentary",
+            "titleKa": "მენეჯმენტის კომენტარი",
+            "text": "Use this section for key movements, decisions, escalations and management commentary.",
+            "textKa": "გამოიყენეთ ეს სექცია მნიშვნელოვანი ცვლილებების, გადაწყვეტილებების, ესკალაციებისა და მენეჯმენტის კომენტარებისთვის.",
+            "dashboardId": "",
+            "columns": [],
+            "filters": {
+              "businessUnitId": "",
+              "categoryL1": "",
+              "status": "",
+              "rating": "",
+              "riskType": "",
+              "ownerId": "",
+              "outlook": ""
+            }
+          },
+          {
+            "id": "report_section_register",
+            "type": "risk-register",
+            "title": "Priority risk register",
+            "titleKa": "პრიორიტეტული რისკების რეესტრი",
+            "text": "",
+            "textKa": "",
+            "dashboardId": "",
+            "columns": [
+              "number",
+              "risk",
+              "category",
+              "owner",
+              "residual",
+              "target",
+              "status",
+              "trend"
+            ],
+            "filters": {
+              "businessUnitId": "",
+              "categoryL1": "",
+              "status": "",
+              "rating": "",
+              "riskType": "",
+              "ownerId": "",
+              "outlook": ""
+            }
+          }
+        ]
+      }
+    ],
+    "siteContent": {
+      "brandName": "AIZEN",
+      "brandDescriptor": "Risk & Compliance",
+      "brandDescriptorKa": "რისკები და შესაბამისობა",
+      "heroEyebrow": "Governance technology that grows with you",
+      "heroEyebrowKa": "მმართველობის ტექნოლოგია, რომელიც თქვენთან ერთად ვითარდება",
+      "heroTitle": "Turn risk decisions into visible, accountable action.",
+      "heroTitleKa": "გადააქციეთ რისკის გადაწყვეტილებები გამჭვირვალე და ანგარიშვალდებულ ქმედებებად.",
+      "heroDescription": "A clear workspace for risk identification, 5×5 assessment, controls, remediation, dashboards and management reporting — ready today in the Risk Management solution.",
+      "heroDescriptionKa": "ერთიანი სამუშაო სივრცე რისკების იდენტიფიკაციისთვის, 5×5 შეფასებისთვის, კონტროლებისთვის, რემედიაციისთვის, დეშბორდებისა და მენეჯმენტის ანგარიშგებისთვის — Risk Management გადაწყვეტა უკვე ხელმისაწვდომია.",
+      "heroPrimaryCta": "Explore Risk Management",
+      "heroPrimaryCtaKa": "Risk Management-ის ნახვა",
+      "heroSecondaryCta": "Watch product demo",
+      "heroSecondaryCtaKa": "პროდუქტის დემოს ნახვა",
+      "solutionsTitle": "One platform. A growing governance suite.",
+      "solutionsTitleKa": "ერთი პლატფორმა. განვითარებადი მმართველობის ეკოსისტემა.",
+      "solutionsDescription": "Start with enterprise risk management today. Compliance and audit workspaces are presented transparently as planned modules.",
+      "solutionsDescriptionKa": "დაიწყეთ საწარმოს რისკების მართვით დღესვე. შესაბამისობისა და აუდიტის სამუშაო სივრცეები გამჭვირვალედ არის წარმოდგენილი, როგორც დაგეგმილი მოდულები.",
+      "aboutTitle": "About AIZEN Risk & Compliance",
+      "aboutTitleKa": "AIZEN Risk & Compliance-ის შესახებ",
+      "aboutDescription": "AIZEN Risk & Compliance is a technology-driven risk and compliance platform, built to help organizations strengthen governance, manage risk, and meet regulatory requirements with confidence.",
+      "aboutDescriptionKa": "AIZEN Risk & Compliance არის ტექნოლოგიაზე დაფუძნებული რისკებისა და შესაბამისობის პლატფორმა, რომელიც ორგანიზაციებს ეხმარება მმართველობის გაძლიერებაში, რისკების მართვასა და რეგულაციური მოთხოვნების თავდაჯერებულად შესრულებაში.",
+      "aboutReachTitle": "Our reach",
+      "aboutReachTitleKa": "ჩვენი მასშტაბი",
+      "aboutReachDescription": "We currently operate in one market, with a focused approach that enables us to understand local business needs, regulatory requirements, and industry challenges in depth.",
+      "aboutReachDescriptionKa": "ამ ეტაპზე ერთ ბაზარზე ვოპერირებთ. ფოკუსირებული მიდგომა საშუალებას გვაძლევს სიღრმისეულად გავიგოთ ადგილობრივი ბიზნესის საჭიროებები, რეგულაციური მოთხოვნები და ინდუსტრიის გამოწვევები.",
+      "aboutPeopleTitle": "Our people",
+      "aboutPeopleTitleKa": "ჩვენი გუნდი",
+      "aboutPeopleDescription": "Our team brings together some of the market’s leading technology professionals, combining deep expertise in innovation, risk management, compliance, and digital transformation.",
+      "aboutPeopleDescriptionKa": "ჩვენი გუნდი აერთიანებს ბაზრის წამყვან ტექნოლოგიურ პროფესიონალებს და ღრმა გამოცდილებას ინოვაციებში, რისკების მართვაში, შესაბამისობასა და ციფრულ ტრანსფორმაციაში.",
+      "aboutClientsTitle": "Our clients",
+      "aboutClientsTitleKa": "ჩვენი კლიენტები",
+      "aboutClientsDescription": "We help organizations streamline their risk and compliance processes through practical, intelligent, and scalable technology solutions.",
+      "aboutClientsDescriptionKa": "ორგანიზაციებს ვეხმარებით რისკებისა და შესაბამისობის პროცესების გამარტივებაში პრაქტიკული, ინტელექტუალური და მასშტაბირებადი ტექნოლოგიური გადაწყვეტილებებით.",
+      "aboutVisionTitle": "Our vision",
+      "aboutVisionTitleKa": "ჩვენი ხედვა",
+      "aboutVisionDescription": "We aim to make risk and compliance management simpler, more transparent, and more effective—empowering businesses to make informed decisions and grow with confidence.",
+      "aboutVisionDescriptionKa": "ჩვენი მიზანია რისკებისა და შესაბამისობის მართვა გავხადოთ უფრო მარტივი, გამჭვირვალე და ეფექტური, რათა ბიზნესებმა მიიღონ ინფორმირებული გადაწყვეტილებები და თავდაჯერებულად გაიზარდონ.",
+      "teamTitle": "The people behind AIZEN",
+      "teamTitleKa": "ადამიანები AIZEN-ის უკან",
+      "teamDescription": "Meet the specialists shaping our products, customer experience and practical governance outcomes.",
+      "teamDescriptionKa": "გაიცანით სპეციალისტები, რომლებიც ქმნიან ჩვენს პროდუქტებს, მომხმარებლის გამოცდილებასა და პრაქტიკული მმართველობის შედეგებს.",
+      "aboutHighlights": [
+        "Practical by design",
+        "Configurable for each organisation",
+        "Clear ownership and reporting"
+      ],
+      "aboutHighlightsKa": [
+        "პრაქტიკული დიზაინი",
+        "ორგანიზაციაზე მორგებადი",
+        "მკაფიო პასუხისმგებლობა და ანგარიშგება"
+      ],
+      "videoTitle": "See the Risk Management workspace in action",
+      "videoTitleKa": "იხილეთ Risk Management სამუშაო პროცესში",
+      "videoDescription": "A concise walkthrough of configurable dashboards, the risk register, individual risk records, controls, remediation actions and management reports.",
+      "videoDescriptionKa": "მოკლე მიმოხილვა კონფიგურირებადი დეშბორდების, რისკ-რეესტრის, ინდივიდუალური რისკების, კონტროლების, რემედიაციის ქმედებებისა და მენეჯმენტის ანგარიშების შესახებ.",
+      "videoHighlights": [
+        "Configure dashboards from register data",
+        "Assess inherent, residual and target risk",
+        "Track controls, actions, owners and deadlines",
+        "Build reusable management reports"
+      ],
+      "videoHighlightsKa": [
+        "ააწყვეთ დეშბორდები რეესტრის მონაცემებიდან",
+        "შეაფასეთ თავდაპირველი, არსებული და სამიზნე რისკი",
+        "აკონტროლეთ კონტროლები, ქმედებები, მფლობელები და ვადები",
+        "შექმენით მრავალჯერადი მენეჯმენტის ანგარიშები"
+      ],
+      "videoUrl": "",
+      "videoData": "",
+      "contactEmail": "hello@aizen.local",
+      "footerText": "Plan clearly. Manage accountably. Grow with confidence.",
+      "footerTextKa": "დაგეგმეთ მკაფიოდ. მართეთ პასუხისმგებლობით. გაიზარდეთ თავდაჯერებით.",
+      "solutions": [
+        {
+          "id": "solution_risk",
+          "name": "Risk Management",
+          "nameKa": "რისკების მართვა",
+          "description": "Maintain a governed risk register, assess inherent/residual/target exposure, document controls and drive remediation to closure.",
+          "descriptionKa": "მართეთ რისკ-რეესტრი, შეაფასეთ თავდაპირველი/არსებული/სამიზნე რისკი, აღწერეთ კონტროლები და მიიყვანეთ რემედიაცია დასრულებამდე.",
+          "status": "available",
+          "route": "/dashboard",
+          "accentColor": "#5868B7",
+          "order": 1,
+          "features": [
+            "Unlimited risk registers",
+            "Adaptive assessment matrix",
+            "Control and remediation tracking",
+            "Live, flexible dashboards and reports",
+            "AI assistance for assessments and control mapping",
+            "Unlimited users"
+          ],
+          "featuresKa": [
+            "შეუზღუდავი რისკ-რეესტრები",
+            "ადაპტირებადი შეფასების მატრიცა",
+            "კონტროლებისა და რემედიაციის მონიტორინგი",
+            "ცოცხალი, მოქნილი დეშბორდები და ანგარიშები",
+            "AI დახმარება შეფასებებსა და კონტროლების დაკავშირებაში",
+            "შეუზღუდავი მომხმარებლები"
+          ]
+        },
+        {
+          "id": "solution_compliance",
+          "name": "Compliance Management",
+          "nameKa": "შესაბამისობის მართვა",
+          "description": "A planned workspace for obligations, regulatory change, internal standards, monitoring, evidence and compliance issues.",
+          "descriptionKa": "დაგეგმილი სამუშაო სივრცე ვალდებულებების, რეგულაციური ცვლილებების, შიდა სტანდარტების, მონიტორინგის, მტკიცებულებებისა და შესაბამისობის საკითხებისთვის.",
+          "status": "coming-soon",
+          "route": "",
+          "accentColor": "#8A94B8",
+          "order": 2,
+          "features": [
+            "Regulatory Compliance Management",
+            "Internal policy and standards compliance management",
+            "Continuous compliance monitoring and automation",
+            "Issue and control deficiency tracking"
+          ],
+          "featuresKa": [
+            "რეგულაციური შესაბამისობის მართვა",
+            "შიდა პოლიტიკებისა და სტანდარტების შესაბამისობის მართვა",
+            "შესაბამისობის უწყვეტი მონიტორინგი და ავტომატიზაცია",
+            "საკითხებისა და კონტროლის ხარვეზების მონიტორინგი"
+          ]
+        },
+        {
+          "id": "solution_audit",
+          "name": "Audit Management",
+          "nameKa": "აუდიტის მართვა",
+          "description": "A planned workspace for evidence, audit delivery, intelligent review, reporting, findings and follow-up.",
+          "descriptionKa": "დაგეგმილი სამუშაო სივრცე მტკიცებულებების, აუდიტის შესრულების, ინტელექტუალური შემოწმების, ანგარიშგების, მიგნებებისა და შემდგომი კონტროლისთვის.",
+          "status": "coming-soon",
+          "route": "",
+          "accentColor": "#9AA2BD",
+          "order": 3,
+          "features": [
+            "Evidence collection and centralized repository",
+            "AI-powered evidence checks and recommendations",
+            "Engagement delivery and reporting",
+            "Findings follow-up"
+          ],
+          "featuresKa": [
+            "მტკიცებულებების შეგროვება და ცენტრალიზებული საცავი",
+            "AI-ზე დაფუძნებული მტკიცებულებების შემოწმება და რეკომენდაციები",
+            "აუდიტის შესრულება და ანგარიშგება",
+            "მიგნებების შემდგომი კონტროლი"
+          ]
+        }
+      ],
+      "team": [],
+      "updatedAt": "2026-08-13T12:00:00Z",
+      "updatedBy": "usr_super_admin"
+    },
+    "sso": {
+      "enabled": false,
+      "providerName": "Microsoft Entra ID / Okta",
+      "entityId": "",
+      "metadataUrl": "",
+      "acsUrl": "https://your-domain.example.com/auth/saml/acs",
+      "emailAttribute": "email",
+      "roleAttribute": "groups",
+      "roleMappings": "ERM-Admins=Administrator\nERM-Risk-Managers=Risk Manager\nERM-Auditors=Auditor"
+    }
+  }
+}
