@@ -190,11 +190,16 @@
 }
 
 /* 2/3 + 1/3, collapsing to one column when the third would be too narrow. */
+/*
+ * Actions lead, commentary follows. The aside is wide enough to hold the
+ * history chart without the line collapsing to a smear, and `stretch` lets the
+ * actions column match its height rather than running past it.
+ */
 .risk-view__split {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(17rem, 1fr);
+  grid-template-columns: minmax(0, 1.9fr) minmax(21rem, 1fr);
   gap: var(--space-16);
-  align-items: start;
+  align-items: stretch;
 }
 
 .risk-view__assessments {
@@ -710,5 +715,220 @@
 @media (max-width: 68rem) {
   .risk-view__split {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Stacked, there is no aside to match — the panel returns to the flow. */
+  .risk-view__actions-slot {
+    min-block-size: 0;
+  }
+
+  .risk-view__actions-slot > .risk-actions {
+    position: static;
+  }
+
+  .risk-actions__list {
+    block-size: auto;
+    max-block-size: 34lh;
+  }
+}
+
+/* --- overview: actions, history and per-panel editing -----------------------
+ *
+ * The Actions tab merged into the overview (Presentation1, p.3). Everything
+ * below is presentation only — the same records, the same fields, rendered in
+ * one place instead of two.
+ */
+
+/* Two columns: the working detail leads, the commentary sits beside it. */
+.risk-view__aside {
+  display: grid;
+  align-content: start;
+  gap: var(--space-16);
+  min-width: 0;
+}
+
+/*
+ * The edit affordance on a panel header. It is an icon button at the product's
+ * 32px target size, and it only appears for a user who may edit the risk.
+ */
+.risk-view__edit {
+  flex: none;
+}
+
+.risk-structured__head-end {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.risk-structured__head-end .panel__meta {
+  margin: 0;
+}
+
+/* --- action list ----------------------------------------------------------- */
+
+/*
+ * The slot takes the grid cell; the panel fills it. Because the panel is out
+ * of flow, six actions and sixty produce the same row height — the aside
+ * decides it, and the list scrolls for the rest. The floor keeps the panel
+ * usable when the aside is unusually short.
+ */
+.risk-view__actions-slot {
+  position: relative;
+  min-block-size: 26rem;
+  min-width: 0;
+}
+
+.risk-view__actions-slot > .risk-actions {
+  position: absolute;
+  inset: 0;
+}
+
+.risk-actions {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--space-12);
+  min-width: 0;
+}
+
+/*
+ * Scrolls inside the panel: a long remediation plan must not push the
+ * narrative and history off the page. The cap is in `lh` so it always ends on
+ * a whole line of text, and the scrollport keeps its own thin scrollbar.
+ */
+.risk-actions__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-16);
+  block-size: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.risk-actions__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-16);
+  padding-block-end: var(--space-16);
+  border-block-end: 1px solid var(--border);
+}
+
+.risk-actions__item:last-child {
+  padding-block-end: 0;
+  border-block-end: 0;
+}
+
+/* The section tag from the target design, marking each entry in the list. */
+.risk-actions__tag {
+  align-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 1.75lh;
+  padding-inline: var(--space-12);
+  border-radius: var(--radius-card);
+  background: var(--brand-primary);
+  color: var(--text-on-dark);
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.risk-actions__body {
+  display: grid;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.risk-actions__title {
+  margin: 0;
+  font-size: var(--text-14);
+  font-weight: var(--weight-semibold);
+  text-wrap: balance;
+}
+
+.risk-actions__description {
+  margin: 0;
+  max-width: none;
+  font-size: var(--text-13);
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+.risk-actions__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-8) var(--space-16);
+  margin: 0;
+  align-items: start;
+}
+
+.risk-actions__fact {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.risk-actions__fact--wide {
+  grid-column: span 2;
+}
+
+.risk-actions__facts dt {
+  font-size: var(--text-11);
+  font-weight: var(--weight-semibold);
+  color: var(--text-muted);
+}
+
+.risk-actions__facts dd {
+  margin: 0;
+  font-size: var(--text-13);
+  min-width: 0;
+}
+
+.risk-actions__note {
+  display: block;
+  margin-block-start: var(--space-4);
+  font-size: var(--text-12);
+  font-weight: var(--weight-regular);
+  color: var(--text-secondary);
+}
+
+.risk-actions__date {
+  font-variant-numeric: tabular-nums;
+}
+
+.risk-actions__fact--progress dd {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.risk-actions__fact--progress progress {
+  flex: 1;
+  min-inline-size: 4rem;
+  block-size: 0.5lh;
+  accent-color: var(--brand-primary);
+}
+
+.risk-actions__percent {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-semibold);
+}
+
+/* --- assessment history ---------------------------------------------------- */
+
+.risk-history {
+  display: grid;
+  align-content: start;
+  gap: var(--space-12);
+}
+
+@media (max-width: 75rem) {
+  .risk-actions__fact--wide {
+    grid-column: span 1;
   }
 }

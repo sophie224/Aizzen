@@ -181,8 +181,12 @@ describe('header band', () => {
 
 // --- tabs -------------------------------------------------------------------
 
-describe('all five tabs', () => {
-  const TABS = ['Overview', 'Assessment', 'Controls', 'Actions', 'Trend & audit']
+/*
+ * Four tabs since the Actions tab merged into the overview — the two views
+ * showed the same records (Presentation1, p.3).
+ */
+describe('all four tabs', () => {
+  const TABS = ['Overview', 'Assessment', 'Controls', 'Trend & audit']
 
   it('renders every tab for a fully populated risk', async () => {
     renderView('risk_full')
@@ -208,11 +212,11 @@ describe('all five tabs', () => {
     renderView('risk_min')
     await screen.findByRole('heading', { level: 1 })
 
+    // Actions sit on the overview now, so its empty state shows without a tab.
+    expect(screen.getByText('No remediation actions recorded.')).toBeInTheDocument()
+
     await openTab('Controls')
     expect(screen.getByText('No controls documented.')).toBeInTheDocument()
-
-    await openTab('Actions')
-    expect(screen.getByText('No remediation actions recorded.')).toBeInTheDocument()
 
     await openTab('Trend & audit')
     expect(screen.getByText('No audit events recorded for this risk.')).toBeInTheDocument()
@@ -264,19 +268,26 @@ describe('overview tab', () => {
     expect(screen.getByText('No description provided.')).toBeInTheDocument()
   })
 
-  it('shows the action table with the six required columns', async () => {
+  /*
+   * The overview's action table became a card list, but it must still carry
+   * every field the table's columns did — that column set was fixed by an
+   * explicit change request.
+   */
+  it('shows every required action field on the overview', async () => {
     renderView('risk_full')
     await screen.findByRole('heading', { level: 1 })
 
-    const table = screen.getAllByRole('table').find((candidate) =>
-      within(candidate).queryByText('Patch cycle rollout') !== null,
-    )
-    expect(table).toBeDefined()
-    if (!table) return
+    const card = screen
+      .getAllByRole('listitem')
+      .find((candidate) => within(candidate).queryByText('Patch cycle rollout') !== null)
+    expect(card).toBeDefined()
+    if (!card) return
 
-    for (const column of ['Action title', 'Description', 'Deliverable', 'Status', 'Deadline', 'Action owner']) {
-      expect(within(table).getByRole('columnheader', { name: column }), column).toBeInTheDocument()
+    for (const field of ['Deliverable', 'Action owner', 'Status', 'Deadline', 'Progress']) {
+      expect(within(card).getByText(field), field).toBeInTheDocument()
     }
+    // Title and description are the card's own heading and lead paragraph.
+    expect(within(card).getByRole('heading', { name: 'Patch cycle rollout' })).toBeInTheDocument()
   })
 
   it('marks an overdue action', async () => {
@@ -454,12 +465,13 @@ describe('controls tab', () => {
   })
 })
 
-describe('actions tab', () => {
+describe('remediation actions on the overview', () => {
   it('shows progress, deadline, owner and notes', async () => {
     renderView('risk_full')
-    await openTab('Actions')
+    await screen.findByRole('heading', { level: 1 })
 
-    expect(screen.getByRole('heading', { name: 'Patch cycle rollout', level: 2 })).toBeInTheDocument()
+    // On the overview, no tab to open.
+    expect(screen.getByRole('heading', { name: 'Patch cycle rollout', level: 3 })).toBeInTheDocument()
     expect(screen.getByText('Approved patch standard')).toBeInTheDocument()
     expect(screen.getByText(/45%/)).toBeInTheDocument()
     expect(screen.getByText('Blocked on migration.')).toBeInTheDocument()

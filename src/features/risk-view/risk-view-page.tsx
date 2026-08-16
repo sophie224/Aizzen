@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAppData } from '../../data/app-data-context.ts'
 import { hierarchyPath } from '../../domain/business-units/index.ts'
-import { displayActionStatus, isActionOverdue } from '../../domain/actions/index.ts'
+import { displayActionStatus } from '../../domain/actions/index.ts'
 import { canEditRisk, canSeeRisk } from '../../domain/permissions/index.ts'
 import { assess, impactLabel, likelihoodLabel } from '../../domain/risk-engine/index.ts'
 import { isRiskOverdue } from '../../domain/risks/index.ts'
@@ -14,7 +14,7 @@ import { initialsOf } from '../../ui/initials.ts'
 import { StatusPill } from '../../ui/status-pill.tsx'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
 import { RatingChip } from '../../ui/rating-chip.tsx'
-import { RiskEditorModal } from '../risk-editor/risk-editor-modal.tsx'
+import { RiskEditorModal, type TabId as EditorTabId } from '../risk-editor/risk-editor-modal.tsx'
 import { AssessmentMatrix } from './assessment-matrix.tsx'
 import { MatrixGuidance } from './matrix-guidance.tsx'
 import { ResidualTrendChart } from './residual-trend-chart.tsx'
@@ -33,7 +33,6 @@ const TABS = [
   { id: 'overview', labelKey: 'view.tab.overview' },
   { id: 'assessment', labelKey: 'view.tab.assessment' },
   { id: 'controls', labelKey: 'view.tab.controls' },
-  { id: 'actions', labelKey: 'view.tab.actions' },
   { id: 'trend', labelKey: 'view.tab.trendAudit' },
 ] as const satisfies readonly { id: string; labelKey: TranslationKey }[]
 
@@ -73,7 +72,11 @@ export function RiskViewPage() {
   const { context } = useCurrentUser()
 
   const [activeTab, setActiveTab] = useState<TabId>('overview')
-  const [editing, setEditing] = useState(false)
+  /*
+   * Which editor tab to open on, or null when the editor is closed. The
+   * overview's panels each open the editor on the tab that owns their fields.
+   */
+  const [editorTab, setEditorTab] = useState<EditorTabId | null>(null)
 
   const risk = useMemo(() => {
     if (!state) return null
@@ -115,7 +118,7 @@ export function RiskViewPage() {
             type="button"
             className="btn btn--primary"
             onClick={() => {
-              setEditing(true)
+              setEditorTab('basic')
             }}
           >
             <IconPencil size={14} />
@@ -160,19 +163,24 @@ export function RiskViewPage() {
         aria-labelledby={`risk-tab-${activeTab}`}
       >
         {activeTab === 'overview' ? (
-          <OverviewTab risk={risk} userName={userName} today={today} />
+          <OverviewTab
+            risk={risk}
+            userName={userName}
+            today={today}
+            onEdit={editable ? setEditorTab : null}
+          />
         ) : null}
         {activeTab === 'assessment' ? <AssessmentTab risk={risk} matrix={state.matrix} userName={userName} /> : null}
         {activeTab === 'controls' ? <ControlsTab risk={risk} userName={userName} /> : null}
-        {activeTab === 'actions' ? <ActionsTab risk={risk} userName={userName} today={today} /> : null}
         {activeTab === 'trend' ? <TrendAuditTab risk={risk} userName={userName} /> : null}
       </div>
 
-      {editing ? (
+      {editorTab ? (
         <RiskEditorModal
           risk={risk}
+          initialTab={editorTab}
           onClose={() => {
-            setEditing(false)
+            setEditorTab(null)
           }}
         />
       ) : null}
@@ -279,6 +287,22 @@ function RiskHero(props: {
             {overdue ? <span className="risk-view__overdue">{t('view.overdue')}</span> : null}
           </dd>
         </div>
+
+        {/*
+          * Outlook is the owner's own 12-month judgement — never a computed
+          * trend (ARCHITECTURE.md §7.1). It sits in the strip so the reader
+          * sees the direction of travel next to the scores themselves.
+          */}
+        <div className="risk-hero__kpi">
+          <dt>{t('view.indicator.outlook')}</dt>
+          <dd>
+            <SignalChip
+              label={t('view.indicator.outlook')}
+              value={risk.outlook}
+              direction={OUTLOOK_DIRECTION[risk.outlook]}
+            />
+          </dd>
+        </div>
       </dl>
     </header>
   )
@@ -304,14 +328,139 @@ function SignalChip({
   )
 }
 
-function OverviewTab({
+/**
+ * Remediation actions, on the overview.
+ *
+ * The Actions tab used to hold this; it now lives here because the two views
+ * showed the same records. The list scrolls inside the panel so a long plan
+ * cannot push the rest of the overview off screen, and every action is
+ * reachable without leaving the page.
+ */
+function ActionsPanel({
   risk,
   userName,
   today,
+  onEdit,
 }: {
   risk: Risk
   userName: (id: string) => string
   today: string
+  onEdit: ((tab: EditorTabId) => void) | null
+}) {
+  const { t } = useTranslation()
+
+  return (
+    <article className="panel risk-actions">
+      <header className="risk-view__card-head">
+        <h2>{t('view.overview.actionsSummary')}</h2>
+        <div className="risk-structured__head-end">
+          <p className="panel__meta">
+            {risk.actions.length} {t('view.tab.actions')}
+          </p>
+          <EditPanelButton section={t('view.overview.actionsSummary')} tab="actions" onEdit={onEdit} />
+        </div>
+      </header>
+
+      {risk.actions.length === 0 ? (
+        <EmptyState message={t('view.overview.noActions')} />
+      ) : (
+        <ul className="risk-actions__list">
+          {risk.actions.map((action) => (
+            <li key={action.id} className="risk-actions__item">
+              <span className="risk-actions__tag">{t('view.tab.actions')}</span>
+
+              <div className="risk-actions__body">
+                <h3 className="risk-actions__title">{action.title}</h3>
+                {action.description.trim().length > 0 ? (
+                  <p className="risk-actions__description">{action.description}</p>
+                ) : null}
+
+                <dl className="risk-actions__facts">
+                  <div className="risk-actions__fact risk-actions__fact--wide">
+                    <dt>{t('view.actions.deliverable')}</dt>
+                    <dd>
+                      <strong>{action.deliverable || '—'}</strong>
+                      {action.notes.trim().length > 0 ? (
+                        <span className="risk-actions__note">{action.notes}</span>
+                      ) : null}
+                    </dd>
+                  </div>
+                  <div className="risk-actions__fact">
+                    <dt>{t('editor.action.owner')}</dt>
+                    <dd>{userName(action.ownerId)}</dd>
+                  </div>
+                  <div className="risk-actions__fact">
+                    <dt>{t('register.column.status')}</dt>
+                    <dd>
+                      <StatusPill status={displayActionStatus(action, today)} />
+                    </dd>
+                  </div>
+                  <div className="risk-actions__fact">
+                    <dt>{t('view.actions.deadline')}</dt>
+                    <dd className="risk-actions__date">{action.dueDate}</dd>
+                  </div>
+                  <div className="risk-actions__fact risk-actions__fact--progress">
+                    <dt>{t('editor.action.progress')}</dt>
+                    <dd>
+                      <progress value={action.progress} max={100} />
+                      <span className="risk-actions__percent">{action.progress}%</span>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </article>
+  )
+}
+
+/**
+ * Edit affordance on an overview panel.
+ *
+ * Opens the existing risk editor on the tab that owns the panel's fields. It
+ * adds no mutation path of its own — every write still goes through the one
+ * editor transaction. Renders nothing when the user cannot edit the risk, so
+ * a read-only viewer is never offered a control that would be refused.
+ */
+function EditPanelButton({
+  section,
+  tab,
+  onEdit,
+}: {
+  section: string
+  tab: EditorTabId
+  onEdit: ((tab: EditorTabId) => void) | null
+}) {
+  const { t } = useTranslation()
+  if (!onEdit) return null
+
+  return (
+    <button
+      type="button"
+      className="btn btn--icon risk-view__edit"
+      aria-label={`${t('view.edit')}: ${section}`}
+      title={`${t('view.edit')}: ${section}`}
+      onClick={() => {
+        onEdit(tab)
+      }}
+    >
+      <IconPencil size={14} />
+    </button>
+  )
+}
+
+function OverviewTab({
+  risk,
+  userName,
+  today,
+  onEdit,
+}: {
+  risk: Risk
+  userName: (id: string) => string
+  today: string
+  onEdit: ((tab: EditorTabId) => void) | null
 }) {
   const { t } = useTranslation()
 
@@ -321,44 +470,61 @@ function OverviewTab({
 
   return (
     <div className="risk-view__stack">
-      <div className="risk-view__split">
-        <article className="panel risk-structured">
-          <header className="risk-structured__head">
-            <h2>{t('view.overview.structured')}</h2>
+      {/* The narrative reads full width; the working detail sits below it. */}
+      <article className="panel risk-structured">
+        <header className="risk-structured__head">
+          <h2>{t('view.overview.structured')}</h2>
+          <div className="risk-structured__head-end">
             <p className="panel__meta">{t('view.overview.structuredHint')}</p>
-          </header>
-
-          {/*
-            * The manual description, in full: never clamped here, and the
-            * line breaks the author typed are preserved (CR-002).
-            */}
-          <div className="risk-structured__description">
-            <h3>{t('view.overview.description')}</h3>
-            {risk.description.trim().length > 0 ? (
-              <p>{risk.description}</p>
-            ) : (
-              <p className="risk-structured__empty">{t('view.overview.noDescription')}</p>
-            )}
+            <EditPanelButton section={t('view.overview.structured')} tab="description" onEdit={onEdit} />
           </div>
+        </header>
 
-          <div className="risk-structured__cards">
-            {(['cause', 'event', 'consequence'] as const).map((field, position) => (
-              <section key={field} className="risk-structured__card">
-                <span className="risk-structured__step" aria-hidden="true">
-                  {String(position + 1).padStart(2, '0')}
-                </span>
-                <h3>{t(`risk.${field}` as TranslationKey)}</h3>
-                <p>{risk[field]}</p>
-              </section>
-            ))}
-          </div>
-        </article>
+        {/*
+          * The manual description, in full: never clamped here, and the line
+          * breaks the author typed are preserved (CR-002).
+          */}
+        <div className="risk-structured__description">
+          <h3>{t('view.overview.description')}</h3>
+          {risk.description.trim().length > 0 ? (
+            <p>{risk.description}</p>
+          ) : (
+            <p className="risk-structured__empty">{t('view.overview.noDescription')}</p>
+          )}
+        </div>
 
-        <article className="panel risk-narrative">
-          <header className="risk-narrative__head">
-            <h2>{t('view.overview.narrative')}</h2>
-            <p className="panel__meta">{risk.updatedAt.slice(0, 10)}</p>
-          </header>
+        <div className="risk-structured__cards">
+          {(['cause', 'event', 'consequence'] as const).map((field, position) => (
+            <section key={field} className="risk-structured__card">
+              <span className="risk-structured__step" aria-hidden="true">
+                {String(position + 1).padStart(2, '0')}
+              </span>
+              <h3>{t(`risk.${field}` as TranslationKey)}</h3>
+              <p>{risk[field]}</p>
+            </section>
+          ))}
+        </div>
+      </article>
+
+      <div className="risk-view__split">
+        {/*
+          * The slot, not the panel, is the grid item. The panel fills it
+          * absolutely, so its content length never drives the row height —
+          * the aside beside it does, and the two columns end level.
+          */}
+        <div className="risk-view__actions-slot">
+          <ActionsPanel risk={risk} userName={userName} today={today} onEdit={onEdit} />
+        </div>
+
+        <div className="risk-view__aside">
+          <article className="panel risk-narrative">
+            <header className="risk-narrative__head">
+              <h2>{t('view.overview.narrative')}</h2>
+              <div className="risk-structured__head-end">
+                <p className="panel__meta">{risk.updatedAt.slice(0, 10)}</p>
+                <EditPanelButton section={t('view.overview.narrative')} tab="basic" onEdit={onEdit} />
+              </div>
+            </header>
 
           <p className="risk-narrative__body">
             {risk.statusNarrative.trim().length > 0
@@ -367,9 +533,10 @@ function OverviewTab({
           </p>
 
           {/*
-           * Three separate indicators. Historical Trend and Direction to Target
-           * are computed; Outlook is management judgement and is never
-           * overwritten by either of them (ARCHITECTURE.md §7.1).
+           * The two COMPUTED indicators. Outlook is management judgement and
+           * sits in the hero strip beside the scores — the three stay separate
+           * values and are never derived from one another
+           * (ARCHITECTURE.md §7.1).
            */}
           <div className="risk-narrative__chips">
             <SignalChip
@@ -381,11 +548,6 @@ function OverviewTab({
               label={t('view.indicator.directionToTarget')}
               value={t(`direction.${direction}` as TranslationKey)}
               direction={directionArrow}
-            />
-            <SignalChip
-              label={t('view.indicator.outlook')}
-              value={risk.outlook}
-              direction={OUTLOOK_DIRECTION[risk.outlook]}
             />
           </div>
 
@@ -403,15 +565,35 @@ function OverviewTab({
               <dd>{risk.type}</dd>
             </div>
           </dl>
-        </article>
+          </article>
+
+          {/*
+            * Assessment history is DERIVED from the snapshots the engine wrote
+            * — it is a record, not a field. It is the one panel here with no
+            * edit affordance.
+            */}
+          <article className="panel risk-history">
+            <header className="risk-view__card-head">
+              <h2>{t('view.assessment.history')}</h2>
+            </header>
+            {/*
+              * The chart component already renders the same series as a table
+              * beneath itself, so the data is never chart-only.
+              */}
+            <ResidualTrendChart history={risk.history} />
+          </article>
+        </div>
       </div>
 
       <article className="panel">
         <header className="risk-view__card-head">
           <h2>{t('view.overview.controlsSummary')}</h2>
-          <p className="panel__meta">
-            {risk.controls.length} {t('view.overview.controlsCount')}
-          </p>
+          <div className="risk-structured__head-end">
+            <p className="panel__meta">
+              {risk.controls.length} {t('view.overview.controlsCount')}
+            </p>
+            <EditPanelButton section={t('view.overview.controlsSummary')} tab="controls" onEdit={onEdit} />
+          </div>
         </header>
         {risk.controls.length === 0 ? (
           <EmptyState message={t('view.overview.noControls')} />
@@ -429,47 +611,13 @@ function OverviewTab({
         )}
       </article>
 
-      {/* Overview action table columns are fixed by an explicit change request. */}
-      <article className="panel">
-        <h2>{t('view.overview.actionsSummary')}</h2>
-        {risk.actions.length === 0 ? (
-          <EmptyState message={t('view.overview.noActions')} />
-        ) : (
-          <div className="scroll-x">
-            <table className="risk-view__table">
-              <thead>
-                <tr>
-                  <th scope="col">{t('editor.action.title')}</th>
-                  <th scope="col">{t('view.actions.description')}</th>
-                  <th scope="col">{t('view.actions.deliverable')}</th>
-                  <th scope="col">{t('register.column.status')}</th>
-                  <th scope="col">{t('view.actions.deadline')}</th>
-                  <th scope="col">{t('editor.action.owner')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {risk.actions.map((action) => (
-                  <tr key={action.id}>
-                    <td>{action.title}</td>
-                    <td>{action.description}</td>
-                    <td>{action.deliverable}</td>
-                    <td>
-                      <StatusPill status={displayActionStatus(action, today)} />
-                    </td>
-                    <td>{action.dueDate}</td>
-                    <td>{userName(action.ownerId)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </article>
-
       {/* Acceptance summary appears only for an Accept response. */}
       {risk.responseType === 'Accept' ? (
         <article className="panel">
-          <h2>{t('view.acceptance.title')}</h2>
+          <header className="risk-view__card-head">
+            <h2>{t('view.acceptance.title')}</h2>
+            <EditPanelButton section={t('view.acceptance.title')} tab="basic" onEdit={onEdit} />
+          </header>
           <p>{risk.acceptance.rationale}</p>
           <dl className="risk-view__facts">
             <div>
@@ -641,63 +789,6 @@ function ControlsTab({ risk, userName }: { risk: Risk; userName: (id: string) =>
 
 // --- actions ----------------------------------------------------------------
 
-function ActionsTab({
-  risk,
-  userName,
-  today,
-}: {
-  risk: Risk
-  userName: (id: string) => string
-  today: string
-}) {
-  const { t } = useTranslation()
-
-  if (risk.actions.length === 0) {
-    return <EmptyState message={t('view.overview.noActions')} />
-  }
-
-  return (
-    <div className="risk-view__stack">
-      {risk.actions.map((action) => (
-        <article key={action.id} className="panel">
-          <h2>{action.title}</h2>
-          <p>{action.description}</p>
-          <dl className="risk-view__facts">
-            <div>
-              <dt>{t('view.actions.deliverable')}</dt>
-              <dd>{action.deliverable || '—'}</dd>
-            </div>
-            <div>
-              <dt>{t('editor.action.owner')}</dt>
-              <dd>{userName(action.ownerId)}</dd>
-            </div>
-            <div>
-              <dt>{t('view.actions.deadline')}</dt>
-              <dd>
-                {action.dueDate}
-                {isActionOverdue(action, today) ? (
-                  <span className="risk-view__overdue"> {t('view.actions.overdue')}</span>
-                ) : null}
-              </dd>
-            </div>
-            <div>
-              <dt>{t('register.column.status')}</dt>
-              <dd>{action.status}</dd>
-            </div>
-            <div>
-              <dt>{t('editor.action.progress')}</dt>
-              <dd>
-                <progress value={action.progress} max={100} /> {action.progress}%
-              </dd>
-            </div>
-          </dl>
-          {action.notes.trim().length > 0 ? <p className="panel__meta">{action.notes}</p> : null}
-        </article>
-      ))}
-    </div>
-  )
-}
-
 // --- trend & audit ----------------------------------------------------------
 
 function TrendAuditTab({ risk, userName }: { risk: Risk; userName: (id: string) => string }) {
@@ -705,11 +796,6 @@ function TrendAuditTab({ risk, userName }: { risk: Risk; userName: (id: string) 
 
   return (
     <div className="risk-view__stack">
-      <article className="panel">
-        <h2>{t('view.assessment.history')}</h2>
-        <ResidualTrendChart history={risk.history} />
-      </article>
-
       <article className="panel">
         <h2>{t('view.audit.title')}</h2>
         {risk.audit.length === 0 ? (

@@ -426,7 +426,7 @@
  */
 .register-table-scroll {
   max-width: 100%;
-  max-height: calc(100vh - 21rem);
+  max-block-size: calc(100dvh - var(--header-height) - 17rem);
   overflow: auto;
   background: var(--color-card);
   border: 1px solid var(--color-border);

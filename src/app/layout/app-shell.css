@@ -3,11 +3,28 @@
  * (ARCHITECTURE.md §9 and the AIZEN Risk & Compliance target design).
  */
 
+/*
+ * The shell is pinned to the VISIBLE viewport and clips its own overflow, so
+ * `.shell__main` is the only thing that scrolls. Without this a tall panel can
+ * push the document itself, and scrolling then lifts the whole shell — rail
+ * included — off the bottom of the window.
+ *
+ * `dvh` rather than `vh`: on a browser with a collapsing toolbar, `100vh` is
+ * the toolbar-expanded height and overflows by exactly the toolbar.
+ */
 .shell {
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   grid-template-rows: var(--header-height) minmax(0, 1fr);
-  height: 100%;
+  block-size: 100dvh;
+  overflow: hidden;
+  /*
+   * A containing block for stray absolutes. `.visually-hidden` is positioned
+   * but has no offsets, so without this its containing block is the document
+   * and a screen-reader-only label sitting below the fold silently extends the
+   * page — which is what let the whole shell scroll away.
+   */
+  position: relative;
   background: var(--color-page);
 }
 
@@ -278,6 +295,8 @@
 .shell__main {
   grid-column: 2;
   grid-row: 2;
+  /* The scrollport is also a containing block, for the same reason. */
+  position: relative;
   min-width: 0;
   min-height: 0;
   padding: var(--space-24) var(--space-32) var(--space-48);

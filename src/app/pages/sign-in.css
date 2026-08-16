@@ -1,7 +1,7 @@
 /* Phase 1 sign-in page. */
 
 .sign-in {
-  min-height: 100vh;
+  min-block-size: 100dvh;
   display: grid;
   place-items: center;
   padding: var(--space-24);

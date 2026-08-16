@@ -64,7 +64,7 @@ const TABS = [
   { id: 'custom', labelKey: 'editor.tab.custom' },
 ] as const satisfies readonly { id: string; labelKey: TranslationKey }[]
 
-type TabId = (typeof TABS)[number]['id']
+export type TabId = (typeof TABS)[number]['id']
 
 const ASSESSMENTS = ['inherent', 'residual', 'target'] as const
 
@@ -76,6 +76,12 @@ function generateId(prefix: string): string {
 export interface RiskEditorModalProps {
   /** The risk being edited, or null to create a new one. */
   risk: Risk | null
+  /**
+   * Tab to open on. The risk overview edits in place: each panel there opens
+   * this editor on the tab that owns those fields, so the user lands where
+   * they clicked instead of on Basic every time.
+   */
+  initialTab?: TabId
   onClose: () => void
   onSaved?: (risk: Risk) => void
 }
@@ -103,11 +109,11 @@ interface RiskEditorProps extends RiskEditorModalProps {
   context: ReturnType<typeof useCurrentUser>['context']
 }
 
-function RiskEditor({ risk, onClose, onSaved, state, user, context }: RiskEditorProps) {
+function RiskEditor({ risk, initialTab, onClose, onSaved, state, user, context }: RiskEditorProps) {
   const { t, language } = useTranslation()
   const store = useAppDataStore()
 
-  const [activeTab, setActiveTab] = useState<TabId>('basic')
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab ?? 'basic')
   const [errors, setErrors] = useState<ValidationError[]>([])
   const [saving, setSaving] = useState(false)
   const [confirmingClose, setConfirmingClose] = useState(false)

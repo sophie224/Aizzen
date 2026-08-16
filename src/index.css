@@ -70,9 +70,26 @@
 }
 
 html,
-body,
+body {
+  block-size: 100%;
+}
+
+/*
+ * `min-` not a fixed height: the public site is a normal scrolling document
+ * and must be free to grow past the viewport. The application shell pins
+ * itself instead — see .shell.
+ */
 #root {
-  height: 100%;
+  min-block-size: 100%;
+}
+
+/*
+ * The root element carries the page colour as well as the body. Anything the
+ * body does not cover — overscroll, or a rounding gap under a pinned shell —
+ * would otherwise show as bare white.
+ */
+html {
+  background: var(--surface-page);
 }
 
 body {

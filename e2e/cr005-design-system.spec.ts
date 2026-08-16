@@ -328,7 +328,7 @@ test.describe('CR-005 design system', () => {
     await page.waitForTimeout(200)
     expect([...new Set(await badges())]).toEqual([...register])
 
-    await page.getByRole('button', { name: 'Edit risk' }).click()
+    await page.getByRole('button', { name: 'Edit risk', exact: true }).click()
     await page.getByRole('tab', { name: 'Risk assessments' }).click()
     await page.waitForTimeout(200)
     expect([...new Set(await badges())]).toEqual([...register])
@@ -354,7 +354,7 @@ test.describe('CR-005 design system', () => {
       .innerText()
 
     await page.locator('.register-table__title').first().click()
-    await page.getByRole('button', { name: 'Edit risk' }).click()
+    await page.getByRole('button', { name: 'Edit risk', exact: true }).click()
     const select = page.getByRole('combobox', { name: 'Status' })
     await expect(select).toHaveValue(rowStatus.trim())
   })
