@@ -6,6 +6,7 @@ import type {
   ReportTemplate,
   WidgetType,
 } from '../../domain/types/index.ts'
+import { LEGACY_COMPACT_COLUMN_MAP } from '../../domain/export/index.ts'
 import { isRecord } from '../../domain/validation/guards.ts'
 
 /*
@@ -155,7 +156,15 @@ function migrateSection(raw: unknown): ReportSection | null {
     type,
     titleEn: str(raw.titleEn, str(raw.title)),
     titleKa: str(raw.titleKa),
-    columns: Array.isArray(raw.columns) ? raw.columns.filter((c): c is string => typeof c === 'string') : [],
+    // v7 named these columns after the register header (`number`, `risk`,
+    // `owner`, `date`); v8 keys them by field. Slugs with no v8 equivalent are
+    // left as-is here and dropped by repairReportSections, which can see the
+    // custom attributes and so can tell an attribute id from a dead slug.
+    columns: Array.isArray(raw.columns)
+      ? raw.columns
+          .filter((c): c is string => typeof c === 'string')
+          .map((c) => LEGACY_COMPACT_COLUMN_MAP[c] ?? c)
+      : [],
     filters,
   }
 }

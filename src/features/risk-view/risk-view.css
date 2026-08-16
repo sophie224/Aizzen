@@ -802,6 +802,13 @@
   margin: 0;
   padding: 0;
   display: grid;
+  /*
+   * `start`, not the default. The list has a definite height (it fills the
+   * panel), and a grid with auto-sized rows and `align-content: normal`
+   * STRETCHES those rows to fill it — so a short plan would inflate each entry
+   * and push its own title, description and fields apart.
+   */
+  align-content: start;
   gap: var(--space-16);
   block-size: 100%;
   overflow-y: auto;
@@ -813,6 +820,7 @@
 .risk-actions__item {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
   gap: var(--space-16);
   padding-block-end: var(--space-16);
   border-block-end: 1px solid var(--border);
@@ -840,6 +848,8 @@
 
 .risk-actions__body {
   display: grid;
+  /* Same reason as the list: rows keep their content height. */
+  align-content: start;
   gap: var(--space-8);
   min-width: 0;
 }

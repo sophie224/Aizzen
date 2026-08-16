@@ -12,6 +12,7 @@ import type {
   WidgetMetric,
   WidgetSpan,
   WidgetType,
+  ChartType,
 } from './enums.ts'
 
 /**
@@ -127,6 +128,15 @@ export interface DashboardWidget {
   /** Which assessment a heatmap or Top Risks widget reads. */
   scoreBasis?: AssessmentType
   grouping?: WidgetGrouping
+  /**
+   * Chart shape for a distribution widget (CR-2026-014 FR-01). Absent means
+   * the horizontal bar list the widget has always drawn.
+   */
+  chartType?: ChartType
+  /** Second grouping plotted as the series — the stack or the line set. */
+  breakdown?: WidgetGrouping
+  /** Per-series colour overrides, keyed by series key (FR-04). */
+  seriesColors?: Record<string, string>
   metric?: WidgetMetric
   /** 1–20, for Top Risks and Recent Activity. */
   limit?: number

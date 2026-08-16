@@ -1,4 +1,5 @@
 import { filterRisks, type DashboardContext } from '../../domain/dashboard/index.ts'
+import { isCompactColumn } from '../../domain/export/index.ts'
 import { assess } from '../../domain/risk-engine/index.ts'
 import type {
   CompactRegisterReportSection,
@@ -115,6 +116,10 @@ export function CompactRegisterSectionView({
   const headerLabel = (column: string): string => {
     const attribute = context.customAttributes.find((candidate) => candidate.id === column)
     if (attribute) return pickNamed(attribute, 'label', language)
+    // Columns come from a stored template, so an id the dictionary does not
+    // cover is reachable (a legacy slug, or an attribute removed by hand). Show
+    // the raw id rather than looking up a key that does not exist.
+    if (!isCompactColumn(column)) return column
     return t(`register.column.${column}` as TranslationKey)
   }
 

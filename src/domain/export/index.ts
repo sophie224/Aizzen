@@ -204,6 +204,48 @@ export const COMPACT_REGISTER_COLUMNS = [
 
 export type CompactColumn = (typeof COMPACT_REGISTER_COLUMNS)[number]
 
+/** True when `column` is one of the base columns the section renderer knows. */
+export function isCompactColumn(column: string): column is CompactColumn {
+  return (COMPACT_REGISTER_COLUMNS as readonly string[]).includes(column)
+}
+
+/**
+ * Legacy (v7) compact-register column slugs → canonical ids.
+ *
+ * v7 named the report columns after the register header rather than the field,
+ * and offered four columns the compact section does not render. Mapping what
+ * maps and dropping the rest is what keeps a migrated template renderable.
+ */
+export const LEGACY_COMPACT_COLUMN_MAP: Record<string, CompactColumn> = {
+  number: 'ref',
+  risk: 'title',
+  riskName: 'title',
+  owner: 'riskOwner',
+  date: 'targetDate',
+}
+
+/**
+ * Normalises a stored column list: legacy slugs are renamed, custom-attribute
+ * ids are kept, duplicates collapse and anything else is dropped.
+ *
+ * Returns `null` when nothing survives, so the caller can decide the fallback
+ * (a compact section must always keep at least one column).
+ */
+export function normaliseCompactColumns(
+  columns: readonly unknown[],
+  customAttributeIds: ReadonlySet<string>,
+): string[] | null {
+  const seen = new Set<string>()
+
+  for (const raw of columns) {
+    if (typeof raw !== 'string') continue
+    const column = LEGACY_COMPACT_COLUMN_MAP[raw] ?? raw
+    if (isCompactColumn(column) || customAttributeIds.has(column)) seen.add(column)
+  }
+
+  return seen.size === 0 ? null : [...seen]
+}
+
 /**
  * A compact register section must always keep at least one column
  * (ARCHITECTURE.md §8.4).

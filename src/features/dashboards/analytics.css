@@ -34,16 +34,30 @@
 
 /* --- filter bar ------------------------------------------------------------ */
 
+/*
+ * All eight filters on one row.
+ *
+ * The six selects only ever show a short value — "All", a name, a status — so
+ * they flex down. The two date inputs cannot: they need a floor wide enough
+ * for dd.mm.yyyy plus the native picker button, or the value clips.
+ */
 .dash-filters {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: var(--space-12);
+  grid-template-columns: repeat(6, minmax(0, 1fr)) repeat(2, 8.5rem);
+  gap: var(--space-8) var(--space-12);
   margin: 0;
   padding: var(--space-16);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-card);
   box-shadow: var(--shadow-card);
+}
+
+/* Below the point where eight columns stop being legible, wrap instead. */
+@media (max-width: 71rem) {
+  .dash-filters {
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  }
 }
 
 .dash-filters legend {

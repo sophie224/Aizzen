@@ -81,6 +81,21 @@
   --site-chrome-amber: #efbc55;
   --site-chrome-green: #5bc780;
 
+  /*
+   * --- chart series palette (CR-2026-014 FR-04) ----------------------------
+   *
+   * For series a widget colours itself — category, business unit, status. A
+   * RATING series never uses these: its colour is the configured matrix colour
+   * (CR-003), so a level looks the same on every surface. Six steps, cycled,
+   * so adjacent series always differ.
+   */
+  --chart-1: #1a2151;
+  --chart-2: #3f7fb5;
+  --chart-3: #6a8f3f;
+  --chart-4: #a8682a;
+  --chart-5: #7a4b8f;
+  --chart-6: #2f8c85;
+
   /* --- typography (§3.2) --------------------------------------------------- */
   --font-sans: 'Inter', 'Noto Sans Georgian', 'BPG Nino Mtavruli', system-ui, -apple-system,
     'Segoe UI', sans-serif;

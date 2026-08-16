@@ -4,6 +4,7 @@ import type { AppState } from '../../domain/types/index.ts'
 import { validateAppState } from '../../domain/validation/app-state.ts'
 import { createSeedState } from '../seed/index.ts'
 import { migrateState } from './index.ts'
+import { DEFAULT_REGISTER_COLUMNS } from './repair.ts'
 
 /** Migrates and fails loudly with the validation errors if it did not work. */
 function migrate(raw: unknown): { state: AppState; notes: string[] } {
@@ -438,6 +439,79 @@ describe('repair: missing defaults', () => {
     expect(state.reportTemplates.length).toBeGreaterThan(0)
     expect(Object.keys(state.siteContent).length).toBeGreaterThan(0)
     expect(notes.join(' ')).toContain('default dashboard')
+  })
+})
+
+describe('repair: compact register sections', () => {
+  /** Replaces the seeded template with one compact section carrying `columns`. */
+  function withColumns(columns: string[]): AppState {
+    const seeded = createSeedState()
+    seeded.reportTemplates = [
+      {
+        id: 'rpt_legacy', nameEn: 'Legacy pack', nameKa: '',
+        descriptionEn: '', descriptionKa: '',
+        sections: [
+          {
+            id: 'sec_register', type: 'compactRegister',
+            titleEn: 'Register', titleKa: '', columns, filters: {},
+          },
+        ],
+      },
+    ]
+    return seeded
+  }
+
+  function sectionColumns(state: AppState): string[] {
+    const section = state.reportTemplates[0].sections[0]
+    return section.type === 'compactRegister' ? section.columns : []
+  }
+
+  it('drops columns no renderer covers', () => {
+    // `trend`, `controls` and `response` exist in the register but not in the
+    // compact section, and were reachable from a v7 template.
+    const { state, notes } = migrate(withColumns(['ref', 'trend', 'controls', 'response', 'status']))
+
+    expect(sectionColumns(state)).toEqual(['ref', 'status'])
+    expect(notes.join(' ')).toContain('normalised register columns')
+  })
+
+  it('falls back to the default columns when nothing survives', () => {
+    const { state } = migrate(withColumns(['trend', 'controls']))
+    expect(sectionColumns(state)).toEqual(DEFAULT_REGISTER_COLUMNS)
+  })
+
+  it('keeps custom attribute columns, including deactivated ones', () => {
+    const seeded = createSeedState()
+    const attribute = seeded.customAttributes[0]
+    attribute.active = false
+    const withAttribute = withColumns(['ref', attribute.id])
+    withAttribute.customAttributes = seeded.customAttributes
+
+    // Deactivation hides the field but preserves stored values, so the column
+    // must survive migration rather than be repaired away.
+    expect(sectionColumns(migrate(withAttribute).state)).toEqual(['ref', attribute.id])
+  })
+
+  it('leaves a valid column list untouched', () => {
+    const columns = ['ref', 'title', 'residual', 'status']
+    const { state, notes } = migrate(withColumns(columns))
+
+    expect(sectionColumns(state)).toEqual(columns)
+    expect(notes.join(' ')).not.toContain('normalised register columns')
+  })
+
+  it('renames the v7 column slugs on the baseline template', () => {
+    // The v7 fixture stores ['number','risk','category','owner','residual',
+    // 'target','status','trend'] — none of which the v8 renderer knows, which
+    // is what blanked the Reports page before this pass existed.
+    const { state } = migrate(baseline)
+    const section = state.reportTemplates[0].sections.find(
+      (candidate) => candidate.type === 'compactRegister',
+    )
+
+    expect(section?.type === 'compactRegister' && section.columns).toEqual([
+      'ref', 'title', 'category', 'riskOwner', 'residual', 'target', 'status',
+    ])
   })
 })
 

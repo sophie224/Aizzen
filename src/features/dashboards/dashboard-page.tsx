@@ -12,6 +12,7 @@ import { canAccess, visibleRisks } from '../../domain/permissions/index.ts'
 import { ratingLevels, ratingName } from '../../domain/risk-engine/index.ts'
 import { buildRegisterIndex, level1Groups } from '../../domain/register/index.ts'
 import {
+  CHART_TYPES,
   OUTLOOKS,
   RISK_STATUSES,
   RISK_TYPES,
@@ -24,6 +25,9 @@ import type { Dashboard, DashboardWidget, RiskFilters, RatingMatrix } from '../.
 import { pickNamed, useTranslation, type TranslationKey } from '../../i18n/index.ts'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
 import { AnalyticsDashboard } from './analytics-dashboard.tsx'
+import { resolveCssColor } from '../../ui/resolve-color.ts'
+import { ChartGlyph } from './chart-glyph.tsx'
+import { computeChartData, type ChartData } from '../../domain/dashboard/series.ts'
 import { WidgetBody } from './dashboard-widget.tsx'
 import './dashboards.css'
 
@@ -261,6 +265,20 @@ export function ConfigurableDashboards() {
               {editing && canEdit ? (
                 <WidgetSettings
                   widget={widget}
+                  series={
+                    widget.type === 'distribution'
+                      ? computeChartData(
+                          filtered,
+                          widget.grouping ?? 'rating',
+                          widget.breakdown,
+                          dashboardContext,
+                          {
+                            totalLabel: t(`grouping.${widget.grouping ?? 'rating'}` as TranslationKey),
+                            seriesColors: widget.seriesColors,
+                          },
+                        )
+                      : null
+                  }
                   position={position}
                   total={dashboard.widgets.length}
                   onPatch={(changes) => {
@@ -416,6 +434,8 @@ function DashboardSettings(props: {
 
 function WidgetSettings(props: {
   widget: DashboardWidget
+  /** Resolved chart data, so colour controls can be listed per series. */
+  series: ChartData | null
   position: number
   total: number
   onPatch: (changes: Partial<DashboardWidget>) => void
@@ -502,6 +522,94 @@ function WidgetSettings(props: {
         </label>
       ) : null}
 
+      {widget.type === 'distribution' ? (
+        <>
+          {/*
+            * Chart type picker (CR-2026-014 FR-01). Radios, not a select: the
+            * ten shapes are shown as a grid of glyphs grouped by family, and a
+            * radio group is already keyboard-operable and announces its state.
+            */}
+          <fieldset className="chart-picker">
+            <legend>{t('dash.widget.chartType')}</legend>
+            <div className="chart-picker__grid">
+              <label className="chart-picker__option">
+                <input
+                  type="radio"
+                  name={`${widget.id}-chart`}
+                  checked={!widget.chartType}
+                  onChange={() => { props.onPatch({ chartType: undefined }) }}
+                />
+                <ChartGlyph type={null} />
+                <span>{t('dash.widget.chartList')}</span>
+              </label>
+
+              {CHART_TYPES.map((type) => (
+                <label key={type} className="chart-picker__option">
+                  <input
+                    type="radio"
+                    name={`${widget.id}-chart`}
+                    checked={widget.chartType === type}
+                    onChange={() => { props.onPatch({ chartType: type }) }}
+                  />
+                  <ChartGlyph type={type} />
+                  <span>{t(`chart.${type}` as TranslationKey)}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          {/* The series dimension: what the stack or the line set is made of. */}
+          <label>
+            <span>{t('dash.widget.breakdown')}</span>
+            <select
+              aria-label={`${name} ${t('dash.widget.breakdown')}`}
+              value={widget.breakdown ?? ''}
+              onChange={(event) => {
+                const value = event.target.value
+                props.onPatch({ breakdown: value === '' ? undefined : (value as DashboardWidget['breakdown']) })
+              }}
+            >
+              <option value="">{t('dash.widget.breakdownNone')}</option>
+              {WIDGET_GROUPINGS.map((grouping) => (
+                <option key={grouping} value={grouping}>{t(`grouping.${grouping}` as TranslationKey)}</option>
+              ))}
+            </select>
+          </label>
+
+          {/*
+            * One colour control per series — or per SLICE for pie and doughnut,
+            * which plot categories rather than series (FR-04). A rating series
+            * is omitted: its colour is the configured matrix colour, so a level
+            * looks the same on every surface (CR-003).
+            */}
+          {props.series ? (
+            <fieldset className="widget-series">
+              <legend>{t('dash.widget.seriesColour')}</legend>
+              <div className="widget-series__list">
+                {(widget.chartType === 'pie' || widget.chartType === 'doughnut'
+                  ? props.series.points.map((point) => ({ key: point.key, label: point.name, color: point.color ?? '' }))
+                  : props.series.series
+                ).map((entry) => (
+                  <label key={entry.key} className="widget-series__item">
+                    <input
+                      type="color"
+                      aria-label={`${entry.label} ${t('dash.widget.seriesColour')}`}
+                      value={resolveCssColor(entry.color)}
+                      onChange={(event) => {
+                        props.onPatch({
+                          seriesColors: { ...widget.seriesColors, [entry.key]: event.target.value },
+                        })
+                      }}
+                    />
+                    <span>{entry.label}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ) : null}
+        </>
+      ) : null}
+
       {widget.type === 'heatmap' || widget.type === 'topRisks' ? (
         <label>
           <span>{t('dash.widget.scoreBasis')}</span>
@@ -532,12 +640,19 @@ function WidgetSettings(props: {
       ) : null}
 
       <div className="dash-widget__actions">
-        <button type="button" disabled={props.position === 0} onClick={() => { props.onMove(props.position - 1) }}>
+        {/* A disabled control states why, rather than just going grey. */}
+        <button
+          type="button"
+          disabled={props.position === 0}
+          title={props.position === 0 ? t('dash.widget.atStart') : undefined}
+          onClick={() => { props.onMove(props.position - 1) }}
+        >
           {t('dash.widget.moveUp')}
         </button>
         <button
           type="button"
           disabled={props.position === props.total - 1}
+          title={props.position === props.total - 1 ? t('dash.widget.atEnd') : undefined}
           onClick={() => { props.onMove(props.position + 1) }}
         >
           {t('dash.widget.moveDown')}

@@ -10,6 +10,7 @@ import {
   repairMatrix,
   repairRisks,
   repairRoles,
+  repairReportSections,
   repairSavedViews,
   repairSuperAdminUser,
   repairUserScopes,
@@ -86,6 +87,8 @@ export function migrateState(raw: unknown): MigrationOutcome {
   repairRisks(state, notes)
   repairSavedViews(state, notes)
   repairDefaults(state, notes)
+  // After repairDefaults, so a restored seed template is normalised too.
+  repairReportSections(state, notes)
   repairMatrix(state, notes)
 
   const validated = validateAppState(state)

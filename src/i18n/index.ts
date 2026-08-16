@@ -15,9 +15,20 @@ export type { TranslationKey } from './dictionary.ts'
 export { dictionary } from './dictionary.ts'
 export { pickLabel, pickLanguage, pickNamed } from '../domain/localisation/index.ts'
 
-/** Resolves a chrome string, falling back to English when Georgian is blank. */
+/**
+ * Resolves a chrome string, falling back to English when Georgian is blank.
+ *
+ * Several call sites build a key from stored data (`register.column.${column}`,
+ * `trend.${trend}`), so an unknown key is reachable from migrated or
+ * hand-edited state. A missing phrase degrades to the key itself — a rendering
+ * blemish must never throw during render and blank the page.
+ */
 export function translate(key: TranslationKey, language: Language): string {
-  const phrase = dictionary[key]
+  const phrase = dictionary[key] as { en: string; ka: string } | undefined
+  if (!phrase) {
+    if (import.meta.env.DEV) console.warn(`i18n: missing translation key "${key}"`)
+    return key
+  }
   return pickLabel(phrase, language)
 }
 

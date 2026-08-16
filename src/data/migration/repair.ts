@@ -1,5 +1,6 @@
 import type { AppState, BusinessUnit, PermissionSet, RatingMatrix } from '../../domain/types/index.ts'
 import { MODULE_NAMES, SCALE_VALUES } from '../../domain/types/index.ts'
+import { normaliseCompactColumns } from '../../domain/export/index.ts'
 import { RISK_DESCRIPTION_MAX_LENGTH } from '../../domain/risk-editor/index.ts'
 import { isPermissionLevel, isRatingLabel, isRecord } from '../../domain/validation/guards.ts'
 import { createSeedMatrix } from '../seed/matrix.ts'
@@ -187,6 +188,34 @@ export function repairSavedViews(state: AppState, notes: RepairNotes): void {
     if (!isRecord(view.filters)) view.filters = {}
     if (typeof view.search !== 'string') view.search = ''
     if (!isRecord(view.sort)) view.sort = { field: 'ref', direction: 'asc' }
+  }
+}
+
+/**
+ * Normalises the column list of every Compact Register report section.
+ *
+ * A section stores raw column ids, so a template written against an older build
+ * — or carrying an attribute that was removed by hand — can name a column no
+ * renderer covers. Such a column has no label to resolve, which used to blank
+ * the whole Reports page. Unknown ids are dropped and a section left with none
+ * falls back to the default column set, since the section must always keep at
+ * least one (ARCHITECTURE.md §8.4).
+ */
+export function repairReportSections(state: AppState, notes: RepairNotes): void {
+  const attributeIds = new Set(state.customAttributes.map((attribute) => attribute.id))
+
+  for (const template of state.reportTemplates) {
+    for (const section of template.sections) {
+      if (section.type !== 'compactRegister') continue
+
+      const columns = Array.isArray(section.columns) ? section.columns : []
+      const next = normaliseCompactColumns(columns, attributeIds) ?? [...DEFAULT_REGISTER_COLUMNS]
+
+      if (next.length !== columns.length || next.some((column, at) => column !== columns[at])) {
+        notes.push(`report ${template.id} / section ${section.id}: normalised register columns`)
+        section.columns = next
+      }
+    }
   }
 }
 

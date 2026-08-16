@@ -132,25 +132,62 @@
   color: var(--color-text-muted);
 }
 
+/*
+ * The matrix fills its widget rather than sitting at a fixed 2rem per cell, so
+ * a full-width widget shows a large, readable grid instead of a small one
+ * stranded in whitespace.
+ */
 .widget-heatmap {
-  border-collapse: collapse;
+  inline-size: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 2px;
   font-variant-numeric: tabular-nums;
 }
 
 .widget-heatmap th {
   padding: 2px var(--space-8);
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+}
+
+/* First column holds the impact axis and must not take a cell's width. */
+.widget-heatmap th[scope='row'] {
+  inline-size: 1.75rem;
 }
 
 .widget-heatmap td {
-  width: 2rem;
-  height: 2rem;
+  block-size: 2.5rlh;
   text-align: center;
-  border: 1px solid var(--color-card);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--color-surface-deep);
+  border-radius: var(--radius-cell);
+  font-size: var(--text-14);
+  font-weight: var(--weight-semibold);
+}
+
+/*
+ * A populated cell is a link into the register, filtered to exactly those
+ * risks. It fills the cell so the whole square is the target, well past the
+ * 32px bar.
+ */
+.widget-heatmap__cell {
+  display: grid;
+  place-items: center;
+  block-size: 100%;
+  inline-size: 100%;
+  border-radius: var(--radius-cell);
+  text-decoration: none;
+  transition: box-shadow var(--motion-state) var(--ease);
+}
+
+/* Nothing moves — the cell reads as pressable by its ring alone. */
+.widget-heatmap__cell:hover {
+  box-shadow: inset 0 0 0 2px var(--surface);
+}
+
+.widget-heatmap__cell:focus-visible {
+  outline: 2px solid var(--brand-primary-ring);
+  outline-offset: -2px;
 }
 
 .widget-bars {
@@ -201,9 +238,33 @@
 
 .widget-top li {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+}
+
+/* The whole row opens the risk. */
+.widget-top__link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-8);
+  min-block-size: var(--hit-target);
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-control);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--motion-state) var(--ease);
+}
+
+.widget-top__link:hover {
+  background: var(--surface-sunken);
+}
+
+.widget-top__link:active {
+  background: var(--brand-primary-soft);
+}
+
+.widget-top__link:focus-visible {
+  outline: 2px solid var(--brand-primary-ring);
+  outline-offset: 1px;
 }
 
 .widget-top__ref {
@@ -217,12 +278,34 @@
   white-space: nowrap;
 }
 
+/*
+ * One size for every rating, so Low and Significant align down the list. The
+ * two tracks are fixed; only the badge's own colour changes.
+ */
 .widget-top__score {
-  padding: 2px var(--space-8);
-  border-radius: var(--radius-sm);
-  font-weight: 600;
+  display: inline-grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-4);
+  inline-size: 8.5rem;
+  min-block-size: 1.5rlh;
+  padding-inline: var(--space-8);
+  border-radius: var(--radius-card);
+  font-weight: var(--weight-semibold);
   white-space: nowrap;
-  color: var(--color-surface-deep);
+}
+
+.widget-top__value {
+  font-size: var(--text-14);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.widget-top__rating {
+  font-size: var(--text-12);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .widget-progress dl,
@@ -284,4 +367,349 @@
   .dash-widget {
     grid-column: 1 / -1 !important;
   }
+}
+
+/* --- chart widgets (CR-2026-014) -------------------------------------------
+ *
+ * One renderer serves the dashboard grid and the editor preview, so these
+ * styles apply to both and the two can never diverge.
+ */
+
+.widget-chart {
+  display: grid;
+  gap: var(--space-8);
+  margin: 0;
+  min-inline-size: 0;
+}
+
+/* --- bars and columns, laid out in HTML so the text stays crisp ------------- */
+
+.chart-bars {
+  display: grid;
+  gap: var(--space-8);
+  min-inline-size: 0;
+}
+
+/* Horizontal: label, track, total — three columns, one row per category. */
+.chart-bars--horizontal .chart-bars__entry {
+  display: grid;
+  grid-template-columns: minmax(4rem, 9rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+/* Vertical: columns side by side, each with its total above and label below. */
+.chart-bars--vertical {
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: end;
+  block-size: 9rlh;
+}
+
+.chart-bars--vertical .chart-bars__entry {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-4);
+  block-size: 100%;
+  min-inline-size: 0;
+}
+
+/* Total above the plot, label below it, whatever the source order. */
+.chart-bars--vertical .chart-bars__total {
+  grid-row: 1;
+}
+
+.chart-bars__label {
+  font-size: var(--text-11);
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-bars--vertical .chart-bars__label {
+  grid-row: 3;
+  text-align: center;
+}
+
+.chart-bars__total {
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.chart-bars__track {
+  display: flex;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.chart-bars--horizontal .chart-bars__track {
+  flex-direction: column;
+  min-block-size: 0.75rlh;
+}
+
+.chart-bars--horizontal .chart-bars__track--stacked {
+  flex-direction: row;
+  align-items: stretch;
+  block-size: 1.1rlh;
+  gap: 0;
+}
+
+/* Columns grow from the baseline up. */
+.chart-bars--vertical .chart-bars__track {
+  grid-row: 2;
+  flex-direction: row;
+  align-items: end;
+  block-size: 100%;
+}
+
+.chart-bars--vertical .chart-bars__track--stacked {
+  flex-direction: column-reverse;
+  gap: 0;
+}
+
+.chart-bars__segment {
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-cell);
+  min-block-size: 0.4rlh;
+  overflow: hidden;
+}
+
+.chart-bars--horizontal .chart-bars__track:not(.chart-bars__track--stacked) .chart-bars__segment {
+  block-size: 0.6rlh;
+}
+
+.chart-bars--vertical .chart-bars__track:not(.chart-bars__track--stacked) .chart-bars__segment {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.chart-bars--vertical .chart-bars__track--stacked .chart-bars__segment {
+  inline-size: 100%;
+}
+
+/*
+ * The value sits on the segment's own fill. Its colour is computed per fill by
+ * the renderer, so it stays readable on any hue an administrator configures.
+ */
+.chart-bars__value {
+  padding-inline: var(--space-4);
+  font-size: var(--text-11);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* --- line and area ---------------------------------------------------------- */
+
+.chart-line {
+  inline-size: 100%;
+  block-size: 8rlh;
+}
+
+.chart-round {
+  inline-size: 100%;
+  block-size: 9rlh;
+}
+
+.chart-axis {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-8);
+  font-size: var(--text-11);
+  color: var(--text-secondary);
+}
+
+.chart-axis__tick {
+  display: grid;
+  justify-items: center;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-axis__tick strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+/* The legend is what carries meaning; the drawing only reinforces it. */
+.widget-chart__legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-12);
+  font-size: var(--text-12);
+  color: var(--text-secondary);
+}
+
+.widget-chart__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.widget-chart__legend strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.widget-chart__swatch {
+  inline-size: 0.6rlh;
+  block-size: 0.6rlh;
+  border-radius: var(--radius-cell);
+  flex: none;
+}
+
+/* --- chart type picker ------------------------------------------------------ */
+
+.chart-picker {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--space-12);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.chart-picker legend {
+  padding-inline: var(--space-4);
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+}
+
+.chart-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+  gap: var(--space-8);
+}
+
+/*
+ * The whole tile is the target, comfortably past the 32px bar. Nothing moves
+ * on selection or hover — only colour and border respond.
+ */
+.chart-picker__option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-8);
+  min-block-size: var(--hit-target);
+  padding: var(--space-8);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  font-size: var(--text-11);
+  cursor: pointer;
+  transition:
+    background-color var(--motion-state) var(--ease),
+    border-color var(--motion-state) var(--ease);
+}
+
+.chart-picker__option:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-sunken);
+}
+
+.chart-picker__option:active {
+  background: var(--brand-primary-soft);
+}
+
+/* The radio itself is hidden; the tile reports the state. */
+.chart-picker__option input {
+  position: absolute;
+  opacity: 0;
+  inline-size: 1px;
+  block-size: 1px;
+}
+
+.chart-picker__option:has(input:checked) {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-soft);
+  font-weight: var(--weight-semibold);
+}
+
+.chart-picker__option:has(input:focus-visible) {
+  outline: 2px solid var(--brand-primary-ring);
+  outline-offset: 2px;
+}
+
+.chart-glyph {
+  inline-size: 1.6rlh;
+  block-size: 1.4rlh;
+  flex: none;
+}
+
+.chart-glyph__bar--1 {
+  fill: var(--chart-1);
+}
+
+.chart-glyph__bar--2 {
+  fill: var(--chart-2);
+}
+
+.chart-glyph__line {
+  stroke: var(--chart-1);
+  stroke-width: 1.4;
+}
+
+.chart-glyph__area {
+  fill: var(--chart-1);
+  opacity: 0.25;
+}
+
+.chart-glyph__hole {
+  fill: var(--surface);
+}
+
+/* --- series colours and live preview ---------------------------------------- */
+
+.widget-series {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--space-12);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.widget-series legend {
+  padding-inline: var(--space-4);
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+}
+
+.widget-series__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: var(--space-8);
+}
+
+.widget-series__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-8);
+  font-size: var(--text-12);
+}
+
+.widget-preview {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--space-8);
+  padding: var(--space-12);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-sunken);
+}
+
+/* Says plainly that this is a draft, not the saved widget. */
+.widget-preview__label {
+  font-size: var(--text-11);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
 }

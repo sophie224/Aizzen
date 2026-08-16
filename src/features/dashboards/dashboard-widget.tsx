@@ -8,10 +8,16 @@ import {
   computeTrendSummary,
   type DashboardContext,
 } from '../../domain/dashboard/index.ts'
-import { ratingColor } from '../../domain/risk-engine/index.ts'
+import { ratingColor, ratingName } from '../../domain/risk-engine/index.ts'
 import { SCALE_VALUES } from '../../domain/types/enums.ts'
 import type { DashboardWidget, RatingLabel, Risk } from '../../domain/types/index.ts'
+import { Link } from 'react-router-dom'
+import { registerLinkFor } from '../../domain/register/filter-params.ts'
+import { LARGE_TEXT_TARGET, readableOn } from '../../domain/risk-engine/contrast.ts'
+import { computeChartData } from '../../domain/dashboard/series.ts'
+import { resolveCssColor } from '../../ui/resolve-color.ts'
 import { useTranslation, type TranslationKey } from '../../i18n/index.ts'
+import { WidgetChart } from './widget-chart.tsx'
 
 /*
  * Widget renderers (ARCHITECTURE.md §8.3).
@@ -84,13 +90,39 @@ function HeatmapWidget({ widget, risks, context }: WidgetProps) {
             {SCALE_VALUES.map((likelihood) => {
               const cell = cells.find((c) => c.impact === impact && c.likelihood === likelihood)
               const count = cell?.count ?? 0
+              const fill = ratingColor((cell?.rating ?? 'Low') as RatingLabel, context.matrix)
+              const ink = readableOn(resolveCssColor(fill), LARGE_TEXT_TARGET)
+              /*
+                * The cell's colour IS the rating, so the rating name must be in
+                * the accessible name — colour never carries meaning alone.
+                */
+              const description = `Impact ${String(impact)}, likelihood ${String(likelihood)}: ${String(count)} risks, ${cell?.rating ?? ''}`
+
               return (
-                <td
-                  key={likelihood}
-                  style={{ background: ratingColor((cell?.rating ?? 'Low') as RatingLabel, context.matrix) }}
-                  aria-label={`Impact ${String(impact)}, likelihood ${String(likelihood)}: ${String(count)} risks, ${cell?.rating ?? ''}`}
-                >
-                  {count > 0 ? count : ''}
+                <td key={likelihood} style={{ background: fill, color: ink }}>
+                  {count > 0 ? (
+                    /*
+                     * A populated cell opens the register filtered to exactly
+                     * those risks. An empty one is not interactive — there is
+                     * nothing to open.
+                     */
+                    <Link
+                      className="widget-heatmap__cell"
+                      /*
+                        * Drills to exactly this cell, not to the whole rating:
+                        * the register shares one predicate set with the
+                        * dashboard, so the list is the same computation
+                        * (CR-004).
+                        */
+                      to={registerLinkFor({ basis, impact, likelihood })}
+                      style={{ color: ink }}
+                      aria-label={description}
+                    >
+                      {count}
+                    </Link>
+                  ) : (
+                    <span className="visually-hidden">{description}</span>
+                  )}
                 </td>
               )
             })}
@@ -109,6 +141,31 @@ function DistributionWidget({ widget, risks, context }: WidgetProps) {
 
   if (buckets.length === 0) return <p className="panel__meta">{t('dash.noData')}</p>
 
+  /*
+   * A chart shape was chosen for this widget (CR-2026-014 FR-01). The data is
+   * the same register count either way — only the drawing changes.
+   */
+  if (widget.chartType) {
+    /*
+     * Pie and doughnut plot one slice per category (FR-01), so a breakdown has
+     * nowhere to go — plotting only its first series would show a fraction of
+     * the register while looking like the whole of it.
+     */
+    const round = widget.chartType === 'pie' || widget.chartType === 'doughnut'
+    const data = computeChartData(risks, grouping, round ? undefined : widget.breakdown, context, {
+      totalLabel: t(`grouping.${grouping}` as TranslationKey),
+      seriesColors: widget.seriesColors,
+    })
+    return (
+      <WidgetChart
+        type={widget.chartType}
+        data={data}
+        label={widget.titleEn || t(`grouping.${grouping}` as TranslationKey)}
+        percentLabel={(value) => `${String(Math.round(value * 100))}%`}
+      />
+    )
+  }
+
   return (
     <ul className="widget-bars">
       {buckets.map((bucket) => (
@@ -120,9 +177,14 @@ function DistributionWidget({ widget, risks, context }: WidgetProps) {
               style={{
                 width: `${String((bucket.count / max) * 100)}%`,
                 background:
+                  /*
+                   * A rating keeps the configured matrix colour so a level
+                   * looks the same everywhere; anything else takes the
+                   * widget's own override, then its accent.
+                   */
                   grouping === 'rating'
                     ? ratingColor(bucket.key as RatingLabel, context.matrix)
-                    : widget.accentColor,
+                    : (widget.seriesColors?.[bucket.key] ?? widget.accentColor),
               }}
             />
           </span>
@@ -141,18 +203,31 @@ function TopRisksWidget({ widget, risks, context }: WidgetProps) {
 
   return (
     <ol className="widget-top">
-      {entries.map((entry) => (
-        <li key={entry.risk.id}>
-          <span className="widget-top__ref">{entry.risk.ref}</span>
-          <span className="widget-top__title">{entry.risk.title}</span>
-          <span
-            className="widget-top__score"
-            style={{ background: ratingColor(entry.rating as RatingLabel, context.matrix) }}
-          >
-            {entry.score} · {entry.rating}
-          </span>
-        </li>
-      ))}
+      {entries.map((entry) => {
+        const fill = ratingColor(entry.rating as RatingLabel, context.matrix)
+        return (
+          <li key={entry.risk.id}>
+            {/* The whole row opens the risk, so a listed risk is reachable. */}
+            <Link className="widget-top__link" to={`/app/risks/${entry.risk.id}`}>
+              <span className="widget-top__ref">{entry.risk.ref}</span>
+              <span className="widget-top__title">{entry.risk.title}</span>
+              <span
+                className="widget-top__score"
+                style={{
+                  background: fill,
+                  // Computed per fill: the palette is administrator-chosen.
+                  color: readableOn(resolveCssColor(fill), LARGE_TEXT_TARGET),
+                }}
+              >
+                <span className="widget-top__value">{entry.score}</span>
+                <span className="widget-top__rating">
+                  {ratingName(context.matrix, entry.rating as RatingLabel, context.language)}
+                </span>
+              </span>
+            </Link>
+          </li>
+        )
+      })}
     </ol>
   )
 }

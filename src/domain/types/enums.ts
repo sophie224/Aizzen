@@ -158,6 +158,24 @@ export const WIDGET_GROUPINGS = [
 ] as const
 export type WidgetGrouping = (typeof WIDGET_GROUPINGS)[number]
 
+/*
+ * Chart shapes a distribution widget can take (CR-2026-014 FR-01). The keys
+ * are the change request's own vocabulary and must not be renamed.
+ */
+export const CHART_TYPES = [
+  'column',
+  'columnStacked',
+  'columnPct',
+  'bar',
+  'barStacked',
+  'barPct',
+  'line',
+  'area',
+  'pie',
+  'doughnut',
+] as const
+export type ChartType = (typeof CHART_TYPES)[number]
+
 /** Permitted grid spans for a widget. */
 export const WIDGET_SPANS = [3, 4, 6, 8, 12] as const
 export type WidgetSpan = (typeof WIDGET_SPANS)[number]
