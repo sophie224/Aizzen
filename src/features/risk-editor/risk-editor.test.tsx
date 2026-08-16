@@ -506,18 +506,25 @@ describe('assessment matrix picker', () => {
     renderRegister()
     const user = await openNewRisk()
     const dialog = screen.getByRole('dialog')
-    await user.click(within(dialog).getByRole('tab', { name: 'Risk assessments' }))
 
-    const summary = within(dialog).getByLabelText('Score summary')
     // Documented new-risk defaults: 3x3, 2x3, 2x2.
-    expect(summary).toHaveTextContent('Inherent9')
-    expect(summary).toHaveTextContent('Target4')
+    expect(within(dialog).getByLabelText('Score summary')).toHaveTextContent('Inherent9')
+    expect(within(dialog).getByLabelText('Score summary')).toHaveTextContent('Target4')
+
+    /*
+     * The summary is a Basic-tab affordance: the assessments tab shows a badge
+     * inside each fieldset, so repeating them in the footer would duplicate.
+     * Change a score there, come back, and the summary must have followed.
+     */
+    await user.click(within(dialog).getByRole('tab', { name: 'Risk assessments' }))
+    expect(within(dialog).queryByLabelText('Score summary')).not.toBeInTheDocument()
 
     const target = within(dialog).getByRole('group', { name: /^Target/ })
     await user.selectOptions(within(target).getByLabelText('Impact'), '5')
 
+    await user.click(within(dialog).getByRole('tab', { name: 'Basic information' }))
     await waitFor(() => {
-      expect(summary).toHaveTextContent('Target10')
+      expect(within(dialog).getByLabelText('Score summary')).toHaveTextContent('Target10')
     })
   })
 })

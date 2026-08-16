@@ -6,6 +6,7 @@ import { useTranslation } from '../../i18n/index.ts'
 import { BrandMark } from '../../ui/brand-mark.tsx'
 import { IconChart, IconGauge, IconGlobe, IconList, IconSettings, IconSignOut } from '../../ui/icons.tsx'
 import { initialsOf } from '../../ui/initials.ts'
+import { RiskPalette } from './risk-palette.tsx'
 import { useAuth } from '../session/use-auth.ts'
 import { useCurrentUser } from '../session/use-current-user.ts'
 import './app-shell.css'
@@ -104,6 +105,8 @@ export function AppShell() {
 
   return (
     <div className="shell">
+      {/* Publishes the configured rating palette as CSS variables. */}
+      <RiskPalette />
       <a className="skip-link" href="#main-content">
         {t('nav.skipToContent')}
       </a>

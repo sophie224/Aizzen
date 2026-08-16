@@ -1,81 +1,66 @@
+@import './styles/tokens.css';
+
 /*
- * Aizzen design tokens and base styles (ARCHITECTURE.md §9).
+ * Base layer and shared primitives (CR-005 §3.5, §3.6).
  *
- * Brand palette: primary navy #1A2151, surface dark navy #0D1128, accent white.
+ * Every value here comes from src/styles/tokens.css — no literal hex, pixel
+ * radius or millisecond duration below this line.
  *
- * RATING COLOURS ARE DELIBERATELY ABSENT. Low / Medium / High / Significant are
- * read from the configured rating matrix at runtime so an administrator's
- * change propagates everywhere at once. Hard-coding them here would fork that
- * configuration — see src/domain/risk-engine.
+ * The `--color-*` / `--space-N` names are LEGACY ALIASES kept so the feature
+ * stylesheets written before the token layer keep resolving to the same
+ * values. New CSS should reference the token names directly.
  */
 
 :root {
-  /* Brand */
-  --color-primary: #1a2151;
-  --color-primary-hover: #232c6b;
-  --color-surface-deep: #0d1128;
-  --color-accent: #ffffff;
+  /* legacy aliases → tokens */
+  --color-primary: var(--brand-primary);
+  --color-primary-hover: var(--brand-primary-hover);
+  --color-surface-deep: var(--brand-ink);
+  --color-accent: var(--text-on-dark);
 
-  /* Neutrals, biased slightly toward the brand navy so greys read as chosen */
-  --color-page: #f4f6fb;
-  --color-card: #ffffff;
-  --color-border: #e2e5ef;
-  --color-border-strong: #b9bfd4;
-  --color-text: #1c2033;
-  --color-text-muted: #5b6180;
-  --color-text-subtle: #8a90ab;
-  --color-text-inverse: #ffffff;
-  --color-text-on-primary: #eef0f8;
+  --color-page: var(--surface-page);
+  --color-card: var(--surface);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text-primary);
+  --color-text-muted: var(--text-secondary);
+  --color-text-subtle: var(--text-muted);
+  --color-text-inverse: var(--text-on-dark);
+  --color-text-on-primary: var(--text-on-dark);
 
-  /* Chrome — dark navy rail, light content, as in the target design */
-  --color-rail: #10142f;
-  --color-rail-hover: rgba(255, 255, 255, 0.08);
-  --color-rail-active: #232a55;
-  --color-topbar: #ffffff;
-  --color-hover: #f1f3fa;
+  --color-rail: var(--brand-ink);
+  --color-rail-hover: var(--brand-ink-hover);
+  --color-rail-active: var(--brand-primary);
+  --color-topbar: var(--surface);
+  --color-hover: var(--surface-sunken);
 
-  /* Feedback — semantic, and distinct from risk-rating colours */
-  --color-danger: #b3261e;
-  --color-danger-surface: #fdecea;
-  --color-warning-surface: #fff6e0;
+  --color-danger: var(--danger);
+  --color-danger-surface: var(--danger-soft);
+  --color-warning-surface: var(--warning-soft);
 
-  /* Spacing scale */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.5rem;
-  --space-6: 2rem;
-  --space-7: 3rem;
+  /*
+   * No spacing aliases: every stylesheet names the 4px token scale directly.
+   * An alias here is not merely redundant — `--space-4` is a REAL token, so
+   * redefining it silently rewrites 4px gaps to 16px across the whole app.
+   */
 
-  /* Type */
-  --font-sans: 'Segoe UI', system-ui, -apple-system, 'Noto Sans Georgian', 'BPG Nino Mtavruli',
-    sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.375rem;
-  --text-2xl: 1.75rem;
+  --text-xs: var(--text-12);
+  --text-sm: var(--text-13);
+  --text-base: var(--text-14);
+  --text-lg: var(--text-16);
+  --text-xl: var(--text-22);
+  --text-2xl: var(--text-28);
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-pill: 999px;
+  --radius-sm: var(--radius-cell);
+  --radius-md: var(--radius-control);
+  --radius-lg: var(--radius-card);
+  --radius-xl: var(--radius-modal);
 
-  --shadow-card: 0 1px 2px rgba(13, 17, 40, 0.05), 0 2px 10px rgba(13, 17, 40, 0.04);
-  --shadow-raised: 0 8px 24px rgba(13, 17, 40, 0.14);
-  --shadow-popover: 0 12px 32px rgba(13, 17, 40, 0.18);
+  --shadow-raised: var(--shadow-modal);
+  --shadow-popover: var(--shadow-dropdown);
 
-  --header-height: 4.25rem;
-  --sidebar-width: 14.5rem;
-
-  --transition-fast: 120ms;
-  --transition-page: 220ms;
-
-  color-scheme: light;
+  --transition-fast: var(--motion-state);
+  --transition-page: var(--motion-modal);
 }
 
 *,
@@ -93,10 +78,10 @@ body,
 body {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: var(--text-base);
+  font-size: var(--text-body);
   line-height: 1.5;
-  color: var(--color-text);
-  background: var(--color-page);
+  color: var(--text-primary);
+  background: var(--surface-page);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -105,29 +90,30 @@ h1,
 h2,
 h3,
 h4 {
-  margin: 0 0 var(--space-3);
+  margin: 0 0 var(--space-12);
   line-height: 1.25;
   text-wrap: balance;
-  color: var(--color-primary);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-tight);
 }
 
 h1 {
-  font-size: var(--text-2xl);
+  font-size: var(--text-page-title);
 }
 h2 {
-  font-size: var(--text-xl);
+  font-size: var(--text-section-title);
 }
 h3 {
-  font-size: var(--text-lg);
+  font-size: var(--text-card-title);
 }
 
 p {
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-16);
   max-width: 68ch;
 }
 
 a {
-  color: var(--color-primary);
+  color: var(--brand-primary);
 }
 
 button {
@@ -135,31 +121,51 @@ button {
 }
 
 /*
- * Accessibility baseline (ARCHITECTURE.md §9).
+ * Every score, count, date and identifier lines up column to column (§3.2).
+ */
+input[type='number'],
+input[type='date'],
+time,
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Risk codes are data, not prose — one of the system's two liberties (§3.2). */
+.code {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/*
+ * Accessibility baseline (ARCHITECTURE.md §9, CR-005 §3.5).
  * Keyboard focus must always be visible; colour alone never carries meaning.
  */
 :focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: 2px solid var(--brand-primary-ring);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-cell);
 }
 
 /* Visible only when focused — the first tab stop on every page. */
 .skip-link {
   position: absolute;
-  left: var(--space-4);
-  top: -4rem;
-  z-index: 100;
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-accent);
-  color: var(--color-primary);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-raised);
-  transition: top var(--transition-fast) ease;
+  inset-inline-start: var(--space-16);
+  inset-block-start: var(--space-16);
+  z-index: var(--layer-skip-link);
+  /* Parked off-screen by transform, not by `top` — §12.2 forbids animating
+     layout properties, and transform is composited. */
+  transform: translateY(-200%);
+  padding: var(--space-8) var(--space-16);
+  background: var(--surface);
+  color: var(--brand-primary);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-dropdown);
+  transition: transform var(--motion-state) var(--ease);
 }
 
 .skip-link:focus-visible {
-  top: var(--space-4);
+  transform: none;
 }
 
 .visually-hidden {
@@ -177,9 +183,8 @@ button {
 /* Wide content scrolls inside its own container, never the page body. */
 .scroll-x {
   overflow-x: auto;
-  /* Momentum plus a visible, thin scrollbar: table scrolling must be obvious. */
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border-strong) transparent;
+  scrollbar-color: var(--border-strong) transparent;
 }
 
 .scroll-x::-webkit-scrollbar {
@@ -187,118 +192,276 @@ button {
 }
 
 .scroll-x::-webkit-scrollbar-thumb {
-  background: var(--color-border-strong);
+  background: var(--border-strong);
   border-radius: var(--radius-pill);
 }
 
 /*
- * --- shared primitives -------------------------------------------------------
+ * --- buttons (§3.5) ----------------------------------------------------------
  *
- * One button and one pill definition for the whole module, so the Register,
- * the risk detail and the editor cannot drift apart.
+ * Nothing moves on hover: only colour, border and shadow respond.
  */
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  padding: 0.5rem var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-card);
-  color: var(--color-text);
-  font-size: var(--text-sm);
-  font-weight: 600;
+  gap: var(--space-8);
+  min-height: var(--hit-target);
+  padding: var(--space-8) var(--space-16);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: var(--text-dense);
+  font-weight: var(--weight-semibold);
   line-height: 1.4;
   white-space: nowrap;
   cursor: pointer;
-  transition: background var(--transition-fast) ease, border-color var(--transition-fast) ease;
+  transition:
+    background-color var(--motion-state) var(--ease),
+    border-color var(--motion-state) var(--ease),
+    color var(--motion-state) var(--ease);
 }
 
+/* Secondary: border strengthens, background sinks. */
 .btn:hover {
-  background: var(--color-hover);
+  background: var(--surface-sunken);
+  border-color: var(--border-strong);
+}
+
+.btn:active,
+.btn[aria-pressed='true'] {
+  background: var(--brand-primary-soft);
 }
 
 .btn--primary {
-  border-color: var(--color-primary);
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+  color: var(--text-on-dark);
 }
 
 .btn--primary:hover {
-  background: var(--color-primary-hover);
+  background: var(--brand-primary-hover);
+  border-color: var(--brand-primary-hover);
 }
 
-.btn--primary:disabled {
-  opacity: 0.6;
-  cursor: progress;
+.btn--primary:active {
+  background: var(--brand-primary-active);
+  border-color: var(--brand-primary-active);
 }
 
 .btn--ghost {
   border-color: transparent;
   background: transparent;
-  color: var(--color-text-muted);
+  color: var(--text-secondary);
 }
 
 .btn--ghost:hover {
-  background: var(--color-hover);
-  color: var(--color-text);
-}
-
-.btn--icon {
-  padding: 0.35rem;
-  min-width: 2rem;
+  background: var(--surface-sunken);
   border-color: transparent;
-  background: transparent;
-  color: var(--color-text-muted);
-}
-
-.btn--icon:hover {
-  background: var(--color-hover);
-  color: var(--color-text);
+  color: var(--text-primary);
 }
 
 .btn--danger:hover {
-  color: var(--color-danger);
+  color: var(--danger);
+  border-color: var(--danger);
 }
 
-/* Status / meta pill. Never the only carrier of meaning — text is always shown. */
+/* Icon button: circular sunken background on hover (§3.5). */
+.btn--icon {
+  min-width: var(--hit-target);
+  padding: var(--space-16);
+  border-color: transparent;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.btn--icon:hover {
+  background: var(--surface-sunken);
+  border-color: transparent;
+  color: var(--text-primary);
+}
+
+.btn--icon[aria-pressed='true'] {
+  background: var(--brand-primary-soft);
+}
+
+/* Disabled: 40% opacity, no hover, no pointer (§3.5). */
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.btn--primary:disabled:hover {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+
+/*
+ * --- form controls (§3.5, §3.6) ----------------------------------------------
+ *
+ * Native selects and date inputs are given the same shell as text inputs so a
+ * form never mixes a custom control with a raw browser one.
+ */
+
+.field-control,
+.editor-panel input,
+.editor-panel select,
+.editor-panel textarea,
+.dash-filters select,
+.dash-filters input,
+.register-filters select,
+.admin-form input,
+.admin-form select,
+.admin-form textarea,
+.admin-criteria input,
+.admin-criteria textarea,
+.admin-levels__row input:not([type='color']),
+.admin-matrix__scale input,
+.matrix-editor select,
+.saved-views__save input,
+.register-toolbar__search input,
+.bilingual__control {
+  font: inherit;
+  font-size: var(--text-dense);
+  min-height: var(--hit-target);
+  padding: var(--space-8) var(--space-12);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text-primary);
+  transition:
+    border-color var(--motion-state) var(--ease);
+}
+
+.field-control:hover,
+.editor-panel input:hover,
+.editor-panel select:hover,
+.editor-panel textarea:hover,
+.dash-filters select:hover,
+.dash-filters input:hover,
+.register-filters select:hover,
+.admin-criteria input:hover,
+.admin-criteria textarea:hover,
+.matrix-editor select:hover,
+.bilingual__control:hover {
+  border-color: var(--border-strong);
+}
+
+.field-control:focus-visible,
+.editor-panel input:focus-visible,
+.editor-panel select:focus-visible,
+.editor-panel textarea:focus-visible,
+.dash-filters select:focus-visible,
+.dash-filters input:focus-visible,
+.register-filters select:focus-visible,
+.admin-criteria input:focus-visible,
+.admin-criteria textarea:focus-visible,
+.matrix-editor select:focus-visible,
+.bilingual__control:focus-visible {
+  border-color: var(--brand-primary);
+  outline-offset: 1px;
+}
+
+/* A styled chevron, so a closed select reads as one of our controls. */
+select.field-control,
+.editor-panel select,
+.dash-filters select,
+.register-filters select,
+.admin-form select,
+.matrix-editor select {
+  appearance: none;
+  padding-inline-end: var(--space-24);
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    right var(--space-12) center,
+    right var(--space-8) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+[aria-invalid='true'] {
+  border-color: var(--danger) !important;
+}
+
+/* Field label and helper text: one style everywhere (§3.6). */
+.field__label {
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+}
+
+.field__help {
+  font-size: var(--text-12);
+  color: var(--text-muted);
+}
+
+.field__error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  font-size: var(--text-12);
+  color: var(--danger);
+}
+
+/* --- badges and pills (§3.6) ------------------------------------------------ */
+
+/*
+ * One component, two variants. `soft` carries status and workflow in a tinted
+ * background with dark text; `solid` is reserved for score badges, which take
+ * their fill from the configured matrix.
+ */
 .pill {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: 0.15rem var(--space-2);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  line-height: 1.5;
+  gap: var(--space-16);
+  min-height: 1.25rem;
+  padding: 0 var(--space-8);
+  /* Transparent by default, so every variant is the same size. */
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+  line-height: 1.25rem;
   white-space: nowrap;
 }
 
+/*
+ * The neutral fill matches the sunken surface, which is also the zebra stripe
+ * of an even table row — an outline keeps it reading as a badge on both.
+ */
 .pill--neutral {
-  background: #eef0f8;
-  color: var(--color-primary);
+  border-color: var(--border);
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
 }
 
 .pill--info {
-  background: #e6edfb;
-  color: #1c3f8f;
+  background: var(--info-soft);
+  color: var(--brand-primary);
 }
 
 .pill--warn {
-  background: var(--color-warning-surface);
-  color: #8a5a00;
+  background: var(--warning-soft);
+  color: var(--warning);
 }
 
 .pill--danger {
-  background: var(--color-danger-surface);
-  color: var(--color-danger);
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
 .pill--success {
-  background: #e4f6ea;
-  color: #1a6c38;
+  background: var(--success-soft);
+  color: var(--success);
 }
 
 /* Initials avatar. Decorative — the name is always rendered beside it. */
@@ -309,42 +472,87 @@ button {
   width: 1.75rem;
   height: 1.75rem;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  background: var(--brand-primary);
+  color: var(--text-on-dark);
+  font-size: var(--text-11);
+  font-weight: var(--weight-semibold);
 }
 
 .avatar--rail {
-  background: var(--color-rail-active);
+  background: var(--brand-primary);
 }
 
-/* Icon-based empty state, used wherever a collection is empty. */
+/* --- empty state (§3.6) ----------------------------------------------------- */
+
 .empty-state {
   display: grid;
   justify-items: center;
-  gap: var(--space-2);
-  padding: var(--space-6) var(--space-4);
-  color: var(--color-text-muted);
+  gap: var(--space-8);
+  padding: var(--space-32) var(--space-16);
+  color: var(--text-muted);
   text-align: center;
 }
 
 .empty-state__icon {
   display: grid;
   place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text-subtle);
+  width: var(--space-40);
+  height: var(--space-40);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  color: var(--text-muted);
+}
+
+.empty-state__title {
+  margin: 0;
+  font-size: var(--text-16);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .empty-state p {
   margin: 0;
-  font-size: var(--text-sm);
+  max-width: 42ch;
+  font-size: var(--text-dense);
 }
 
+.empty-state--inline {
+  padding: var(--space-16);
+}
+
+/* --- skeleton (§3.5) -------------------------------------------------------- */
+
+.skeleton {
+  border-radius: var(--radius-card);
+  background: linear-gradient(
+    90deg,
+    var(--surface-sunken),
+    var(--brand-primary-soft),
+    var(--surface-sunken)
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer var(--motion-skeleton) var(--ease) infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/*
+ * prefers-reduced-motion is a requirement (§3.4). The duration tokens are
+ * already zeroed; this also stops keyframe animations.
+ */
+/*
+ * The reduced-motion reset is prescribed verbatim by Uplift §7.1. The 0.01ms
+ * values are the standard idiom — they keep transitionend/animationend firing
+ * where handlers depend on it, which `0s` would not.
+ */
+/* stylelint-disable declaration-property-value-disallowed-list */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -354,4 +562,78 @@ button {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+/* stylelint-enable declaration-property-value-disallowed-list */
+
+/* --- bilingual field group -------------------------------------------------
+ *
+ * One row per label pair: shared caption, EN / KA switch, one control. Used
+ * across Administration wherever a master-data label carries both languages.
+ */
+
+.bilingual {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.bilingual__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  min-height: 1.5rem;
+}
+
+.bilingual__caption {
+  font-size: var(--text-12);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.bilingual__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-sunken);
+}
+
+.bilingual__seg {
+  padding: 1px var(--space-8);
+  border: 0;
+  border-radius: var(--radius-cell);
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--text-11);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--motion-state) var(--ease), color var(--motion-state) var(--ease);
+}
+
+:lang(en) .bilingual__seg {
+  letter-spacing: 0.04em;
+}
+
+.bilingual__seg:hover {
+  color: var(--text-primary);
+}
+
+.bilingual__seg[aria-pressed='true'] {
+  background: var(--brand-primary);
+  color: var(--text-on-dark);
+}
+
+/* Sizing only — the shell comes from the shared form-control rule above. */
+.bilingual__control {
+  width: 100%;
+  min-width: 0;
+  resize: vertical;
+}
+
+.bilingual__control[aria-invalid='true'] {
+  border-color: var(--danger);
 }

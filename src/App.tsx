@@ -1,5 +1,6 @@
 import { BrowserRouter } from 'react-router-dom'
 import { AppDataProvider } from './data/app-data-provider.tsx'
+import { DocumentLanguage } from './app/layout/document-language.tsx'
 import { AppRoutes } from './app/routes.tsx'
 import { SessionBootstrap } from './app/session/session-bootstrap.tsx'
 
@@ -14,6 +15,8 @@ export default function App() {
   return (
     <AppDataProvider>
       <SessionBootstrap>
+        {/* Publishes the active language to <html lang> for a11y and :lang(). */}
+        <DocumentLanguage />
         <BrowserRouter>
           <AppRoutes />
         </BrowserRouter>

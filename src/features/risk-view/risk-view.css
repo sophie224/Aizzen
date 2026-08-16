@@ -2,20 +2,20 @@
 
 .risk-view {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-16);
 }
 
 .risk-view__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-16);
 }
 
 .risk-view__back {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-4);
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text-muted);
@@ -40,21 +40,24 @@
 .risk-hero__band {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
+  gap: var(--space-16);
+  padding: var(--space-16) var(--space-24);
   background: var(--color-primary);
   color: var(--color-accent);
 }
 
 .risk-hero__code {
   flex: none;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-8) var(--space-12);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.12);
+  background: color-mix(in oklab, var(--surface) 12%, transparent);
   font-size: var(--text-sm);
   font-weight: 700;
-  letter-spacing: 0.08em;
   font-variant-numeric: tabular-nums;
+}
+
+:lang(en) .risk-hero__code {
+  letter-spacing: 0.08em;
 }
 
 .risk-hero__identity {
@@ -71,42 +74,50 @@
 .risk-hero__context {
   margin: 2px 0 0;
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.72);
+  color: color-mix(in oklab, var(--surface) 72%, transparent);
 }
 
 .risk-hero__status {
   flex: none;
-  background: rgba(255, 255, 255, 0.92);
+  background: color-mix(in oklab, var(--surface) 92%, transparent);
 }
 
 /* KPI strip: one grid, so the columns line up with the band above them. */
+/*
+ * Sized so the score badge — the same badge, at the same size, as the register
+ * uses — fits a cell without shrinking. Six cells no longer fit on one row at
+ * this width, so the strip reflows rather than squeezing the badge.
+ */
 .risk-hero__kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(14.5rem, 1fr));
   gap: 0;
   margin: 0;
   background: var(--color-card);
 }
 
 .risk-hero__kpi {
-  padding: var(--space-3) var(--space-4);
-  border-top: 3px solid transparent;
-  border-left: 1px solid var(--color-border);
+  padding: var(--space-12) var(--space-16);
+  border-block-start: 3px solid transparent;
+  border-inline-start: 1px solid var(--color-border);
 }
 
 .risk-hero__kpi:first-child {
-  border-left: 0;
+  border-inline-start: 0;
 }
 
 .risk-hero__kpi dt {
   font-size: 0.625rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   color: var(--color-text-subtle);
 }
 
+:lang(en) .risk-hero__kpi dt {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .risk-hero__kpi dd {
-  margin: var(--space-1) 0 0;
+  margin: var(--space-4) 0 0;
   font-size: var(--text-sm);
   font-weight: 600;
 }
@@ -114,12 +125,12 @@
 .risk-hero__person {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-8);
 }
 
 .risk-hero__meta {
   display: block;
-  margin-top: 2px;
+  margin-block-start: 2px;
   font-size: var(--text-xs);
   font-weight: 400;
   color: var(--color-text-subtle);
@@ -128,27 +139,7 @@
 .risk-hero__kpi--score dd {
   display: grid;
   justify-items: start;
-  gap: var(--space-1);
-}
-
-.risk-hero__score-line {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-2);
-}
-
-.risk-hero__score {
-  font-size: var(--text-2xl);
-  line-height: 1;
-  font-weight: 700;
-  color: var(--color-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.risk-hero__breakdown {
-  font-size: var(--text-xs);
-  font-weight: 500;
-  color: var(--color-text-subtle);
+  gap: var(--space-4);
 }
 
 
@@ -171,7 +162,7 @@
 }
 
 .risk-view__tab {
-  padding: 0.4rem var(--space-4);
+  padding: 0.4rem var(--space-16);
   border: 0;
   border-radius: var(--radius-pill);
   background: transparent;
@@ -195,21 +186,21 @@
 
 .risk-view__stack {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-16);
 }
 
 /* 2/3 + 1/3, collapsing to one column when the third would be too narrow. */
 .risk-view__split {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(17rem, 1fr);
-  gap: var(--space-4);
+  gap: var(--space-16);
   align-items: start;
 }
 
 .risk-view__assessments {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-4);
+  gap: var(--space-16);
 }
 
 .risk-view__panel h2 {
@@ -223,8 +214,8 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
+  gap: var(--space-12);
+  margin-block-end: var(--space-12);
 }
 
 .risk-view__card-head h2,
@@ -242,17 +233,20 @@
 /* --- structured description ------------------------------------------------ */
 
 .risk-structured__description {
-  padding-bottom: var(--space-3);
-  margin-bottom: var(--space-3);
-  border-bottom: 1px solid var(--color-border);
+  padding-block-end: var(--space-12);
+  margin-block-end: var(--space-12);
+  border-block-end: 1px solid var(--color-border);
 }
 
 .risk-structured__description h3 {
-  margin: 0 0 var(--space-1);
+  margin: 0 0 var(--space-4);
   font-size: var(--text-xs);
+  color: var(--color-text-subtle);
+}
+
+:lang(en) .risk-structured__description h3 {
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--color-text-subtle);
 }
 
 .risk-structured__description p {
@@ -271,11 +265,11 @@
 .risk-structured__cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-  gap: var(--space-3);
+  gap: var(--space-12);
 }
 
 .risk-structured__card {
-  padding: var(--space-3);
+  padding: var(--space-12);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-page);
@@ -285,12 +279,15 @@
   display: block;
   font-size: var(--text-xs);
   font-weight: 700;
-  letter-spacing: 0.1em;
   color: var(--color-text-subtle);
 }
 
+:lang(en) .risk-structured__step {
+  letter-spacing: 0.1em;
+}
+
 .risk-structured__card h3 {
-  margin: var(--space-2) 0 var(--space-1);
+  margin: var(--space-8) 0 var(--space-4);
   font-size: var(--text-sm);
   color: var(--color-primary);
 }
@@ -304,7 +301,7 @@
 /* --- status narrative panel ------------------------------------------------ */
 
 .risk-narrative__body {
-  margin: 0 0 var(--space-3);
+  margin: 0 0 var(--space-12);
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
@@ -312,16 +309,16 @@
 .risk-narrative__chips {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--color-border);
+  gap: var(--space-8);
+  padding-block-end: var(--space-12);
+  border-block-end: 1px solid var(--color-border);
 }
 
 .signal-chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: 0.15rem var(--space-2);
+  gap: var(--space-4);
+  padding: 0.15rem var(--space-8);
   border-radius: var(--radius-sm);
   background: var(--color-page);
   font-size: var(--text-xs);
@@ -330,7 +327,7 @@
 }
 
 .signal-chip--down {
-  color: #1a6c38;
+  color: var(--success);
 }
 
 .signal-chip--up {
@@ -343,15 +340,15 @@
 
 .risk-narrative__facts {
   display: grid;
-  gap: var(--space-2);
-  margin: var(--space-3) 0 0;
+  gap: var(--space-8);
+  margin: var(--space-12) 0 0;
 }
 
 .risk-narrative__facts div {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-12);
 }
 
 .risk-narrative__facts dt {
@@ -371,19 +368,22 @@
 .risk-view__facts {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: var(--space-3);
+  gap: var(--space-12);
   margin: 0;
 }
 
 .risk-view__facts dt {
   font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: var(--color-text-subtle);
 }
 
+:lang(en) .risk-view__facts dt {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .risk-view__facts dd {
-  margin: var(--space-1) 0 0;
+  margin: var(--space-4) 0 0;
   font-weight: 600;
 }
 
@@ -392,7 +392,7 @@
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-12);
 }
 
 .risk-view__control-summary li {
@@ -408,18 +408,21 @@
 .risk-view__table th,
 .risk-view__table td {
   text-align: left;
-  padding: var(--space-2) var(--space-3);
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-8) var(--space-12);
+  border-block-end: 1px solid var(--color-border);
   vertical-align: top;
   font-size: var(--text-sm);
 }
 
 .risk-view__table thead th {
   font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: var(--color-text-subtle);
   white-space: nowrap;
+}
+
+:lang(en) .risk-view__table thead th {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .risk-view__audit-summary {
@@ -436,7 +439,7 @@
 
 .risk-view__changes {
   margin: 0;
-  padding-left: var(--space-4);
+  padding-inline-start: var(--space-16);
 }
 
 /* --- assessment cards ------------------------------------------------------ */
@@ -445,28 +448,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
+  gap: var(--space-8);
 }
 
 .assessment-card__head h2 {
   margin: 0;
   font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   color: var(--color-text-subtle);
 }
 
-.assessment-card__score {
-  margin: var(--space-2) 0 0;
-  font-size: var(--text-2xl);
-  font-weight: 700;
-  line-height: 1;
-  color: var(--color-primary);
-  font-variant-numeric: tabular-nums;
+:lang(en) .assessment-card__head h2 {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .assessment-card__descriptor {
-  margin: var(--space-1) 0 var(--space-3);
+  margin: var(--space-8) 0 var(--space-12);
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
@@ -477,14 +474,17 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-4);
 }
 
 .matrix__axis {
   font-size: 0.5625rem;
+  color: var(--color-text-subtle);
+}
+
+:lang(en) .matrix__axis {
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-text-subtle);
 }
 
 .matrix__axis--impact {
@@ -515,7 +515,7 @@
 
 .assessment-matrix__cell {
   height: 1.5rem;
-  border-radius: 3px;
+  border-radius: var(--radius-cell);
   text-align: center;
   vertical-align: middle;
   color: var(--color-surface-deep);
@@ -540,7 +540,7 @@
   height: 100%;
   min-height: 1.5rem;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--radius-cell);
   background: transparent;
   color: inherit;
   font: inherit;
@@ -554,8 +554,8 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
+  gap: var(--space-12);
+  margin-block-end: var(--space-12);
 }
 
 .matrix-guidance__head h2 {
@@ -565,7 +565,7 @@
 .matrix-guidance__scales {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  gap: var(--space-4);
+  gap: var(--space-16);
 }
 
 .matrix-guidance__scales dl {
@@ -575,17 +575,20 @@
 .matrix-guidance__scales dt {
   font-size: var(--text-xs);
   font-weight: 700;
+  color: var(--color-text-subtle);
+  margin-block-end: var(--space-8);
+}
+
+:lang(en) .matrix-guidance__scales dt {
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--color-text-subtle);
-  margin-bottom: var(--space-2);
 }
 
 .matrix-guidance__scales dd {
   display: flex;
   align-items: baseline;
-  gap: var(--space-2);
-  margin: 0 0 var(--space-1);
+  gap: var(--space-8);
+  margin: 0 0 var(--space-4);
   font-size: var(--text-sm);
 }
 
@@ -610,17 +613,13 @@
 .matrix-guidance__name {
   display: flex;
   align-items: baseline;
-  gap: var(--space-2);
+  gap: var(--space-8);
   flex-wrap: wrap;
 }
 
 .matrix-guidance__description {
   font-size: var(--text-xs);
   color: var(--color-text-subtle);
-}
-
-.matrix-guidance__scales dd {
-  align-items: start;
 }
 
 .matrix-guidance__probability {
@@ -632,9 +631,9 @@
   grid-column: 1 / -1;
   display: flex;
   align-items: flex-start;
-  gap: var(--space-2);
+  gap: var(--space-8);
   margin: 0;
-  padding: var(--space-3);
+  padding: var(--space-12);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-warning-surface);
@@ -645,13 +644,13 @@
 
 .matrix-guidance__note svg {
   flex: none;
-  margin-top: 2px;
+  margin-block-start: 2px;
 }
 
 .matrix-guidance--bar {
   display: grid;
-  gap: var(--space-1);
-  padding: var(--space-3);
+  gap: var(--space-4);
+  padding: var(--space-12);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-page);
@@ -660,7 +659,7 @@
 .matrix-guidance--bar .matrix-guidance__title {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-8);
   margin: 0;
   font-size: var(--text-sm);
   font-weight: 700;
@@ -688,7 +687,7 @@
 
 .trend-chart__data {
   width: auto;
-  margin-top: var(--space-3);
+  margin-block-start: var(--space-12);
   border-collapse: collapse;
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
@@ -696,8 +695,8 @@
 
 .trend-chart__data th,
 .trend-chart__data td {
-  padding: var(--space-1) var(--space-3);
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-4) var(--space-12);
+  border-block-end: 1px solid var(--color-border);
   text-align: left;
 }
 

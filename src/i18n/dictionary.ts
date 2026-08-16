@@ -164,6 +164,9 @@ export const dictionary = {
   'register.column.targetDate': { en: 'Target date', ka: 'სამიზნე თარიღი' },
   'register.column.custom': { en: 'Custom field', ka: 'მორგებული ველი' },
   'register.cell.noDescription': { en: 'No description.', ka: 'აღწერა არ არის.' },
+  'register.cell.more': { en: 'more', ka: 'მეტი' },
+  'register.cell.showDescription': { en: 'Show the full description', ka: 'სრული აღწერის ჩვენება' },
+  'register.cell.showActions': { en: 'Show the full action plan', ka: 'სრული სამოქმედო გეგმის ჩვენება' },
   'register.cell.noControls': { en: 'No controls documented.', ka: 'კონტროლები არ არის დოკუმენტირებული.' },
   'register.cell.noActions': { en: 'No action plan.', ka: 'ქმედებების გეგმა არ არის.' },
 

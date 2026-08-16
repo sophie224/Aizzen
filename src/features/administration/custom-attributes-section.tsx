@@ -10,6 +10,7 @@ import {
 import { ATTRIBUTE_TYPES } from '../../domain/types/enums.ts'
 import type { CustomAttribute } from '../../domain/types/index.ts'
 import { useTranslation, type TranslationKey } from '../../i18n/index.ts'
+import { BilingualField } from '../../ui/bilingual-field.tsx'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
 
 /*
@@ -154,25 +155,19 @@ export function CustomAttributesSection() {
           ) : null}
 
           <div className="admin-form">
-            <label>
-              <span>{t('admin.attr.labelEn')}</span>
-              <input
-                value={draft.labelEn}
-                aria-invalid={issues.some((issue) => issue.field === 'labelEn')}
-                onChange={(event) => {
-                  setDraft({ ...draft, labelEn: event.target.value })
-                }}
-              />
-            </label>
-            <label>
-              <span>{t('admin.attr.labelKa')}</span>
-              <input
-                value={draft.labelKa}
-                onChange={(event) => {
-                  setDraft({ ...draft, labelKa: event.target.value })
-                }}
-              />
-            </label>
+            <BilingualField
+              labelEn={t('admin.attr.labelEn')}
+              labelKa={t('admin.attr.labelKa')}
+              valueEn={draft.labelEn}
+              valueKa={draft.labelKa}
+              invalid={issues.some((issue) => issue.field === 'labelEn')}
+              onChangeEn={(value) => {
+                setDraft({ ...draft, labelEn: value })
+              }}
+              onChangeKa={(value) => {
+                setDraft({ ...draft, labelKa: value })
+              }}
+            />
             <label>
               <span>{t('admin.attr.type')}</span>
               <select

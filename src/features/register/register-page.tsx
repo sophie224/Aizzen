@@ -27,7 +27,8 @@ import {
 import { buildExportRows, toCsv, toSpreadsheetXml } from '../../domain/export/index.ts'
 import type { Risk, SavedView } from '../../domain/types/index.ts'
 import { useTranslation } from '../../i18n/index.ts'
-import { IconDownload, IconPlus } from '../../ui/icons.tsx'
+import { EmptyState } from '../../ui/empty-state.tsx'
+import { IconDownload, IconList, IconPlus } from '../../ui/icons.tsx'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
 import { RiskEditorModal } from '../risk-editor/risk-editor-modal.tsx'
 import { RegisterTable } from './register-table.tsx'
@@ -142,7 +143,7 @@ export function RegisterPage() {
     () => (state ? visibleRisks(context, state.risks) : []),
     [state, context],
   )
-console.log('scoped', scoped)
+
   const results = useMemo(() => {
     if (!state || !index) return []
     return queryRegister(
@@ -348,23 +349,31 @@ console.log('scoped', scoped)
        * assignments to "clear filters" they never set.
        */}
       {scoped.length === 0 ? (
-        <div className="panel panel--notice">
-          <h2>{t('register.empty.title')}</h2>
-          <p>{t('register.empty.body')}</p>
+        <div className="panel">
+          <EmptyState
+            icon={<IconList size={18} />}
+            title={t('register.empty.title')}
+            body={t('register.empty.body')}
+          />
         </div>
       ) : results.length === 0 ? (
-        <div className="panel panel--notice">
-          <h2>{t('register.noResults.title')}</h2>
-          <p>{t('register.noResults.body')}</p>
-          <button
-            type="button"
-            className="btn"
-            onClick={() => {
-              change({ search: EMPTY_QUERY.search, filters: {} })
-            }}
-          >
-            {t('register.filter.clear')}
-          </button>
+        <div className="panel">
+          <EmptyState
+            icon={<IconList size={18} />}
+            title={t('register.noResults.title')}
+            body={t('register.noResults.body')}
+            action={
+              <button
+                type="button"
+                className="btn btn--secondary"
+                onClick={() => {
+                  change({ search: EMPTY_QUERY.search, filters: {} })
+                }}
+              >
+                {t('register.filter.clear')}
+              </button>
+            }
+          />
         </div>
       ) : (
         <RegisterTable

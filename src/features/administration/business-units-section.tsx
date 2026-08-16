@@ -8,6 +8,7 @@ import {
 import { descendantIds, hierarchyPath } from '../../domain/business-units/index.ts'
 import type { BusinessUnit } from '../../domain/types/index.ts'
 import { pickNamed, useTranslation, type TranslationKey } from '../../i18n/index.ts'
+import { BilingualField } from '../../ui/bilingual-field.tsx'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
 
 /*
@@ -220,25 +221,19 @@ export function BusinessUnitsSection() {
                 }}
               />
             </label>
-            <label>
-              <span>{t('admin.bu.nameEn')}</span>
-              <input
-                value={draft.nameEn}
-                aria-invalid={issues.some((issue) => issue.field === 'nameEn')}
-                onChange={(event) => {
-                  setDraft({ ...draft, nameEn: event.target.value })
-                }}
-              />
-            </label>
-            <label>
-              <span>{t('admin.bu.nameKa')}</span>
-              <input
-                value={draft.nameKa}
-                onChange={(event) => {
-                  setDraft({ ...draft, nameKa: event.target.value })
-                }}
-              />
-            </label>
+            <BilingualField
+              labelEn={t('admin.bu.nameEn')}
+              labelKa={t('admin.bu.nameKa')}
+              valueEn={draft.nameEn}
+              valueKa={draft.nameKa}
+              invalid={issues.some((issue) => issue.field === 'nameEn')}
+              onChangeEn={(value) => {
+                setDraft({ ...draft, nameEn: value })
+              }}
+              onChangeKa={(value) => {
+                setDraft({ ...draft, nameKa: value })
+              }}
+            />
             <label>
               <span>{t('admin.bu.parent')}</span>
               <select

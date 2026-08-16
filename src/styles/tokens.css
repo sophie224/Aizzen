@@ -1,0 +1,189 @@
+/*
+ * AIZEN design tokens (CR-005 §3).
+ *
+ * THE single source of design values. Components reference these; no component
+ * may carry a literal hex, pixel radius or millisecond duration.
+ *
+ * The four RISK colours are deliberately absent here: they are injected at
+ * runtime from Administration → Rating matrix (CR-003) by the RiskPalette
+ * component in src/app/layout/risk-palette.tsx,
+ * so recolouring a rating level in administration moves every badge, matrix
+ * cell, rail and chart at once. This file only reserves their names.
+ */
+
+:root {
+  /* --- brand and surfaces (§3.1) ------------------------------------------ */
+  --brand-ink: #0d1128;
+  --brand-ink-hover: #161c3d;
+  --brand-primary: #1a2151;
+  --brand-primary-hover: #26306e;
+  --brand-primary-active: #141a40;
+  --brand-primary-ring: #3f4a93;
+  --brand-primary-soft: #e6e8f2;
+
+  --surface: #ffffff;
+  --surface-page: #f7f8fa;
+  --surface-sunken: #f0f2f6;
+  --border: #d3d8e2;
+  /* Border under hover/focus, derived from the same family. */
+  --border-strong: #aab2c4;
+
+  --text-primary: #1a2151;
+  --text-secondary: #5b6478;
+  --text-muted: #98a0b3;
+  --text-on-dark: #ffffff;
+
+  /* --- system semantics (§3.1) -------------------------------------------- */
+  --success: #0f7a4a;
+  --success-soft: #e6f3ec;
+  --warning: #9a5b00;
+  --warning-soft: #fbf0de;
+  --danger: #a81e1a;
+  --danger-soft: #f8e7e6;
+  --info: var(--brand-primary);
+  --info-soft: var(--brand-primary-soft);
+
+  /*
+   * --- risk colours, injected at runtime -----------------------------------
+   *
+   * Fallbacks are the 2026 defaults so a stylesheet is never broken before the
+   * configuration loads; the live values always win.
+   */
+  --risk-1: #00b050;
+  --risk-1-on: #0d1128;
+  --risk-1-soft: #e6f7ed;
+  --risk-1-border: #99d9b9;
+  --risk-2: #fff200;
+  --risk-2-on: #0d1128;
+  --risk-2-soft: #fffce6;
+  --risk-2-border: #fff999;
+  --risk-3: #ffb900;
+  --risk-3-on: #0d1128;
+  --risk-3-soft: #fff8e6;
+  --risk-3-border: #ffe399;
+  --risk-4: #f32121;
+  --risk-4-on: #ffffff;
+  --risk-4-soft: #fee9e9;
+  --risk-4-border: #fba6a6;
+
+  /*
+   * --- public site ---------------------------------------------------------
+   *
+   * The marketing pages carry two accents the product UI has no role for, plus
+   * the decorative traffic lights in the hero's mock browser frame. Declared
+   * here so no literal survives in a stylesheet (Uplift §4, §14).
+   */
+  --site-indigo: #5868b7;
+  --site-indigo-soft: #aeb8e5;
+  --site-violet: #7951a5;
+  --site-violet-soft: #f5edfb;
+  --site-chrome-red: #f07575;
+  --site-chrome-amber: #efbc55;
+  --site-chrome-green: #5bc780;
+
+  /* --- typography (§3.2) --------------------------------------------------- */
+  --font-sans: 'Inter', 'Noto Sans Georgian', 'BPG Nino Mtavruli', system-ui, -apple-system,
+    'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --text-11: 0.6875rem;
+  --text-12: 0.75rem;
+  --text-13: 0.8125rem;
+  --text-14: 0.875rem;
+  --text-16: 1rem;
+  --text-18: 1.125rem;
+  --text-22: 1.375rem;
+  --text-28: 1.75rem;
+  --text-34: 2.125rem;
+
+  /* Roles, so a component asks for its role rather than a size. */
+  --text-body: var(--text-14);
+  --text-dense: var(--text-13);
+  --text-card-title: var(--text-18);
+  --text-section-title: var(--text-22);
+  --text-page-title: var(--text-28);
+  --text-figure: var(--text-34);
+
+  --tracking-tight: -0.011em;
+  --tracking-eyebrow: 0.06em;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  /*
+   * --- spacing (§3.3) -------------------------------------------------------
+   *
+   * The 4px scale, named for the pixel value it carries so an arbitrary 7px or
+   * 13px has nowhere to hide.
+   */
+  --space-4: 0.25rem;
+  --space-8: 0.5rem;
+  --space-12: 0.75rem;
+  --space-16: 1rem;
+  --space-20: 1.25rem;
+  --space-24: 1.5rem;
+  --space-32: 2rem;
+  --space-40: 2.5rem;
+  --space-48: 3rem;
+  --space-64: 4rem;
+
+  /* --- radius (§3.3) ------------------------------------------------------- */
+  --radius-cell: 4px;
+  --radius-control: 6px;
+  --radius-card: 10px;
+  --radius-modal: 14px;
+  --radius-pill: 999px;
+
+  /* --- elevation: three levels, nothing else casts a shadow (§3.3) --------- */
+  --shadow-card: 0 1px 2px rgba(13, 17, 40, 0.06), 0 1px 3px rgba(13, 17, 40, 0.04);
+  --shadow-dropdown: 0 8px 24px rgba(13, 17, 40, 0.14);
+  --shadow-modal: 0 24px 64px rgba(13, 17, 40, 0.24);
+
+  /* --- motion (§3.4) ------------------------------------------------------- */
+  --ease: cubic-bezier(0.2, 0, 0.2, 1);
+  --motion-state: 120ms;
+  --motion-overlay: 180ms;
+  --motion-modal: 240ms;
+  /* Looping placeholder shimmer — the only animation the system runs. */
+  --motion-skeleton: 1400ms;
+
+  /*
+   * --- stacking (Uplift §5) -------------------------------------------------
+   *
+   * The ONLY place a stacking order is decided. No component may write a bare
+   * z-index. `raised` is for local layering inside a component's own
+   * positioning context; the rest are the global overlay order.
+   *
+   * Target state is zero z-index outside this block, with overlays promoted to
+   * the browser top layer via the Popover API and <dialog>. That migration
+   * touches focus management, so it is Phase 3 work — see the report.
+   */
+  --layer-raised: 1;
+  --layer-sticky: 2;
+  --layer-header: 10;
+  --layer-popover: 20;
+  --layer-modal: 30;
+  --layer-skip-link: 40;
+
+  /* --- layout -------------------------------------------------------------- */
+  --header-height: 4.25rem;
+  --sidebar-width: 14.5rem;
+  /* Minimum hit target for any interactive control (§Task 5). */
+  --hit-target: 2rem;
+
+  color-scheme: light;
+}
+
+/*
+ * prefers-reduced-motion is a REQUIREMENT, not an enhancement (§3.4). Zeroing
+ * the duration tokens disables every transition built on them at the source.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-state: 0ms;
+    --motion-overlay: 0ms;
+    --motion-modal: 0ms;
+    --motion-skeleton: 0ms;
+  }
+}

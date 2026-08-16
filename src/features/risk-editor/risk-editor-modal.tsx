@@ -11,7 +11,6 @@ import {
   type ValidationError,
 } from '../../domain/risk-editor/index.ts'
 import {
-  assess,
   impactDescription,
   impactOptionLabel,
   likelihoodDescription,
@@ -44,7 +43,7 @@ import { initialsOf } from '../../ui/initials.ts'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
 import { AssessmentMatrix } from '../risk-view/assessment-matrix.tsx'
 import { MatrixGuidance } from '../risk-view/matrix-guidance.tsx'
-import { RatingChip } from '../register/rating-chip.tsx'
+import { RatingChip } from '../../ui/rating-chip.tsx'
 import './risk-editor.css'
 
 /*
@@ -125,15 +124,15 @@ function RiskEditor({ risk, onClose, onSaved, state, user, context }: RiskEditor
     risk
       ? structuredClone(risk)
       : createDraftRisk({
-          currentUser: user,
-          users: state.users,
-          categories: state.categories,
-          businessUnits: state.businessUnits,
-          customAttributes: state.customAttributes,
-          risks: state.risks,
-          today: new Date().toISOString().slice(0, 10),
-          id: generateId('risk'),
-        }),
+        currentUser: user,
+        users: state.users,
+        categories: state.categories,
+        businessUnits: state.businessUnits,
+        customAttributes: state.customAttributes,
+        risks: state.risks,
+        today: new Date().toISOString().slice(0, 10),
+        id: generateId('risk'),
+      }),
   )
 
   /*
@@ -711,23 +710,34 @@ function RiskEditor({ risk, onClose, onSaved, state, user, context }: RiskEditor
           </p>
         ) : null}
 
+
         <footer className="editor-dialog__footer">
           {/* Live score summary: derived from the engine on every keystroke. */}
-          <p className="editor-summary" aria-label={t('editor.summary.flow')}>
-            {ASSESSMENTS.map((kind, position) => (
-              <span key={kind} className="editor-summary__item">
-                {position > 0 ? (
-                  <span className="editor-summary__arrow" aria-hidden="true">
-                    ›
+          {
+            activeTab === 'basic' ? (
+              <p className="editor-summary" aria-label={t('editor.summary.flow')}>
+                {ASSESSMENTS.map((kind, position) => (
+                  <span key={kind} className="editor-summary__item">
+                    {position > 0 ? (
+                      <span className="editor-summary__arrow" aria-hidden="true">
+                        ›
+                      </span>
+                    ) : null}
+                    <span className="editor-summary__label">
+                      {t(`editor.assessment.${kind}` as TranslationKey)}
+                    </span>
+                    {/* The shared score badge, so the footer matches the register. */}
+                    <RatingChip
+                      score={draft[kind]}
+                      matrix={state.matrix}
+                     
+                      label={t(`editor.assessment.${kind}` as TranslationKey)}
+                    />
                   </span>
-                ) : null}
-                <span className="editor-summary__label">
-                  {t(`editor.assessment.${kind}` as TranslationKey)}
-                </span>
-                <strong>{assess(draft[kind], state.matrix).score}</strong>
-              </span>
-            ))}
-          </p>
+                ))}
+              </p>
+            ) : null
+          }
 
           <div className="editor-dialog__buttons">
             {/* Cancel persists nothing — the draft is simply discarded. */}
@@ -772,7 +782,6 @@ function AssessmentColumn({
 }) {
   const { t, language } = useTranslation()
   const label = t(`editor.assessment.${kind}` as TranslationKey)
-  const view = assess(score, matrix)
 
   /*
    * Option text, axis names and descriptions all come from the saved matrix
@@ -792,9 +801,13 @@ function AssessmentColumn({
     <fieldset className="editor-assessment">
       <legend>
         <span className="editor-assessment__name">{label}</span>
-        <span className="editor-assessment__score">{view.score}</span>
-        <RatingChip score={score} matrix={matrix} variant="pill" label={label} />
       </legend>
+
+      {/*
+        * The badge sits inside the fieldset, not in the legend: at its full
+        * width it would overrun the fieldset border a legend is drawn on.
+        */}
+      <RatingChip score={score} matrix={matrix} label={label} />
 
       <div className="editor-assessment__selects">
         <label>

@@ -18,9 +18,9 @@
   grid-row: 1 / -1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-24);
   min-height: 0;
-  padding: var(--space-5) var(--space-3) var(--space-4);
+  padding: var(--space-24) var(--space-12) var(--space-16);
   background: var(--color-rail);
   color: var(--color-text-on-primary);
   overflow-y: auto;
@@ -29,8 +29,8 @@
 .rail__brand {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: 0 var(--space-2);
+  gap: var(--space-8);
+  padding: 0 var(--space-8);
   color: var(--color-accent);
   text-decoration: none;
 }
@@ -62,32 +62,38 @@
 .rail__brand-name {
   font-size: var(--text-lg);
   font-weight: 700;
-  letter-spacing: 0.14em;
   line-height: 1.1;
+}
+
+:lang(en) .rail__brand-name {
+  letter-spacing: 0.14em;
 }
 
 .rail__brand-line {
   font-size: 0.5625rem;
+  color: color-mix(in oklab, var(--surface) 55%, transparent);
+  overflow-wrap: anywhere;
+}
+
+:lang(en) .rail__brand-line {
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-  overflow-wrap: anywhere;
 }
 
 .rail__nav {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-4);
 }
 
 .rail__link,
 .rail__admin-link {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: 0.625rem var(--space-3);
+  gap: var(--space-12);
+  padding: 0.625rem var(--space-12);
   border-radius: var(--radius-md);
-  color: rgba(255, 255, 255, 0.78);
+  color: color-mix(in oklab, var(--surface) 78%, transparent);
   text-decoration: none;
   font-size: var(--text-sm);
   line-height: 1.3;
@@ -123,20 +129,20 @@
  * (ARCHITECTURE.md §9), so the rail pushes it to the end of the column.
  */
 .rail__foot {
-  margin-top: auto;
+  margin-block-start: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  padding-top: var(--space-4);
+  gap: var(--space-4);
+  padding-block-start: var(--space-16);
 }
 
 .rail__user {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-3);
-  padding: var(--space-2);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  gap: var(--space-8);
+  margin-block-start: var(--space-12);
+  padding: var(--space-8);
+  border-block-start: 1px solid color-mix(in oklab, var(--surface) 12%, transparent);
 }
 
 .rail__user-text {
@@ -160,18 +166,18 @@
 
 .rail__user-title {
   font-size: 0.6875rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: color-mix(in oklab, var(--surface) 55%, transparent);
 }
 
 .rail__signout {
   flex: none;
   display: grid;
   place-items: center;
-  padding: var(--space-1);
+  padding: var(--space-4);
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: rgba(255, 255, 255, 0.7);
+  color: color-mix(in oklab, var(--surface) 70%, transparent);
   cursor: pointer;
 }
 
@@ -188,10 +194,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding: 0 var(--space-6);
+  gap: var(--space-16);
+  padding: 0 var(--space-32);
   background: var(--color-topbar);
-  border-bottom: 1px solid var(--color-border);
+  border-block-end: 1px solid var(--color-border);
 }
 
 .topbar__identity {
@@ -214,7 +220,7 @@
 .topbar__actions {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-16);
 }
 
 .topbar__language {
@@ -229,12 +235,15 @@
 }
 
 .topbar__language-seg {
-  padding: 0.15rem var(--space-2);
+  padding: 0.15rem var(--space-8);
   border-radius: var(--radius-sm);
   font-size: var(--text-xs);
   font-weight: 700;
-  letter-spacing: 0.04em;
   color: var(--color-text-muted);
+}
+
+:lang(en) .topbar__language-seg {
+  letter-spacing: 0.04em;
 }
 
 .topbar__language-seg.is-active {
@@ -246,13 +255,16 @@
 .topbar__client {
   display: inline-flex;
   align-items: center;
-  padding: 0.35rem var(--space-5);
+  padding: 0.35rem var(--space-24);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   font-size: var(--text-xs);
   font-weight: 600;
-  letter-spacing: 0.12em;
   color: var(--color-text-muted);
+}
+
+:lang(en) .topbar__client {
+  letter-spacing: 0.12em;
 }
 
 .topbar__client-logo {
@@ -268,7 +280,7 @@
   grid-row: 2;
   min-width: 0;
   min-height: 0;
-  padding: var(--space-5) var(--space-6) var(--space-7);
+  padding: var(--space-24) var(--space-32) var(--space-48);
   overflow-y: auto;
 }
 
@@ -296,7 +308,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  padding: var(--space-5);
+  padding: var(--space-24);
 }
 
 .panel--notice {
@@ -326,21 +338,21 @@
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
+    gap: var(--space-8);
+    padding: var(--space-12) var(--space-16);
   }
 
   .rail__nav,
   .rail__foot {
     flex-direction: row;
     flex-wrap: wrap;
-    margin-top: 0;
-    padding-top: 0;
+    margin-block-start: 0;
+    padding-block-start: 0;
   }
 
   .rail__user {
-    margin-top: 0;
-    border-top: 0;
+    margin-block-start: 0;
+    border-block-start: 0;
   }
 
   .topbar,
@@ -354,6 +366,6 @@
 
   .shell__main {
     grid-row: 3;
-    padding: var(--space-4);
+    padding: var(--space-16);
   }
 }

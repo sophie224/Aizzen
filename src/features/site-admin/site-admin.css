@@ -2,14 +2,14 @@
 
 .site-fields {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-16);
 }
 
 .site-field {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-  gap: var(--space-3);
-  padding: var(--space-4);
+  gap: var(--space-12);
+  padding: var(--space-16);
   background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -19,7 +19,7 @@
 .site-list__item label {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-4);
 }
 
 .site-field label > span,
@@ -34,7 +34,7 @@
 .site-list__item select,
 .site-list__item textarea {
   font: inherit;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-8) var(--space-12);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
   background: var(--color-card);
@@ -48,18 +48,18 @@
 
 .site-list {
   list-style: none;
-  margin: var(--space-4) 0;
+  margin: var(--space-16) 0;
   padding: 0;
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-16);
 }
 
 .site-list__item {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  gap: var(--space-3);
+  gap: var(--space-12);
   align-items: end;
-  padding: var(--space-4);
+  padding: var(--space-16);
   background: var(--color-page);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -70,7 +70,7 @@
 }
 
 .site-list__item > button {
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-8) var(--space-12);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
   background: var(--color-card);

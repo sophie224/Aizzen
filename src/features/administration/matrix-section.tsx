@@ -24,6 +24,7 @@ import {
 import { SCALE_VALUES } from '../../domain/types/enums.ts'
 import type { RatingLabel, RatingMatrix, ScaleValue } from '../../domain/types/index.ts'
 import { useTranslation, type TranslationKey } from '../../i18n/index.ts'
+import { BilingualField } from '../../ui/bilingual-field.tsx'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
 
 /*
@@ -206,25 +207,19 @@ export function MatrixSection() {
 
       <fieldset className="admin-matrix__scale">
         <legend>{t('admin.matrix.scaleName')}</legend>
-        <label>
-          <span>{t('admin.matrix.scaleNameEn')}</span>
-          <input
-            value={matrix.scaleNameEn}
-            aria-invalid={errorFor('scaleName') !== undefined}
-            onChange={(event) => {
-              edit(setScaleName(matrix, 'en', event.target.value))
-            }}
-          />
-        </label>
-        <label>
-          <span>{t('admin.matrix.scaleNameKa')}</span>
-          <input
-            value={matrix.scaleNameKa}
-            onChange={(event) => {
-              edit(setScaleName(matrix, 'ka', event.target.value))
-            }}
-          />
-        </label>
+        <BilingualField
+          labelEn={t('admin.matrix.scaleNameEn')}
+          labelKa={t('admin.matrix.scaleNameKa')}
+          valueEn={matrix.scaleNameEn}
+          valueKa={matrix.scaleNameKa}
+          invalid={errorFor('scaleName') !== undefined}
+          onChangeEn={(value) => {
+            edit(setScaleName(matrix, 'en', value))
+          }}
+          onChangeKa={(value) => {
+            edit(setScaleName(matrix, 'ka', value))
+          }}
+        />
       </fieldset>
 
       {/* --- cells --------------------------------------------------------- */}
@@ -295,25 +290,19 @@ export function MatrixSection() {
         </legend>
         {levels.map((level) => (
           <div key={level.key} className="admin-levels__row">
-            <label>
-              <span>{t('admin.matrix.levelNameEn')}</span>
-              <input
-                value={level.nameEn}
-                aria-invalid={errorFor(`level.${level.key}.name`) !== undefined}
-                onChange={(event) => {
-                  edit(setRatingLevelName(matrix, level.key, 'en', event.target.value))
-                }}
-              />
-            </label>
-            <label>
-              <span>{t('admin.matrix.levelNameKa')}</span>
-              <input
-                value={level.nameKa}
-                onChange={(event) => {
-                  edit(setRatingLevelName(matrix, level.key, 'ka', event.target.value))
-                }}
-              />
-            </label>
+            <BilingualField
+              labelEn={t('admin.matrix.levelNameEn')}
+              labelKa={t('admin.matrix.levelNameKa')}
+              valueEn={level.nameEn}
+              valueKa={level.nameKa}
+              invalid={errorFor(`level.${level.key}.name`) !== undefined}
+              onChangeEn={(value) => {
+                edit(setRatingLevelName(matrix, level.key, 'en', value))
+              }}
+              onChangeKa={(value) => {
+                edit(setRatingLevelName(matrix, level.key, 'ka', value))
+              }}
+            />
             <label>
               <span>{t('admin.matrix.levelColor')}</span>
               <input
@@ -338,44 +327,35 @@ export function MatrixSection() {
           return (
             <div key={value} className="admin-criteria__row">
               <span className="admin-criteria__value">{value}</span>
-              <label>
-                <span>{t('admin.matrix.criterionNameEn')}</span>
-                <input
-                  value={label.en}
-                  aria-invalid={errorFor(`impact.${String(value)}.name`) !== undefined}
-                  onChange={(event) => {
-                    edit(setImpactLevel(matrix, value, { en: event.target.value }))
+              <BilingualField
+                labelEn={t('admin.matrix.criterionNameEn')}
+                labelKa={t('admin.matrix.criterionNameKa')}
+                valueEn={label.en}
+                valueKa={label.ka}
+                invalid={errorFor(`impact.${String(value)}.name`) !== undefined}
+                onChangeEn={(next) => {
+                  edit(setImpactLevel(matrix, value, { en: next }))
+                }}
+                onChangeKa={(next) => {
+                  edit(setImpactLevel(matrix, value, { ka: next }))
+                }}
+              />
+              <div className="admin-criteria__description">
+                <BilingualField
+                  multiline
+                  labelEn={t('admin.matrix.criterionDescriptionEn')}
+                  labelKa={t('admin.matrix.criterionDescriptionKa')}
+                  valueEn={label.descriptionEn}
+                  valueKa={label.descriptionKa}
+                  invalid={errorFor(`impact.${String(value)}.description`) !== undefined}
+                  onChangeEn={(next) => {
+                    edit(setImpactLevel(matrix, value, { descriptionEn: next }))
+                  }}
+                  onChangeKa={(next) => {
+                    edit(setImpactLevel(matrix, value, { descriptionKa: next }))
                   }}
                 />
-              </label>
-              <label>
-                <span>{t('admin.matrix.criterionNameKa')}</span>
-                <input
-                  value={label.ka}
-                  onChange={(event) => {
-                    edit(setImpactLevel(matrix, value, { ka: event.target.value }))
-                  }}
-                />
-              </label>
-              <label className="admin-criteria__description">
-                <span>{t('admin.matrix.criterionDescriptionEn')}</span>
-                <textarea
-                  value={label.descriptionEn}
-                  aria-invalid={errorFor(`impact.${String(value)}.description`) !== undefined}
-                  onChange={(event) => {
-                    edit(setImpactLevel(matrix, value, { descriptionEn: event.target.value }))
-                  }}
-                />
-              </label>
-              <label className="admin-criteria__description">
-                <span>{t('admin.matrix.criterionDescriptionKa')}</span>
-                <textarea
-                  value={label.descriptionKa}
-                  onChange={(event) => {
-                    edit(setImpactLevel(matrix, value, { descriptionKa: event.target.value }))
-                  }}
-                />
-              </label>
+              </div>
             </div>
           )
         })}
@@ -391,25 +371,19 @@ export function MatrixSection() {
           return (
             <div key={value} className="admin-criteria__row">
               <span className="admin-criteria__value">{value}</span>
-              <label>
-                <span>{t('admin.matrix.criterionNameEn')}</span>
-                <input
-                  value={label.en}
-                  aria-invalid={errorFor(`likelihood.${String(value)}.name`) !== undefined}
-                  onChange={(event) => {
-                    edit(setLikelihoodLevel(matrix, value, { en: event.target.value }))
-                  }}
-                />
-              </label>
-              <label>
-                <span>{t('admin.matrix.criterionNameKa')}</span>
-                <input
-                  value={label.ka}
-                  onChange={(event) => {
-                    edit(setLikelihoodLevel(matrix, value, { ka: event.target.value }))
-                  }}
-                />
-              </label>
+              <BilingualField
+                labelEn={t('admin.matrix.criterionNameEn')}
+                labelKa={t('admin.matrix.criterionNameKa')}
+                valueEn={label.en}
+                valueKa={label.ka}
+                invalid={errorFor(`likelihood.${String(value)}.name`) !== undefined}
+                onChangeEn={(next) => {
+                  edit(setLikelihoodLevel(matrix, value, { en: next }))
+                }}
+                onChangeKa={(next) => {
+                  edit(setLikelihoodLevel(matrix, value, { ka: next }))
+                }}
+              />
               <label className="admin-criteria__percent">
                 <span>{t('admin.matrix.percentFrom')}</span>
                 <input
@@ -442,43 +416,34 @@ export function MatrixSection() {
                   }}
                 />
               </label>
-              <label>
-                <span>{t('admin.matrix.textValueEn')}</span>
-                <input
-                  value={label.textEn}
-                  onChange={(event) => {
-                    edit(setLikelihoodLevel(matrix, value, { textEn: event.target.value }))
+              <BilingualField
+                labelEn={t('admin.matrix.textValueEn')}
+                labelKa={t('admin.matrix.textValueKa')}
+                valueEn={label.textEn}
+                valueKa={label.textKa}
+                onChangeEn={(next) => {
+                  edit(setLikelihoodLevel(matrix, value, { textEn: next }))
+                }}
+                onChangeKa={(next) => {
+                  edit(setLikelihoodLevel(matrix, value, { textKa: next }))
+                }}
+              />
+              <div className="admin-criteria__description">
+                <BilingualField
+                  multiline
+                  labelEn={t('admin.matrix.criterionDescriptionEn')}
+                  labelKa={t('admin.matrix.criterionDescriptionKa')}
+                  valueEn={label.descriptionEn}
+                  valueKa={label.descriptionKa}
+                  invalid={errorFor(`likelihood.${String(value)}.description`) !== undefined}
+                  onChangeEn={(next) => {
+                    edit(setLikelihoodLevel(matrix, value, { descriptionEn: next }))
+                  }}
+                  onChangeKa={(next) => {
+                    edit(setLikelihoodLevel(matrix, value, { descriptionKa: next }))
                   }}
                 />
-              </label>
-              <label>
-                <span>{t('admin.matrix.textValueKa')}</span>
-                <input
-                  value={label.textKa}
-                  onChange={(event) => {
-                    edit(setLikelihoodLevel(matrix, value, { textKa: event.target.value }))
-                  }}
-                />
-              </label>
-              <label className="admin-criteria__description">
-                <span>{t('admin.matrix.criterionDescriptionEn')}</span>
-                <textarea
-                  value={label.descriptionEn}
-                  aria-invalid={errorFor(`likelihood.${String(value)}.description`) !== undefined}
-                  onChange={(event) => {
-                    edit(setLikelihoodLevel(matrix, value, { descriptionEn: event.target.value }))
-                  }}
-                />
-              </label>
-              <label className="admin-criteria__description">
-                <span>{t('admin.matrix.criterionDescriptionKa')}</span>
-                <textarea
-                  value={label.descriptionKa}
-                  onChange={(event) => {
-                    edit(setLikelihoodLevel(matrix, value, { descriptionKa: event.target.value }))
-                  }}
-                />
-              </label>
+              </div>
             </div>
           )
         })}

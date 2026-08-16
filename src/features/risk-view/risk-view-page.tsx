@@ -13,7 +13,7 @@ import { IconChevronLeft, IconList, IconPencil, IconTrend } from '../../ui/icons
 import { initialsOf } from '../../ui/initials.ts'
 import { StatusPill } from '../../ui/status-pill.tsx'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
-import { RatingChip } from '../register/rating-chip.tsx'
+import { RatingChip } from '../../ui/rating-chip.tsx'
 import { RiskEditorModal } from '../risk-editor/risk-editor-modal.tsx'
 import { AssessmentMatrix } from './assessment-matrix.tsx'
 import { MatrixGuidance } from './matrix-guidance.tsx'
@@ -200,13 +200,9 @@ function ScoreKpi({
     <div className="risk-hero__kpi risk-hero__kpi--score" style={{ borderTopColor: view.color }}>
       <dt>{label}</dt>
       <dd>
-        <span className="risk-hero__score-line">
-          <span className="risk-hero__score">{view.score}</span>
-          <span className="risk-hero__breakdown">
-            {view.impact} × {view.likelihood}
-          </span>
-        </span>
-        <RatingChip score={risk[kind]} matrix={matrix} variant="pill" label={label} />
+        {/* One badge carries score, rating and I×L — the same one the register
+            uses, at the same size. */}
+        <RatingChip score={risk[kind]} matrix={matrix} label={label} />
       </dd>
     </div>
   )
@@ -527,9 +523,8 @@ function AssessmentTab({
             <article key={kind} className="panel assessment-card">
               <header className="assessment-card__head">
                 <h2>{label}</h2>
-                <RatingChip score={risk[kind]} matrix={matrix} variant="pill" label={label} />
               </header>
-              <p className="assessment-card__score">{view.score}</p>
+              <RatingChip score={risk[kind]} matrix={matrix} label={label} />
               <p className="assessment-card__descriptor">
                 {impactLabel(view.impact, matrix, language)} × {likelihoodLabel(view.likelihood, matrix, language)}
               </p>

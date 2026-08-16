@@ -10,15 +10,15 @@
  */
 
 .aizen-public-site {
-  --aizen-ink: #101638;
-  --aizen-navy: #1a2151;
-  --aizen-indigo: #5868b7;
-  --aizen-line: #e3e7f0;
-  --aizen-line-strong: #d3d9e8;
-  --aizen-muted: #697187;
+  --aizen-ink: var(--brand-ink);
+  --aizen-navy: var(--brand-primary);
+  --aizen-indigo: var(--site-indigo);
+  --aizen-line: var(--success-soft);
+  --aizen-line-strong: var(--border);
+  --aizen-muted: var(--text-secondary);
 
   min-height: 100vh;
-  background: #fff;
+  background: var(--surface);
   color: var(--aizen-ink);
   overflow-x: hidden;
 }
@@ -37,14 +37,17 @@
 
 .aizen-btn {
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--radius-card);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   font-weight: 750;
   white-space: nowrap;
-  transition: 0.18s ease;
+  transition:
+    background-color var(--motion-state) var(--ease),
+    border-color var(--motion-state) var(--ease),
+    color var(--motion-state) var(--ease);
   padding: 0 15px;
   height: 40px;
   text-decoration: none;
@@ -52,8 +55,7 @@
 }
 
 .aizen-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(15, 23, 55, 0.12);
+  box-shadow: 0 8px 18px color-mix(in oklab, var(--brand-ink) 12%, transparent);
 }
 
 .aizen-btn--sm {
@@ -70,17 +72,17 @@
 
 .aizen-btn--primary {
   background: var(--aizen-navy);
-  color: #fff;
+  color: var(--surface);
 }
 
 .aizen-btn--secondary {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--aizen-line-strong);
   color: var(--aizen-navy);
 }
 
 .aizen-btn--light {
-  background: #fff;
+  background: var(--surface);
   color: var(--aizen-ink);
 }
 
@@ -95,10 +97,10 @@
   justify-content: space-between;
   position: sticky;
   top: 0;
-  z-index: 90;
-  background: rgba(255, 255, 255, 0.9);
+  z-index: var(--layer-header);
+  background: color-mix(in oklab, var(--surface) 90%, transparent);
   backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(26, 33, 81, 0.08);
+  border-block-end: 1px solid color-mix(in oklab, var(--brand-ink) 8%, transparent);
 }
 
 .aizen-public-brand {
@@ -117,11 +119,11 @@
 .aizen-brand-mark {
   width: 42px;
   height: 42px;
-  border-radius: 13px;
+  border-radius: var(--radius-card);
   display: grid;
   place-items: center;
-  background: linear-gradient(145deg, #202a6a, #101638);
-  box-shadow: 0 9px 24px rgba(16, 22, 56, 0.18);
+  background: linear-gradient(145deg, var(--brand-primary-hover), var(--brand-ink));
+  box-shadow: 0 9px 24px color-mix(in oklab, var(--brand-ink) 18%, transparent);
   flex: none;
   overflow: hidden;
 }
@@ -136,7 +138,7 @@
 .aizen-brand-mark.large {
   width: 64px;
   height: 64px;
-  border-radius: 19px;
+  border-radius: var(--radius-modal);
 }
 
 .aizen-brand-mark.large img {
@@ -152,14 +154,20 @@
 
 .aizen-public-brand strong {
   font-size: 18px;
+}
+
+:lang(en) .aizen-public-brand strong {
   letter-spacing: 0.12em;
 }
 
 .aizen-public-brand small {
   font-size: 9px;
+  color: var(--text-secondary);
+  margin-block-start: 6px;
+}
+
+:lang(en) .aizen-public-brand small {
   letter-spacing: 0.2em;
-  color: #707993;
-  margin-top: 6px;
   text-transform: uppercase;
 }
 
@@ -167,24 +175,27 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .aizen-public-nav button {
   border: 0;
   background: transparent;
-  border-radius: 9px;
+  border-radius: var(--radius-card);
   padding: 10px 13px;
-  color: #545e76;
+  color: var(--text-secondary);
   font-weight: 730;
   font-size: 13px;
-  transition: 0.16s ease;
+  transition:
+    background-color var(--motion-state) var(--ease),
+    border-color var(--motion-state) var(--ease),
+    color var(--motion-state) var(--ease);
   cursor: pointer;
 }
 
 .aizen-public-nav button:hover,
 .aizen-public-nav button.active {
-  background: #f1f3f9;
+  background: var(--surface-sunken);
   color: var(--aizen-navy);
 }
 
@@ -198,15 +209,15 @@
   display: inline-flex;
   padding: 3px;
   border: 1px solid var(--aizen-line);
-  border-radius: 9px;
-  background: #fff;
-  margin-right: 4px;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  margin-inline-end: 4px;
 }
 
 .aizen-language-switch button {
   border: 0;
   background: transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   font-size: 11px;
   font-weight: 800;
   padding: 6px 8px;
@@ -216,15 +227,15 @@
 
 .aizen-language-switch button.active {
   background: var(--aizen-navy);
-  color: #fff;
+  color: var(--surface);
 }
 
 .aizen-signout {
   width: 35px;
   height: 35px;
   border: 1px solid var(--aizen-line);
-  background: #fff;
-  border-radius: 9px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   color: var(--aizen-navy);
   display: grid;
   place-items: center;
@@ -236,8 +247,8 @@
   width: 35px;
   height: 35px;
   border: 1px solid var(--aizen-line);
-  background: #fff;
-  border-radius: 9px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
   color: var(--aizen-navy);
   place-items: center;
   cursor: pointer;
@@ -254,8 +265,8 @@
   align-items: center;
   position: relative;
   background:
-    radial-gradient(circle at 94% 8%, rgba(88, 104, 183, 0.18), transparent 25%),
-    linear-gradient(180deg, #fbfcff, #f4f6fb);
+    radial-gradient(circle at 94% 8%, color-mix(in oklab, var(--brand-primary) 18%, transparent), transparent 25%),
+    linear-gradient(180deg, var(--surface), var(--surface-page));
 }
 
 .aizen-hero::before {
@@ -263,18 +274,18 @@
   position: absolute;
   width: 420px;
   height: 420px;
-  border: 1px solid rgba(26, 33, 81, 0.07);
-  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--brand-ink) 7%, transparent);
+  border-radius: var(--radius-pill);
   left: -270px;
   bottom: -180px;
   box-shadow:
-    0 0 0 65px rgba(26, 33, 81, 0.025),
-    0 0 0 130px rgba(26, 33, 81, 0.018);
+    0 0 0 65px color-mix(in oklab, var(--brand-ink) 2.5%, transparent),
+    0 0 0 130px color-mix(in oklab, var(--brand-ink) 1.8%, transparent);
 }
 
 .aizen-hero-copy {
   position: relative;
-  z-index: 2;
+  z-index: var(--layer-raised);
   max-width: 720px;
 }
 
@@ -282,46 +293,53 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid #d9deef;
-  background: rgba(255, 255, 255, 0.78);
-  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--surface) 78%, transparent);
+  border-radius: var(--radius-pill);
   padding: 7px 12px 7px 9px;
-  margin-bottom: 24px;
-  box-shadow: 0 7px 20px rgba(37, 48, 99, 0.05);
+  margin-block-end: 24px;
+  box-shadow: 0 7px 20px color-mix(in oklab, var(--brand-ink) 5%, transparent);
 }
 
 .aizen-availability > span {
   width: 9px;
   height: 9px;
-  border-radius: 50%;
-  background: #22a35a;
-  box-shadow: 0 0 0 4px rgba(34, 163, 90, 0.12);
+  border-radius: var(--radius-pill);
+  background: var(--success);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--brand-primary) 12%, transparent);
 }
 
 .aizen-availability b {
   font-size: 10px;
+  color: var(--success);
+}
+
+:lang(en) .aizen-availability b {
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #238348;
 }
 
 .aizen-availability em {
   font-style: normal;
   font-size: 11px;
-  color: #69728a;
-  border-left: 1px solid #dce1ed;
-  padding-left: 8px;
+  color: var(--text-secondary);
+  border-inline-start: 1px solid var(--border);
+  padding-inline-start: 8px;
 }
 
 .aizen-kicker,
 .aizen-section-label {
   font-size: 11px;
   font-weight: 850;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #626faa;
+  color: var(--site-indigo);
   margin: 0 0 17px;
   display: block;
+}
+
+:lang(en) .aizen-kicker,
+:lang(en) .aizen-section-label {
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .aizen-hero h1 {
@@ -336,7 +354,7 @@
 .aizen-hero-description {
   font-size: clamp(16px, 1.5vw, 20px);
   line-height: 1.72;
-  color: #5d667d;
+  color: var(--text-secondary);
   max-width: 700px;
   margin: 0 0 30px;
 }
@@ -348,43 +366,43 @@
 }
 
 .aizen-hero-actions .aizen-btn--secondary {
-  background: rgba(255, 255, 255, 0.8);
+  background: color-mix(in oklab, var(--surface) 80%, transparent);
 }
 
 .aizen-proof-row {
   display: flex;
   gap: 19px;
   flex-wrap: wrap;
-  margin-top: 29px;
+  margin-block-start: 29px;
 }
 
 .aizen-proof-row span {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #626b81;
+  color: var(--text-secondary);
   font-size: 11px;
   font-weight: 700;
 }
 
 .aizen-proof-row svg {
-  color: #5968af;
+  color: var(--site-indigo);
 }
 
 /* --- hero carousel -------------------------------------------------------- */
 
 .aizen-hero-visual {
   position: relative;
-  border: 1px solid rgba(26, 33, 81, 0.13);
-  border-radius: 24px;
-  background: #fff;
+  border: 1px solid color-mix(in oklab, var(--brand-ink) 13%, transparent);
+  border-radius: var(--radius-modal);
+  background: var(--surface);
   padding: 40px 12px 12px;
   box-shadow:
-    0 35px 80px rgba(25, 34, 78, 0.15),
-    0 8px 20px rgba(25, 34, 78, 0.08);
+    0 35px 80px color-mix(in oklab, var(--brand-ink) 15%, transparent),
+    0 8px 20px color-mix(in oklab, var(--brand-ink) 8%, transparent);
   transform: perspective(1500px) rotateY(-4deg) rotateX(1deg);
   transform-origin: center;
-  z-index: 2;
+  z-index: var(--layer-raised);
 }
 
 .aizen-browser-chrome {
@@ -396,29 +414,34 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #8c94a9;
+  color: var(--text-muted);
   font-size: 9px;
 }
 
 .aizen-browser-chrome i {
   width: 7px;
   height: 7px;
-  border-radius: 50%;
-  background: #d2d7e4;
+  border-radius: var(--radius-pill);
+  background: var(--border);
 }
 
+/*
+ * Traffic lights in the mock browser frame. Purely decorative — they carry no
+ * status meaning, so they use their own tokens rather than the semantic
+ * success / warning / danger roles.
+ */
 .aizen-browser-chrome i:nth-child(1) {
-  background: #f07575;
+  background: var(--site-chrome-red);
 }
 .aizen-browser-chrome i:nth-child(2) {
-  background: #efbc55;
+  background: var(--site-chrome-amber);
 }
 .aizen-browser-chrome i:nth-child(3) {
-  background: #5bc780;
+  background: var(--site-chrome-green);
 }
 
 .aizen-browser-chrome span {
-  margin-left: 7px;
+  margin-inline-start: 7px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -426,10 +449,10 @@
 
 .aizen-carousel-viewport {
   position: relative;
-  border-radius: 14px;
+  border-radius: var(--radius-modal);
   overflow: hidden;
   aspect-ratio: 16 / 9;
-  background: #eef1f8;
+  background: var(--surface-sunken);
 }
 
 .aizen-carousel-slide {
@@ -438,7 +461,7 @@
   margin: 0;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.5s ease;
+  transition: opacity var(--motion-modal) var(--ease);
 }
 
 .aizen-carousel-slide.active {
@@ -463,17 +486,17 @@
   gap: 11px;
   align-items: flex-start;
   padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(11, 15, 36, 0.82);
+  border-radius: var(--radius-modal);
+  background: color-mix(in oklab, var(--brand-ink) 82%, transparent);
   backdrop-filter: blur(10px);
-  color: #fff;
+  color: var(--surface);
 }
 
 .aizen-carousel-icon {
   width: 32px;
   height: 32px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-card);
+  background: color-mix(in oklab, var(--surface) 12%, transparent);
   display: grid;
   place-items: center;
   flex: none;
@@ -482,21 +505,24 @@
 .aizen-carousel-slide figcaption small {
   display: block;
   font-size: 9px;
+  color: color-mix(in oklab, var(--surface) 65%, transparent);
+}
+
+:lang(en) .aizen-carousel-slide figcaption small {
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.65);
 }
 
 .aizen-carousel-slide figcaption strong {
   display: block;
   font-size: 14px;
-  margin-top: 3px;
+  margin-block-start: 3px;
 }
 
 .aizen-carousel-slide figcaption p {
   margin: 4px 0 0;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.75);
+  color: color-mix(in oklab, var(--surface) 75%, transparent);
 }
 
 .aizen-carousel-arrow {
@@ -504,15 +530,15 @@
   top: calc(50% - 19px);
   width: 38px;
   height: 38px;
-  border-radius: 12px;
-  border: 1px solid rgba(26, 33, 81, 0.12);
-  background: rgba(255, 255, 255, 0.92);
+  border-radius: var(--radius-card);
+  border: 1px solid color-mix(in oklab, var(--brand-ink) 12%, transparent);
+  background: color-mix(in oklab, var(--surface) 92%, transparent);
   color: var(--aizen-navy);
   display: grid;
   place-items: center;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(19, 27, 66, 0.14);
-  z-index: 3;
+  box-shadow: 0 10px 24px color-mix(in oklab, var(--brand-ink) 14%, transparent);
+  z-index: var(--layer-sticky);
 }
 
 .aizen-carousel-arrow.previous {
@@ -532,7 +558,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  z-index: 3;
+  z-index: var(--layer-sticky);
 }
 
 .aizen-carousel-dots {
@@ -551,21 +577,27 @@
   display: block;
   width: 22px;
   height: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.45);
-  transition: 0.2s ease;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--surface) 45%, transparent);
+  transition:
+    background-color var(--motion-state) var(--ease),
+    border-color var(--motion-state) var(--ease),
+    color var(--motion-state) var(--ease);
 }
 
 .aizen-carousel-dots button.active span {
   width: 34px;
-  background: #fff;
+  background: var(--surface);
 }
 
 .aizen-carousel-counter {
   font-size: 9px;
   font-weight: 850;
+  color: color-mix(in oklab, var(--surface) 80%, transparent);
+}
+
+:lang(en) .aizen-carousel-counter {
   letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.8);
 }
 
 /* --- lifecycle strip ------------------------------------------------------ */
@@ -574,9 +606,9 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   padding: 0 clamp(24px, 5vw, 84px);
-  background: #fff;
-  border-top: 1px solid #edf0f6;
-  border-bottom: 1px solid #edf0f6;
+  background: var(--surface);
+  border-block-start: 1px solid var(--surface-sunken);
+  border-block-end: 1px solid var(--surface-sunken);
 }
 
 .aizen-lifecycle article {
@@ -585,27 +617,27 @@
   display: flex;
   align-items: flex-start;
   gap: 17px;
-  border-right: 1px solid #edf0f6;
+  border-inline-end: 1px solid var(--surface-sunken);
 }
 
 .aizen-lifecycle article:first-child {
-  border-left: 1px solid #edf0f6;
+  border-inline-start: 1px solid var(--surface-sunken);
 }
 
 .aizen-lifecycle b {
   font-size: 11px;
-  color: #7681ad;
-  margin-top: 3px;
+  color: var(--site-indigo);
+  margin-block-start: 3px;
 }
 
 .aizen-lifecycle strong {
   font-size: 15px;
-  color: #151b39;
+  color: var(--brand-ink);
 }
 
 .aizen-lifecycle p {
   font-size: 12px;
-  color: #737b8e;
+  color: var(--text-secondary);
   line-height: 1.55;
   margin: 7px 0 0;
 }
@@ -618,15 +650,18 @@
 
 .aizen-section-heading {
   max-width: 790px;
-  margin-bottom: 42px;
+  margin-block-end: 42px;
 }
 
 .aizen-section-heading > span {
   font-size: 10px;
   font-weight: 850;
+  color: var(--site-indigo);
+}
+
+:lang(en) .aizen-section-heading > span {
   letter-spacing: 0.17em;
   text-transform: uppercase;
-  color: #6876b4;
 }
 
 .aizen-section-heading h2,
@@ -651,7 +686,7 @@
 /* --- solutions ------------------------------------------------------------ */
 
 .aizen-solutions-section {
-  background: #fff;
+  background: var(--surface);
 }
 
 .aizen-solution-grid {
@@ -661,17 +696,20 @@
 }
 
 .aizen-solution-card {
-  --solution-accent: #5868b7;
+  --solution-accent: var(--site-indigo);
   position: relative;
-  border: 1px solid #e1e5ef;
-  border-radius: 22px;
+  border: 1px solid var(--success-soft);
+  border-radius: var(--radius-modal);
   padding: 25px;
-  background: linear-gradient(180deg, #fff, #fafbfe);
+  background: linear-gradient(180deg, var(--surface), var(--surface-page));
   min-height: 470px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: 0.2s ease;
+  transition:
+    background-color var(--motion-state) var(--ease),
+    border-color var(--motion-state) var(--ease),
+    color var(--motion-state) var(--ease);
 }
 
 .aizen-solution-card::before {
@@ -685,13 +723,12 @@
 }
 
 .aizen-solution-card.available:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 25px 55px rgba(31, 43, 94, 0.12);
-  border-color: #cbd2e5;
+  box-shadow: 0 25px 55px color-mix(in oklab, var(--brand-ink) 12%, transparent);
+  border-color: var(--border);
 }
 
 .aizen-solution-card.coming {
-  background: #f6f7fa;
+  background: var(--surface-page);
   filter: saturate(0.4);
   opacity: 0.72;
 }
@@ -705,29 +742,32 @@
 .aizen-solution-number {
   font-size: 10px;
   font-weight: 850;
-  color: #858da2;
+  color: var(--text-muted);
 }
 
 .aizen-solution-status {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 6px 9px;
   font-size: 8px;
   font-weight: 850;
+  background: var(--success-soft);
+  color: var(--text-secondary);
+}
+
+:lang(en) .aizen-solution-status {
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: #e7e9ef;
-  color: #70778a;
 }
 
 .aizen-solution-status.available {
-  background: #e7f7ed;
-  color: #238348;
+  background: var(--success-soft);
+  color: var(--success);
 }
 
 .aizen-solution-icon {
   width: 50px;
   height: 50px;
-  border-radius: 15px;
+  border-radius: var(--radius-modal);
   background: color-mix(in srgb, var(--solution-accent) 13%, white);
   color: var(--solution-accent);
   display: grid;
@@ -738,7 +778,7 @@
 .aizen-solution-card h3 {
   font-size: 25px;
   letter-spacing: -0.03em;
-  color: #131a39;
+  color: var(--brand-ink);
   margin: 0 0 11px;
 }
 
@@ -764,19 +804,19 @@
   align-items: flex-start;
   gap: 8px;
   font-size: 12px;
-  color: #555f78;
+  color: var(--text-secondary);
 }
 
 .aizen-solution-card li svg {
   color: var(--solution-accent);
-  margin-top: 1px;
+  margin-block-start: 1px;
   flex: none;
 }
 
 .aizen-solution-link {
-  margin-top: auto;
+  margin-block-start: auto;
   border: 0;
-  border-top: 1px solid #e5e8f0;
+  border-block-start: 1px solid var(--success-soft);
   background: transparent;
   padding: 18px 0 0;
   display: flex;
@@ -788,24 +828,27 @@
 }
 
 .aizen-coming-line {
-  margin-top: auto;
-  border-top: 1px solid #e0e3ea;
-  padding-top: 18px;
+  margin-block-start: auto;
+  border-block-start: 1px solid var(--border);
+  padding-block-start: 18px;
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 10px;
   font-weight: 850;
+  color: var(--text-muted);
+}
+
+:lang(en) .aizen-coming-line {
   text-transform: uppercase;
-  color: #858b9a;
   letter-spacing: 0.1em;
 }
 
 .aizen-coming-line span {
   width: 7px;
   height: 7px;
-  border-radius: 50%;
-  background: #9ca3b4;
+  border-radius: var(--radius-pill);
+  background: var(--text-muted);
 }
 
 /* --- demo ----------------------------------------------------------------- */
@@ -815,8 +858,8 @@
   grid-template-columns: minmax(330px, 0.72fr) minmax(520px, 1.28fr);
   gap: clamp(40px, 7vw, 110px);
   align-items: center;
-  background: linear-gradient(145deg, #0d1128, #182153);
-  color: #fff;
+  background: linear-gradient(145deg, var(--brand-ink), var(--brand-primary));
+  color: var(--surface);
   position: relative;
   overflow: hidden;
 }
@@ -826,30 +869,30 @@
   position: absolute;
   width: 430px;
   height: 430px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--surface) 7%, transparent);
+  border-radius: var(--radius-pill);
   right: -250px;
   top: -200px;
   box-shadow:
-    0 0 0 50px rgba(255, 255, 255, 0.025),
-    0 0 0 100px rgba(255, 255, 255, 0.018);
+    0 0 0 50px color-mix(in oklab, var(--surface) 2.5%, transparent),
+    0 0 0 100px color-mix(in oklab, var(--surface) 1.8%, transparent);
 }
 
 .aizen-demo-copy {
   position: relative;
-  z-index: 2;
+  z-index: var(--layer-raised);
 }
 
 .aizen-demo-copy .aizen-section-label {
-  color: #aeb8e5;
+  color: var(--site-indigo-soft);
 }
 
 .aizen-demo-copy h2 {
-  color: #fff;
+  color: var(--surface);
 }
 
 .aizen-demo-copy > p {
-  color: rgba(255, 255, 255, 0.7);
+  color: color-mix(in oklab, var(--surface) 70%, transparent);
 }
 
 .aizen-demo-list {
@@ -865,29 +908,29 @@
   gap: 12px;
   align-items: start;
   padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-block-end: 1px solid color-mix(in oklab, var(--surface) 10%, transparent);
 }
 
 .aizen-demo-list span {
   font-size: 9px;
-  color: #aeb8e5;
+  color: var(--site-indigo-soft);
   font-weight: 850;
 }
 
 .aizen-demo-list p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.82);
+  color: color-mix(in oklab, var(--surface) 82%, transparent);
   font-size: 12px;
 }
 
 .aizen-video-frame {
   position: relative;
-  z-index: 2;
-  background: #050817;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 22px;
+  z-index: var(--layer-raised);
+  background: var(--brand-ink);
+  border: 1px solid color-mix(in oklab, var(--surface) 16%, transparent);
+  border-radius: var(--radius-modal);
   overflow: hidden;
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 30px 70px color-mix(in oklab, var(--brand-ink) 35%, transparent);
   aspect-ratio: 16 / 9;
 }
 
@@ -898,7 +941,7 @@
   height: 100%;
   display: block;
   border: 0;
-  background: #050817;
+  background: var(--brand-ink);
   object-fit: cover;
 }
 
@@ -906,14 +949,14 @@
 
 .aizen-about-teaser {
   margin: 0 clamp(24px, 5vw, 84px) 70px;
-  border: 1px solid #dde3ef;
-  border-radius: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-modal);
   padding: clamp(30px, 4vw, 56px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 35px;
-  background: linear-gradient(135deg, #f7f9fd, #eef2fb);
+  background: linear-gradient(135deg, var(--surface-page), var(--surface-sunken));
   position: relative;
   overflow: hidden;
 }
@@ -923,8 +966,8 @@
   position: absolute;
   width: 260px;
   height: 260px;
-  border-radius: 50%;
-  border: 50px solid rgba(88, 104, 183, 0.06);
+  border-radius: var(--radius-pill);
+  border: 50px solid color-mix(in oklab, var(--brand-primary) 6%, transparent);
   right: -80px;
   bottom: -130px;
 }
@@ -932,7 +975,7 @@
 .aizen-about-teaser > div {
   max-width: 850px;
   position: relative;
-  z-index: 1;
+  z-index: var(--layer-raised);
   flex: 1;
 }
 
@@ -945,24 +988,24 @@
 }
 
 .aizen-about-teaser p {
-  color: #657087;
+  color: var(--text-secondary);
   line-height: 1.7;
   margin: 0;
 }
 
 .aizen-about-teaser > .aizen-btn {
   position: relative;
-  z-index: 1;
+  z-index: var(--layer-raised);
   flex: none;
   min-width: 180px;
 }
 
 .aizen-cta-section {
   margin: 0 clamp(24px, 5vw, 84px) 80px;
-  border-radius: 25px;
+  border-radius: var(--radius-modal);
   padding: 44px 48px;
-  background: linear-gradient(135deg, #f0f3fb, #fff);
-  border: 1px solid #dfe4ef;
+  background: linear-gradient(135deg, var(--surface-sunken), var(--surface));
+  border: 1px solid var(--success-soft);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -976,13 +1019,16 @@
 .aizen-cta-section > div:first-child > span {
   font-size: 9px;
   font-weight: 850;
+  color: var(--site-indigo);
+}
+
+:lang(en) .aizen-cta-section > div:first-child > span {
   letter-spacing: 0.17em;
-  color: #6774ae;
 }
 
 .aizen-cta-section h2 {
   font-size: clamp(28px, 3.4vw, 45px);
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 
 .aizen-cta-actions {
@@ -1001,8 +1047,8 @@
 .aizen-public-footer {
   min-height: 120px;
   padding: 30px clamp(24px, 5vw, 84px);
-  background: #0d1128;
-  color: #fff;
+  background: var(--brand-ink);
+  color: var(--surface);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1010,7 +1056,7 @@
 }
 
 .aizen-public-footer .aizen-public-brand {
-  color: #fff;
+  color: var(--surface);
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -1024,33 +1070,39 @@
 
 .aizen-public-footer .aizen-public-brand strong {
   font-size: 18px;
+}
+
+:lang(en) .aizen-public-footer .aizen-public-brand strong {
   letter-spacing: 0.12em;
 }
 
 .aizen-public-footer .aizen-public-brand small {
   font-size: 9px;
+  margin-block-start: 6px;
+  color: color-mix(in oklab, var(--surface) 55%, transparent);
+}
+
+:lang(en) .aizen-public-footer .aizen-public-brand small {
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  margin-top: 6px;
-  color: rgba(255, 255, 255, 0.55);
 }
 
 .aizen-public-footer p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.68);
+  color: color-mix(in oklab, var(--surface) 68%, transparent);
   font-size: 12px;
   text-align: center;
 }
 
 .aizen-public-footer > span {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.5);
+  color: color-mix(in oklab, var(--surface) 50%, transparent);
 }
 
 /* --- about page ----------------------------------------------------------- */
 
 .aizen-about-page {
-  background: #f5f7fb;
+  background: var(--surface-page);
 }
 
 .aizen-about-page main {
@@ -1064,8 +1116,8 @@
   gap: 70px;
   align-items: center;
   background:
-    radial-gradient(circle at 82% 20%, rgba(88, 104, 183, 0.2), transparent 32%),
-    linear-gradient(180deg, #fbfcff, #f0f3fa);
+    radial-gradient(circle at 82% 20%, color-mix(in oklab, var(--brand-primary) 20%, transparent), transparent 32%),
+    linear-gradient(180deg, var(--surface), var(--surface-sunken));
   position: relative;
 }
 
@@ -1074,18 +1126,18 @@
   position: absolute;
   width: 380px;
   height: 380px;
-  border: 1px solid rgba(26, 33, 81, 0.06);
-  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--brand-ink) 6%, transparent);
+  border-radius: var(--radius-pill);
   left: -230px;
   top: -180px;
   box-shadow:
-    0 0 0 65px rgba(26, 33, 81, 0.025),
-    0 0 0 130px rgba(26, 33, 81, 0.018);
+    0 0 0 65px color-mix(in oklab, var(--brand-ink) 2.5%, transparent),
+    0 0 0 130px color-mix(in oklab, var(--brand-ink) 1.8%, transparent);
 }
 
 .aizen-about-hero-copy {
   position: relative;
-  z-index: 1;
+  z-index: var(--layer-raised);
 }
 
 .aizen-about-hero h1 {
@@ -1099,21 +1151,21 @@
 .aizen-about-hero p {
   font-size: clamp(17px, 1.5vw, 21px);
   line-height: 1.75;
-  color: #5e687f;
+  color: var(--text-secondary);
   max-width: 900px;
   margin: 0;
 }
 
 .aizen-about-hero-mark {
   min-height: 340px;
-  border-radius: 30px;
-  background: linear-gradient(145deg, #1a2151, #0d1128);
-  color: #fff;
+  border-radius: var(--radius-modal);
+  background: linear-gradient(145deg, var(--brand-primary), var(--brand-ink));
+  color: var(--surface);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  box-shadow: 0 35px 80px rgba(18, 25, 64, 0.2);
+  box-shadow: 0 35px 80px color-mix(in oklab, var(--brand-ink) 20%, transparent);
   position: relative;
   overflow: hidden;
 }
@@ -1122,8 +1174,8 @@
 .aizen-about-hero-mark::after {
   content: '';
   position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in oklab, var(--surface) 10%, transparent);
 }
 
 .aizen-about-hero-mark::before {
@@ -1131,7 +1183,7 @@
   height: 300px;
   right: -170px;
   bottom: -150px;
-  box-shadow: 0 0 0 48px rgba(255, 255, 255, 0.025);
+  box-shadow: 0 0 0 48px color-mix(in oklab, var(--surface) 2.5%, transparent);
 }
 
 .aizen-about-hero-mark::after {
@@ -1144,10 +1196,10 @@
 .aizen-about-hero-mark .aizen-brand-mark {
   width: 86px;
   height: 86px;
-  border-radius: 25px;
-  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-modal);
+  background: color-mix(in oklab, var(--surface) 10%, transparent);
   box-shadow: none;
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  border: 1px solid color-mix(in oklab, var(--surface) 13%, transparent);
 }
 
 .aizen-about-hero-mark .aizen-brand-mark img {
@@ -1157,15 +1209,21 @@
 
 .aizen-about-hero-mark strong {
   font-size: 29px;
+  margin-block-start: 22px;
+}
+
+:lang(en) .aizen-about-hero-mark strong {
   letter-spacing: 0.18em;
-  margin-top: 22px;
 }
 
 .aizen-about-hero-mark small {
   font-size: 10px;
+  color: color-mix(in oklab, var(--surface) 60%, transparent);
+  margin-block-start: 9px;
+}
+
+:lang(en) .aizen-about-hero-mark small {
   letter-spacing: 0.23em;
-  color: rgba(255, 255, 255, 0.6);
-  margin-top: 9px;
   text-transform: uppercase;
 }
 
@@ -1174,23 +1232,25 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
-  background: #fff;
+  background: var(--surface);
 }
 
 .aizen-about-pillars article {
   position: relative;
-  border: 1px solid #e0e5ef;
-  border-radius: 22px;
+  border: 1px solid var(--success-soft);
+  border-radius: var(--radius-modal);
   padding: 28px 30px 30px;
-  background: linear-gradient(180deg, #fff, #fbfcff);
+  background: linear-gradient(180deg, var(--surface), var(--surface));
   min-height: 250px;
-  box-shadow: 0 10px 30px rgba(34, 47, 94, 0.045);
-  transition: 0.2s ease;
+  box-shadow: 0 10px 30px color-mix(in oklab, var(--brand-ink) 4.5%, transparent);
+  transition:
+    background-color var(--motion-state) var(--ease),
+    border-color var(--motion-state) var(--ease),
+    color var(--motion-state) var(--ease);
 }
 
 .aizen-about-pillars article:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 42px rgba(34, 47, 94, 0.09);
+  box-shadow: 0 18px 42px color-mix(in oklab, var(--brand-ink) 9%, transparent);
 }
 
 .aizen-about-pillars article > span {
@@ -1199,19 +1259,22 @@
   top: 22px;
   font-size: 10px;
   font-weight: 850;
-  color: #98a2ba;
+  color: var(--text-muted);
+}
+
+:lang(en) .aizen-about-pillars article > span {
   letter-spacing: 0.12em;
 }
 
 .aizen-about-pillar-icon {
   width: 48px;
   height: 48px;
-  border-radius: 15px;
-  background: #eef1fa;
+  border-radius: var(--radius-modal);
+  background: var(--surface-sunken);
   color: var(--aizen-indigo);
   display: grid;
   place-items: center;
-  margin-bottom: 24px;
+  margin-block-end: 24px;
 }
 
 .aizen-about-pillars h2 {
@@ -1223,28 +1286,28 @@
 .aizen-about-pillars p {
   font-size: 14px;
   line-height: 1.75;
-  color: #697288;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .aizen-about-pillars .pillar-people .aizen-about-pillar-icon {
-  background: #edf8f3;
-  color: #18865b;
+  background: var(--surface-sunken);
+  color: var(--success);
 }
 
 .aizen-about-pillars .pillar-clients .aizen-about-pillar-icon {
-  background: #fff6df;
-  color: #b47900;
+  background: var(--warning-soft);
+  color: var(--warning);
 }
 
 .aizen-about-pillars .pillar-vision .aizen-about-pillar-icon {
-  background: #f5edfb;
-  color: #7951a5;
+  background: var(--site-violet-soft);
+  color: var(--site-violet);
 }
 
 .aizen-about-team-section {
   padding: 85px clamp(24px, 7vw, 110px) 95px;
-  background: #f5f7fb;
+  background: var(--surface-page);
 }
 
 .aizen-team-heading {
@@ -1252,7 +1315,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 30px;
-  margin-bottom: 34px;
+  margin-block-end: 34px;
 }
 
 .aizen-team-heading > div {
@@ -1272,7 +1335,7 @@
   line-height: 1.7;
   max-width: 520px;
   margin: 0;
-  color: #747c91;
+  color: var(--text-secondary);
 }
 
 .aizen-team-grid {
@@ -1283,25 +1346,27 @@
 }
 
 .aizen-team-card {
-  border: 1px solid #dfe4ef;
-  border-radius: 19px;
-  background: #fff;
+  border: 1px solid var(--success-soft);
+  border-radius: var(--radius-modal);
+  background: var(--surface);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 100%;
-  box-shadow: 0 10px 28px rgba(34, 47, 94, 0.045);
-  transition: 0.2s ease;
+  box-shadow: 0 10px 28px color-mix(in oklab, var(--brand-ink) 4.5%, transparent);
+  transition:
+    background-color var(--motion-state) var(--ease),
+    border-color var(--motion-state) var(--ease),
+    color var(--motion-state) var(--ease);
 }
 
 .aizen-team-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 40px rgba(34, 47, 94, 0.1);
+  box-shadow: 0 18px 40px color-mix(in oklab, var(--brand-ink) 10%, transparent);
 }
 
 .aizen-team-photo {
   aspect-ratio: 4 / 3;
-  background: linear-gradient(145deg, #e9edf7, #cfd7ed);
+  background: linear-gradient(145deg, var(--surface-sunken), var(--border));
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -1317,11 +1382,11 @@
 .aizen-team-photo > span {
   width: 82px;
   height: 82px;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
   background: var(--aizen-navy);
-  color: #fff;
+  color: var(--surface);
   font-size: 25px;
   font-weight: 800;
 }
@@ -1336,33 +1401,33 @@
 .aizen-team-card-body h3 {
   font-size: 20px;
   margin: 0 0 4px;
-  color: #141b3b;
+  color: var(--brand-ink);
 }
 
 .aizen-team-card-body > strong {
   font-size: 11px;
-  color: #6070b0;
+  color: var(--site-indigo);
 }
 
 .aizen-team-card-body > p {
   font-size: 12px;
   line-height: 1.65;
-  color: #6c7488;
+  color: var(--text-secondary);
   margin: 14px 0 0;
 }
 
 .aizen-team-placeholder {
-  border: 1px dashed #cfd6e6;
-  border-radius: 22px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-modal);
   min-height: 230px;
-  background: rgba(255, 255, 255, 0.6);
+  background: color-mix(in oklab, var(--surface) 60%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   text-align: center;
   padding: 30px;
-  color: #747d92;
+  color: var(--text-secondary);
 }
 
 .aizen-team-placeholder p {
@@ -1371,7 +1436,7 @@
 }
 
 .aizen-about-cta {
-  margin-top: 0;
+  margin-block-start: 0;
 }
 
 /* --- responsive ----------------------------------------------------------- */
@@ -1393,11 +1458,11 @@
     flex-direction: column;
     gap: 4px;
     width: 220px;
-    background: #fff;
-    border: 1px solid #dfe4ef;
-    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--success-soft);
+    border-radius: var(--radius-modal);
     padding: 8px;
-    box-shadow: 0 20px 50px rgba(15, 23, 55, 0.16);
+    box-shadow: 0 20px 50px color-mix(in oklab, var(--brand-ink) 16%, transparent);
   }
 
   .aizen-mobile-nav button {
@@ -1405,15 +1470,15 @@
     background: transparent;
     text-align: left;
     padding: 11px 12px;
-    border-radius: 9px;
-    color: #4f5870;
+    border-radius: var(--radius-card);
+    color: var(--text-secondary);
     font-weight: 750;
     cursor: pointer;
   }
 
   .aizen-mobile-nav button:hover,
   .aizen-mobile-nav button.active {
-    background: #eef1fa;
+    background: var(--surface-sunken);
     color: var(--aizen-navy);
   }
 
@@ -1430,8 +1495,8 @@
 @media (max-width: 1100px) {
   .aizen-hero {
     grid-template-columns: 1fr;
-    padding-left: 34px;
-    padding-right: 34px;
+    padding-inline-start: 34px;
+    padding-inline-end: 34px;
   }
 
   .aizen-hero-copy {
@@ -1456,12 +1521,12 @@
   }
 
   .aizen-lifecycle article:nth-child(3) {
-    border-left: 1px solid #edf0f6;
-    border-top: 1px solid #edf0f6;
+    border-inline-start: 1px solid var(--surface-sunken);
+    border-block-start: 1px solid var(--surface-sunken);
   }
 
   .aizen-lifecycle article:nth-child(4) {
-    border-top: 1px solid #edf0f6;
+    border-block-start: 1px solid var(--surface-sunken);
   }
 
   .aizen-solution-grid {
@@ -1534,12 +1599,12 @@
   .aizen-lifecycle article,
   .aizen-lifecycle article:first-child,
   .aizen-lifecycle article:nth-child(3) {
-    border: 1px solid #edf0f6;
-    border-bottom: 0;
+    border: 1px solid var(--surface-sunken);
+    border-block-end: 0;
   }
 
   .aizen-lifecycle article:last-child {
-    border-bottom: 1px solid #edf0f6;
+    border-block-end: 1px solid var(--surface-sunken);
   }
 
   .aizen-solution-card {
@@ -1574,7 +1639,7 @@
   .aizen-carousel-arrow {
     width: 34px;
     height: 34px;
-    border-radius: 10px;
+    border-radius: var(--radius-card);
   }
 
   .aizen-carousel-arrow.previous {
@@ -1604,13 +1669,13 @@
 
   .aizen-about-pillars,
   .aizen-about-team-section {
-    padding-left: 18px;
-    padding-right: 18px;
+    padding-inline-start: 18px;
+    padding-inline-end: 18px;
   }
 
   .aizen-about-teaser {
-    margin-left: 18px;
-    margin-right: 18px;
+    margin-inline-start: 18px;
+    margin-inline-end: 18px;
   }
 }
 

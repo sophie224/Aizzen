@@ -1,0 +1,75 @@
+/*
+ * Rating badge — the single score badge used everywhere a score appears:
+ * the Inherent / Residual / Target register columns, the risk detail hero
+ * strip, the Assessment cards and the Edit risk modal footer.
+ *
+ * ONE size everywhere — Compact and Detailed alike, and on every other
+ * surface. The badge never resizes or reshapes to suit the view or the content
+ * around it. Fill and rating name come from the saved matrix
+ * configuration; the label colour is computed per fill for contrast. Nothing
+ * about the palette is written here.
+ */
+
+.rating-chip {
+  display: inline-grid;
+  /*
+   * Three tracks — score, rating name, impact × likelihood. There is no
+   * `max-width`: the badge holds its size even in a narrow column, so the
+   * column reserves room for it rather than the badge shrinking to fit.
+   */
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  width: max-content;
+  min-width: 12.5rem;
+  min-height: 2rem;
+  gap: var(--space-8);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-card);
+  font-size: var(--text-13);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/*
+ * The floor is sized for the widest DEFAULT rating name in either language —
+ * Georgian "მნიშვნელოვანი" — so every badge in a stock configuration is the
+ * same width. A longer custom name grows the badge past this floor rather than
+ * being clipped; nothing about the surrounding column changes it.
+ */
+.rating-chip__score {
+  font-size: var(--text-12);
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: left;
+}
+
+/*
+ * The rating name is the label the contrast rule is computed for: bold and set
+ * at display size, so the large-text threshold genuinely applies to it.
+ */
+.rating-chip__rating {
+  font-size: var(--text-12);
+  font-weight: 700;
+  text-align: center;
+}
+
+:lang(en) .rating-chip__rating {
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Bold and the same size as the label, so it carries the same contrast. */
+.rating-chip__breakdown {
+  font-size: var(--text-12);
+  font-weight: 700;
+  text-align: right;
+}
+
+.rating-swatch {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: var(--radius-cell);
+  vertical-align: middle;
+}

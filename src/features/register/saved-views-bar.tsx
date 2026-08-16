@@ -133,7 +133,7 @@ export function SavedViewsBar(props: SavedViewsBarProps) {
               setNaming(true)
             }}
           >
-            <IconPlus size={14} />
+            <IconPlus size={12} />
             {t('register.views.save')}
           </button>
         )

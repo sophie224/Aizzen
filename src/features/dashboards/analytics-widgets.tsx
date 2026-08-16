@@ -14,6 +14,7 @@ import {
 import { SCALE_VALUES } from '../../domain/types/enums.ts'
 import type { AssessmentType, RatingMatrix, RiskFilters, ScaleValue } from '../../domain/types/index.ts'
 import { useTranslation, type TranslationKey } from '../../i18n/index.ts'
+import { EmptyState } from '../../ui/empty-state.tsx'
 import { IconDownload } from '../../ui/icons.tsx'
 
 /*
@@ -82,7 +83,7 @@ export function WidgetFrame(props: WidgetFrameProps) {
 /** Shown instead of an empty chart frame. */
 export function WidgetEmpty() {
   const { t } = useTranslation()
-  return <p className="widget__empty">{t('dash.noMatch')}</p>
+  return <EmptyState inline body={t('dash.noMatch')} />
 }
 
 // --- KPI tiles ---------------------------------------------------------------
@@ -94,10 +95,13 @@ export function KpiRow({ analytics }: { analytics: DashboardAnalytics }) {
     <div className="kpi-row">
       {analytics.kpis.map((tile) => (
         <Link key={tile.id} to={registerLinkFor(tile.filters)} className="kpi">
+          {/*
+            * Severity rail on the top edge: a configured rating colour, or the
+            * neutral accent. Decorative — the caption always names the metric.
+            */}
+          <span className="kpi__accent" style={{ background: tile.color }} aria-hidden="true" />
           <span className="kpi__value">{tile.value}</span>
           <span className="kpi__caption">{t(`dash.kpi.${tile.id}` as TranslationKey)}</span>
-          {/* Accent bar: a configured rating colour, or the neutral accent. */}
-          <span className="kpi__accent" style={{ background: tile.color }} aria-hidden="true" />
         </Link>
       ))}
     </div>

@@ -12,9 +12,10 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "e2e": "playwright test",
-    "verify": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "verify": "npm run lint && npm run lint:css && npm run typecheck && npm run test && npm run build",
     "preview": "vite preview",
-    "auth": "tsx server/index.ts"
+    "auth": "tsx server/index.ts",
+    "lint:css": "stylelint \"src/**/*.css\""
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",
@@ -43,6 +44,8 @@
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.7.0",
     "jsdom": "^29.1.1",
+    "stylelint": "^17.14.1",
+    "stylelint-config-standard": "^40.0.0",
     "tsx": "^4.23.12",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.65.0",
