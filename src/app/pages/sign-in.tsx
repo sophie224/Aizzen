@@ -42,7 +42,7 @@ export function SignInPage() {
   // Already signed in — go where they were heading, or to the default landing.
   if (user) {
     const from = (location.state as LocationState | null)?.from
-    return <Navigate to={from ?? (isSuperAdministrator(user) ? '/admin/site' : '/app/dashboard')} replace />
+    return <Navigate to={from ?? (isSuperAdministrator(user) ? '/admin/site' : '/dashboard')} replace />
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -61,7 +61,7 @@ export function SignInPage() {
     }
 
     const from = (location.state as LocationState | null)?.from
-    navigate(from ?? (isSuperAdministrator(result.user) ? '/admin/site' : '/app/dashboard'), {
+    navigate(from ?? (isSuperAdministrator(result.user) ? '/admin/site' : '/dashboard'), {
       replace: true,
     })
   }

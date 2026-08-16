@@ -220,7 +220,8 @@ Categories, business units, custom attributes and users are deactivated, never h
 ## Repository map
 
 ```
-app.html            legacy single-file build (reference for parity; do not extend)
+legacy/app.html     legacy single-file build (reference for parity; do not extend)
+                    (not at the repo root: Vite's HTML fallback would serve it at /app)
 docs/RM_Platform.pdf the spec — source of truth
 index.html          Vite entry
 src/                the refactored SPA (in progress)

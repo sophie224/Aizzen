@@ -62,7 +62,7 @@ export function PublicHeader({ active = 'home' }: PublicHeaderProps) {
 
   const canOpenPlatform = user !== null && canAccess(context, 'dashboard', 'read')
   const openPlatform = () => {
-    navigate(canOpenPlatform ? '/app/dashboard' : '/login')
+    navigate(canOpenPlatform ? '/dashboard' : '/login')
   }
 
   const go = (path: string, sectionId = '') => {

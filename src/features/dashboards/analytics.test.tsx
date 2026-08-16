@@ -78,7 +78,7 @@ function LocationProbe() {
   return <span data-testid="location">{`${location.pathname}${location.search}`}</span>
 }
 
-function renderDashboard(signedInAs = 'usr_admin', route = '/app/dashboard'): RenderResult {
+function renderDashboard(signedInAs = 'usr_admin', route = '/dashboard'): RenderResult {
   resetSessionStore()
   const sessionRepository = new MemorySessionRepository()
   sessionRepository.write(signedInAs)
@@ -91,8 +91,8 @@ function renderDashboard(signedInAs = 'usr_admin', route = '/app/dashboard'): Re
           <MemoryRouter initialEntries={[route]}>
             <LocationProbe />
             <Routes>
-              <Route path="/app/dashboard" element={<AnalyticsDashboard />} />
-              <Route path="/app/register" element={<RegisterPage />} />
+              <Route path="/dashboard" element={<AnalyticsDashboard />} />
+              <Route path="/register" element={<RegisterPage />} />
             </Routes>
           </MemoryRouter>
         </SessionBootstrap>
@@ -253,7 +253,7 @@ describe('dashboard filters', () => {
   })
 
   it('shows an applied filter as a removable chip', async () => {
-    renderDashboard('usr_admin', '/app/dashboard?status=Monitoring')
+    renderDashboard('usr_admin', '/dashboard?status=Monitoring')
     await screen.findByRole('heading', { name: 'Dashboard', level: 1 })
 
     const chip = screen.getByRole('button', { name: /Risk status: Monitoring/ })
@@ -266,7 +266,7 @@ describe('dashboard filters', () => {
   })
 
   it('reports an empty result rather than an empty chart frame', async () => {
-    renderDashboard('usr_admin', '/app/dashboard?businessUnitId=bu_nowhere')
+    renderDashboard('usr_admin', '/dashboard?businessUnitId=bu_nowhere')
     await screen.findByRole('heading', { name: 'Dashboard', level: 1 })
 
     expect(screen.getAllByText('No risks match the current filters.').length).toBeGreaterThan(0)
@@ -290,7 +290,7 @@ describe('record-level permissions', () => {
 
 describe('saved dashboard views', () => {
   it('saves the current filters as a named view', async () => {
-    renderDashboard('usr_admin', '/app/dashboard?status=Monitoring')
+    renderDashboard('usr_admin', '/dashboard?status=Monitoring')
     await screen.findByRole('heading', { name: 'Dashboard', level: 1 })
 
     const user = userEvent.setup()
@@ -337,7 +337,7 @@ describe('bilingual dashboard', () => {
       <AppDataProvider store={store}>
         <SessionRepositoryContext.Provider value={sessionRepository}>
           <SessionBootstrap>
-            <MemoryRouter initialEntries={['/app/dashboard']}>
+            <MemoryRouter initialEntries={['/dashboard']}>
               <AnalyticsDashboard />
             </MemoryRouter>
           </SessionBootstrap>

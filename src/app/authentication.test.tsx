@@ -73,7 +73,7 @@ describe('sign-in with each demo account', () => {
   })
 
   it('returns the user to the page they were denied', async () => {
-    renderApp({ route: '/app/reports' })
+    renderApp({ route: '/reports' })
     await screen.findByRole('heading', { name: /Sign in/i, level: 1 })
 
     await signInWith(CREDENTIALS.admin.email, CREDENTIALS.admin.password)
@@ -308,7 +308,7 @@ describe('read-only roles surface no mutation controls', () => {
   })
 
   it('leaves the auditor read-only across every module', async () => {
-    renderApp({ signedInAs: SEEDED.auditor, route: '/app/register' })
+    renderApp({ signedInAs: SEEDED.auditor, route: '/register' })
     expect(await screen.findByRole('heading', { name: 'Risk Register', level: 1 })).toBeInTheDocument()
 
     // Administration is the one module an auditor holds `none` on.

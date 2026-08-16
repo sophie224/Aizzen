@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import {
   RequireAccess,
   RequireAdministration,
@@ -13,25 +13,60 @@ import { RegisterPage } from '../features/register/register-page.tsx'
 import { RiskViewPage } from '../features/risk-view/risk-view-page.tsx'
 import { SiteAdminPage } from '../features/site-admin/site-admin-page.tsx'
 import { AppShell } from './layout/app-shell.tsx'
+import { legacyAppTarget } from './legacy-app-path.ts'
+import { LoadingState } from './pages/loading-state.tsx'
 import { NotFoundPage } from './pages/placeholder.tsx'
 import { SignInPage } from './pages/sign-in.tsx'
+import { useCurrentUser } from './session/use-current-user.ts'
 
 /*
  * Route table (ARCHITECTURE.md §8.1).
  *
  *   /                     public website — home
  *   /about                public website — about us
- *   /app/dashboard        dashboard: read
- *   /app/register         register: read AND risks: read
- *   /app/risks/:id        record visibility (enforced per record in M9)
- *   /app/reports          reports: read
- *   /app/administration   Administrator / Super Administrator
+ *   /dashboard            dashboard: read
+ *   /register             register: read AND risks: read
+ *   /risks/:id            record visibility (enforced per record in M9)
+ *   /reports              reports: read
+ *   /administration       Administrator / Super Administrator
  *   /admin/site           Super Administrator only
+ *
+ * The platform pages sit at the top level; `AppShell` wraps them through a
+ * pathless layout route, so the shell is shared without owning a URL segment.
+ * The former `/app/*` prefix is kept alive as a redirect only (see below).
  *
  * Each guarded element is wrapped at the route, so a direct URL is checked
  * exactly like a click through the navigation. The public pages take no guard
  * at all — they are the front door and require no session.
  */
+
+/**
+ * Unknown URL.
+ *
+ * A signed-in user gets the not-found page inside the shell; anyone else is
+ * sent to the public home page rather than shown application chrome.
+ */
+function UnknownRoute() {
+  const { user, ready } = useCurrentUser()
+
+  if (!ready) return <LoadingState />
+  if (!user) return <Navigate to="/" replace />
+
+  return <NotFoundPage />
+}
+
+/**
+ * Compatibility redirect for the retired `/app` prefix.
+ *
+ * Bookmarks, shared links and anything persisted before the flattening keep
+ * working: the prefix is stripped and the query string and hash preserved.
+ * Bare `/app` lands on the dashboard, as its index route used to.
+ */
+function LegacyAppRedirect() {
+  const { pathname, search, hash } = useLocation()
+
+  return <Navigate to={legacyAppTarget(pathname, search, hash)} replace />
+}
 
 export function AppRoutes() {
   return (
@@ -40,11 +75,10 @@ export function AppRoutes() {
       <Route path="/about" element={<PublicAboutPage />} />
       <Route path="/login" element={<SignInPage />} />
 
-      <Route path="/app" element={<AppShell />}>
-        <Route index element={<Navigate to="/app/dashboard" replace />} />
-
+      {/* Pathless layout route: shared shell, no `/app` segment in the URL. */}
+      <Route element={<AppShell />}>
         <Route
-          path="dashboard"
+          path="/dashboard"
           element={
             <RequireAccess module="dashboard">
               <DashboardPage />
@@ -54,7 +88,7 @@ export function AppRoutes() {
 
         {/* The Register needs both register:read and risks:read. */}
         <Route
-          path="register"
+          path="/register"
           element={
             <RequireAccess module="register">
               <RequireAccess module="risks">
@@ -65,7 +99,7 @@ export function AppRoutes() {
         />
 
         <Route
-          path="risks/:riskId"
+          path="/risks/:riskId"
           element={
             <RequireAccess module="risks">
               <RiskViewPage />
@@ -74,7 +108,7 @@ export function AppRoutes() {
         />
 
         <Route
-          path="reports"
+          path="/reports"
           element={
             <RequireAccess module="reports">
               <ReportsPage />
@@ -83,7 +117,7 @@ export function AppRoutes() {
         />
 
         <Route
-          path="administration"
+          path="/administration"
           element={
             <RequireAdministration>
               <AdministrationPage />
@@ -91,8 +125,12 @@ export function AppRoutes() {
           }
         />
 
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="*" element={<UnknownRoute />} />
       </Route>
+
+      {/* Retired prefix — kept as a redirect so old links do not break. */}
+      <Route path="/app" element={<LegacyAppRedirect />} />
+      <Route path="/app/*" element={<LegacyAppRedirect />} />
 
       {/* Website Administration sits outside the module permission matrix. */}
       <Route
@@ -110,8 +148,6 @@ export function AppRoutes() {
           }
         />
       </Route>
-
-      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

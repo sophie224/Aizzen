@@ -18,10 +18,10 @@ const PUBLIC = [
 ]
 
 const APP = [
-  { name: 'dashboard', path: '/app/dashboard' },
-  { name: 'register', path: '/app/register' },
-  { name: 'reports', path: '/app/reports' },
-  { name: 'administration', path: '/app/administration' },
+  { name: 'dashboard', path: '/dashboard' },
+  { name: 'register', path: '/register' },
+  { name: 'reports', path: '/reports' },
+  { name: 'administration', path: '/administration' },
 ]
 
 async function signIn(page: import('@playwright/test').Page) {
@@ -29,7 +29,7 @@ async function signIn(page: import('@playwright/test').Page) {
   await page.getByLabel('Email address').fill('admin@erm.local')
   await page.getByLabel('Password').fill('Admin#2026')
   await page.getByRole('button', { name: 'Sign in' }).click()
-  await page.waitForURL(/\/app\//)
+  await page.waitForURL(/\/dashboard/)
 }
 
 for (const width of [1280, 1440]) {

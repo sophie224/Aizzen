@@ -208,7 +208,7 @@ function TopRisksWidget({ widget, risks, context }: WidgetProps) {
         return (
           <li key={entry.risk.id}>
             {/* The whole row opens the risk, so a listed risk is reachable. */}
-            <Link className="widget-top__link" to={`/app/risks/${entry.risk.id}`}>
+            <Link className="widget-top__link" to={`/risks/${entry.risk.id}`}>
               <span className="widget-top__ref">{entry.risk.ref}</span>
               <span className="widget-top__title">{entry.risk.title}</span>
               <span

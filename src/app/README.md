@@ -4,7 +4,7 @@ The route table, layout chrome and route guards. See `ARCHITECTURE.md` §2 (laye
 
 **Contains**
 
-- Route definitions for `/app/dashboard`, `/app/register`, `/app/risks/:id`, `/app/reports`, `/app/administration`, the public site, and Website Administration.
+- Route definitions for `/dashboard`, `/register`, `/risks/:id`, `/reports`, `/administration`, the public site, and Website Administration.
 - Route guards that call the permission engine in `src/domain`.
 - Layout chrome: AIZEN logo top-left, client logo top-right, ADMINISTRATION entry point bottom-left.
 - Providers (data context, query client, i18n, router).

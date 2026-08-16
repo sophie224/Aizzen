@@ -10,9 +10,9 @@ test('every chart type renders from register data', async ({ page }) => {
   await page.getByLabel('Email address').fill('admin@erm.local')
   await page.getByLabel('Password').fill('Admin#2026')
   await page.getByRole('button', { name: 'Sign in' }).click()
-  await page.waitForURL(/\/app\//)
+  await page.waitForURL(/\/dashboard/)
 
-  await page.goto('/app/dashboard')
+  await page.goto('/dashboard')
   await page.evaluate(() => {
     const key = 'erm-risk-management-v3-state'
     const state = JSON.parse(localStorage.getItem(key)!)

@@ -15,7 +15,7 @@ export function AccessDenied() {
       <h1 id="access-denied-title">{t('state.accessDenied.title')}</h1>
       <div className="panel panel--denied">
         <p>{t('state.accessDenied.body')}</p>
-        <Link to="/app/dashboard">{t('state.backToDashboard')}</Link>
+        <Link to="/dashboard">{t('state.backToDashboard')}</Link>
       </div>
     </section>
   )

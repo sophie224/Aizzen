@@ -93,7 +93,7 @@ export function RiskViewPage() {
         <h1 id="risk-missing-title">{t('view.notFound.title')}</h1>
         <div className="panel panel--notice">
           <p>{t('view.notFound.body')}</p>
-          <Link to="/app/register">{t('view.backToRegister')}</Link>
+          <Link to="/register">{t('view.backToRegister')}</Link>
         </div>
       </section>
     )
@@ -108,7 +108,7 @@ export function RiskViewPage() {
   return (
     <section aria-labelledby="risk-title" className="risk-view">
       <div className="risk-view__top">
-        <Link to="/app/register" className="risk-view__back">
+        <Link to="/register" className="risk-view__back">
           <IconChevronLeft size={14} />
           {t('view.backToRegister')}
         </Link>

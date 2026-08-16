@@ -54,7 +54,7 @@ export interface RenderAppResult extends RenderResult {
 
 export function renderApp(options: RenderAppOptions = {}): RenderAppResult {
   const {
-    route = '/app/dashboard',
+    route = '/dashboard',
     signedInAs,
     language = 'en',
     storage = new MemoryStorage(),

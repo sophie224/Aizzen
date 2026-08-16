@@ -73,11 +73,11 @@ export function filtersToParams(filters: RiskFilters, search = ''): URLSearchPar
   return params
 }
 
-/** `/app/register?…` for a drill-through into exactly this population. */
+/** `/register?…` for a drill-through into exactly this population. */
 export function registerLinkFor(filters: RiskFilters, search = ''): string {
   const params = filtersToParams(filters, search)
   const query = params.toString()
-  return query.length > 0 ? `/app/register?${query}` : '/app/register'
+  return query.length > 0 ? `/register?${query}` : '/register'
 }
 
 /** True when any filter is narrowing the set. */

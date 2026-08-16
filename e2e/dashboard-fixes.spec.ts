@@ -8,9 +8,9 @@ test('top N rows open the risk and every badge is one size', async ({ page }) =>
   await page.getByLabel('Email address').fill('admin@erm.local')
   await page.getByLabel('Password').fill('Admin#2026')
   await page.getByRole('button', { name: 'Sign in' }).click()
-  await page.waitForURL(/\/app\//)
+  await page.waitForURL(/\/dashboard/)
 
-  await page.goto('/app/dashboard')
+  await page.goto('/dashboard')
   await page.evaluate(() => {
     const key = 'erm-risk-management-v3-state'
     const state = JSON.parse(localStorage.getItem(key)!)
@@ -62,7 +62,7 @@ test('top N rows open the risk and every badge is one size', async ({ page }) =>
   await page.locator('.dash-widget').nth(1).screenshot({ path: `${OUT}/heatmap.png` })
 
   await cells.first().click()
-  await page.waitForURL(/\/app\/register/)
+  await page.waitForURL(/\/register/)
   expect(page.url()).toContain('impact=')
 
   // A Top N row opens that risk's overview.
@@ -71,5 +71,5 @@ test('top N rows open the risk and every badge is one size', async ({ page }) =>
   await page.getByText('Custom dashboards', { exact: true }).click().catch(() => undefined)
   await page.waitForTimeout(400)
   await page.locator('.widget-top__link').first().click()
-  await page.waitForURL(/\/app\/risks\//)
+  await page.waitForURL(/\/risks\//)
 })

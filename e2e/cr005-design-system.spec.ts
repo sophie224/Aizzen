@@ -7,7 +7,7 @@ async function signIn(page: Page) {
   await page.getByLabel('Email address').fill('admin@erm.local')
   await page.getByLabel('Password').fill('Admin#2026')
   await page.getByRole('button', { name: 'Sign in' }).click()
-  await page.waitForURL(/\/app\//)
+  await page.waitForURL(/\/dashboard/)
 }
 
 
@@ -80,7 +80,7 @@ test.describe('CR-005 design system', () => {
 
   test('register: no frozen columns, equal chips, equal row heights', async ({ page }) => {
     await signIn(page)
-    await page.goto('/app/register')
+    await page.goto('/register')
     await seedRisks(page)
     await expect(page.getByRole('heading', { name: 'Risk Register' })).toBeVisible()
     await page.waitForTimeout(300)
@@ -166,7 +166,7 @@ test.describe('CR-005 design system', () => {
 
   test('register: expandable cells and the date-only column', async ({ page }) => {
     await signIn(page)
-    await page.goto('/app/register')
+    await page.goto('/register')
     await seedRisks(page)
     await expect(page.getByRole('heading', { name: 'Risk Register' })).toBeVisible()
 
@@ -210,7 +210,7 @@ test.describe('CR-005 design system', () => {
 
   test('register: score badge contrast clears the large-text threshold', async ({ page }) => {
     await signIn(page)
-    await page.goto('/app/register')
+    await page.goto('/register')
     await seedRisks(page)
     await expect(page.getByRole('heading', { name: 'Risk Register' })).toBeVisible()
 
@@ -255,7 +255,7 @@ test.describe('CR-005 design system', () => {
    */
   test('compact is fixed height, detailed is complete', async ({ page }) => {
     await signIn(page)
-    await page.goto('/app/register')
+    await page.goto('/register')
     await seedRisks(page)
     await expect(page.getByRole('heading', { name: 'Risk Register' })).toBeVisible()
 
@@ -296,7 +296,7 @@ test.describe('CR-005 design system', () => {
 
   test('score badges are one size on every surface', async ({ page }) => {
     await signIn(page)
-    await page.goto('/app/register')
+    await page.goto('/register')
     await seedRisks(page)
     await expect(page.getByRole('heading', { name: 'Risk Register' })).toBeVisible()
 
@@ -336,7 +336,7 @@ test.describe('CR-005 design system', () => {
 
   test('register: one status badge per row, matching the editor', async ({ page }) => {
     await signIn(page)
-    await page.goto('/app/register')
+    await page.goto('/register')
     await seedRisks(page)
     await expect(page.getByRole('heading', { name: 'Risk Register' })).toBeVisible()
 
@@ -361,7 +361,7 @@ test.describe('CR-005 design system', () => {
 
   test('administration: bilingual groups and matrix', async ({ page }) => {
     await signIn(page)
-    await page.goto('/app/administration')
+    await page.goto('/administration')
     await page.waitForTimeout(400)
     await page.screenshot({ path: `${OUT}/04-admin-1440.png`, fullPage: true })
 
@@ -392,7 +392,7 @@ test.describe('CR-005 design system', () => {
 
   test('dashboard: KPI rail on the top edge', async ({ page }) => {
     await signIn(page)
-    await page.goto('/app/dashboard')
+    await page.goto('/dashboard')
     await seedRisks(page)
     await page.waitForTimeout(600)
     await page.screenshot({ path: `${OUT}/07-dashboard-1440.png`, fullPage: true })
@@ -414,7 +414,7 @@ test.describe('CR-005 design system', () => {
   test('georgian at 1280', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 860 })
     await signIn(page)
-    await page.goto('/app/register')
+    await page.goto('/register')
     await seedRisks(page)
 
     /*
@@ -460,7 +460,7 @@ test.describe('CR-005 design system', () => {
    */
   test('georgian is never uppercased', async ({ page }) => {
     await signIn(page)
-    await page.goto('/app/register')
+    await page.goto('/register')
     await seedRisks(page)
 
     expect(await page.evaluate(() => document.documentElement.lang)).toBe('en')
@@ -507,7 +507,7 @@ test.describe('CR-005 design system', () => {
   test('reduced motion disables transitions', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await signIn(page)
-    await page.goto('/app/register')
+    await page.goto('/register')
     await seedRisks(page)
     await expect(page.getByRole('heading', { name: 'Risk Register' })).toBeVisible()
 

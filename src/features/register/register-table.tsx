@@ -163,11 +163,11 @@ function CellValue({
         <span className="register-table__code">{risk.ref}</span>
       </span>
     case 'ref':
-      return <Link to={`/app/risks/${risk.id}`}>{risk.ref}</Link>
+      return <Link to={`/risks/${risk.id}`}>{risk.ref}</Link>
     case 'title':
       return (
         <>
-          <Link to={`/app/risks/${risk.id}`} className="register-table__title">
+          <Link to={`/risks/${risk.id}`} className="register-table__title">
             {risk.title}
           </Link>
           {/* Detailed adds the structured narrative under the risk name. */}

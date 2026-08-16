@@ -70,7 +70,7 @@ export function PublicHomePage() {
   const text = (en: string, ka: string) => pickLanguage(en, ka, language)
   const canOpenPlatform = user !== null && canAccess(context, 'dashboard', 'read')
   const openPlatform = () => {
-    navigate(canOpenPlatform ? '/app/dashboard' : '/login')
+    navigate(canOpenPlatform ? '/dashboard' : '/login')
   }
 
   const solutions = [...content.solutions].sort((a, b) => a.order - b.order)

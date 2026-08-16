@@ -12,8 +12,8 @@ for (const count of [1, 2, 6]) {
     await page.getByLabel('Email address').fill('admin@erm.local')
     await page.getByLabel('Password').fill('Admin#2026')
     await page.getByRole('button', { name: 'Sign in' }).click()
-    await page.waitForURL(/\/app\//)
-    await page.goto('/app/register')
+    await page.waitForURL(/\/dashboard/)
+    await page.goto('/register')
     await page.evaluate((n) => {
       const key = 'erm-risk-management-v3-state'
       const state = JSON.parse(localStorage.getItem(key)!)

@@ -39,7 +39,7 @@ export function NotFoundPage() {
       <h1 id="page-title">{t('state.notFound.title')}</h1>
       <div className="panel">
         <p>{t('state.notFound.body')}</p>
-        <Link to="/app/dashboard">{t('state.backToDashboard')}</Link>
+        <Link to="/dashboard">{t('state.backToDashboard')}</Link>
       </div>
     </section>
   )

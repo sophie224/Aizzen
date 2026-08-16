@@ -132,7 +132,7 @@ Ordered, independently-testable milestones for refactoring `app.html` (single 2.
 **Goal:** the frame every feature mounts into, matching the existing design system.
 
 **Work**
-- Route table for `/app/dashboard`, `/app/register`, `/app/risks/:id`, `/app/reports`, `/app/administration`, plus the public site and Website Administration.
+- Route table for `/dashboard`, `/register`, `/risks/:id`, `/reports`, `/administration`, plus the public site and Website Administration.
 - Route guards wired to the permission engine (module + route gates).
 - Layout: AIZEN cotton-flower logo top-left, client logo top-right, **ADMINISTRATION entry point bottom-left**.
 - Palette tokens: `#1A2151` primary, `#0D1128` surface, white accent; rating colours from configuration, not hard-coded.

@@ -22,7 +22,7 @@ Two administrative spaces exist and must remain distinct:
 
 | Space | Governs | Who can open it |
 |---|---|---|
-| **Risk Administration** (`/app/administration`) | categories, business units, custom attributes, users, roles, matrix, client branding, SSO draft, data tools | Administrator + Super Administrator |
+| **Risk Administration** (`/administration`) | categories, business units, custom attributes, users, roles, matrix, client branding, SSO draft, data tools | Administrator + Super Administrator |
 | **Website Administration** | AIZEN public site, About Us, solutions, team members, demo media | **Super Administrator only** (dedicated role guard, *not* part of the module permission matrix) |
 
 ### 1.1 Non-negotiable constraints carried from the PRD
@@ -42,9 +42,9 @@ The refactor replaces a single 6 481-line `app.html` (React via `React.createEle
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  Routes / Pages            /app/dashboard, /app/register,     │
-│                            /app/risks/:id, /app/reports,      │
-│                            /app/administration, /admin/site   │
+│  Routes / Pages            /dashboard, /register,             │
+│                            /risks/:id, /reports,              │
+│                            /administration, /admin/site       │
 ├──────────────────────────────────────────────────────────────┤
 │  Feature components        RiskRegisterTable, RiskEditor,     │
 │                            DashboardBuilder, ReportBuilder,   │
@@ -457,12 +457,14 @@ Existing references never change when a Business Unit is later edited; a new ris
 | `/` | public website — home | none (no session required) |
 | `/about` | public website — About Us | none (no session required) |
 | `/login` | sign-in | none |
-| `/app/dashboard` | view and (with rights) manage dashboards | `dashboard: read` |
-| `/app/register` | Risk Register | `register: read` **and** `risks: read` |
-| `/app/risks/:id` | Individual Risk View | record visibility |
-| `/app/reports` | Report template library + generated reports | `reports: read` |
-| `/app/administration` | Risk Administration | Administrator / Super Administrator |
+| `/dashboard` | view and (with rights) manage dashboards | `dashboard: read` |
+| `/register` | Risk Register | `register: read` **and** `risks: read` |
+| `/risks/:id` | Individual Risk View | record visibility |
+| `/reports` | Report template library + generated reports | `reports: read` |
+| `/administration` | Risk Administration | Administrator / Super Administrator |
 | Website Administration | public-site CMS | Super Administrator only |
+
+The platform pages sit at the top level and share `AppShell` through a pathless layout route. They previously lived under an `/app` prefix; `/app/*` now redirects to the equivalent top-level path (`src/app/legacy-app-path.ts`), preserving query string and hash, so older links keep working. The prefix must not come back: the legacy reference build is a file named `app.html`, and Vite's dev-server HTML fallback resolves a request for `/app` to it — which is why that file lives in `legacy/`, not at the repository root.
 
 ### 8.2 Risk Management module
 

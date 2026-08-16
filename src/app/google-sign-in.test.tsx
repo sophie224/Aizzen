@@ -120,7 +120,7 @@ describe('a denied Google sign-in', () => {
 describe('server session', () => {
   it('signs the user in from the service cookie', async () => {
     renderApp({
-      route: '/app/dashboard',
+      route: '/dashboard',
       authService: fakeAuthService({ readSession: () => Promise.resolve('usr_admin') }),
     })
 
@@ -135,7 +135,7 @@ describe('server session', () => {
     sessionRepository.write('usr_auditor')
 
     renderApp({
-      route: '/app/dashboard',
+      route: '/dashboard',
       sessionRepository,
       authService: fakeAuthService({ readSession: () => Promise.resolve('usr_admin') }),
     })
@@ -152,7 +152,7 @@ describe('server session', () => {
     const sessionRepository = new MemorySessionRepository()
     sessionRepository.write('usr_admin')
 
-    renderApp({ route: '/app/dashboard', sessionRepository })
+    renderApp({ route: '/dashboard', sessionRepository })
 
     const nav = await screen.findByRole('navigation', { name: 'Primary navigation' })
     expect(within(nav).getByText('ERM Administrator')).toBeInTheDocument()
@@ -161,7 +161,7 @@ describe('server session', () => {
   it('still re-validates a server session against AppState', async () => {
     // The service claims a user that does not exist in this state.
     renderApp({
-      route: '/app/dashboard',
+      route: '/dashboard',
       authService: fakeAuthService({ readSession: () => Promise.resolve('usr_ghost') }),
     })
 
@@ -171,7 +171,7 @@ describe('server session', () => {
   it('clears the server session on sign-out', async () => {
     const signOut = vi.fn(() => Promise.resolve())
     renderApp({
-      route: '/app/dashboard',
+      route: '/dashboard',
       authService: fakeAuthService({ readSession: () => Promise.resolve('usr_admin'), signOut }),
     })
 

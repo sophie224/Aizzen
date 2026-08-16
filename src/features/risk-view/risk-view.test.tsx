@@ -90,10 +90,10 @@ function renderView(riskId: string, signedInAs = 'usr_admin'): RenderResult {
     <AppDataProvider store={store}>
       <SessionRepositoryContext.Provider value={sessionRepository}>
         <SessionBootstrap>
-          <MemoryRouter initialEntries={[`/app/risks/${riskId}`]}>
+          <MemoryRouter initialEntries={[`/risks/${riskId}`]}>
             <Routes>
-              <Route path="/app/risks/:riskId" element={<RiskViewPage />} />
-              <Route path="/app/register" element={<p>Register</p>} />
+              <Route path="/risks/:riskId" element={<RiskViewPage />} />
+              <Route path="/register" element={<p>Register</p>} />
             </Routes>
           </MemoryRouter>
         </SessionBootstrap>

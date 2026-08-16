@@ -16,10 +16,10 @@ import { expect, test } from '@playwright/test'
  */
 
 const ROUTES = [
-  '/app/dashboard',
-  '/app/register',
-  '/app/reports',
-  '/app/administration',
+  '/dashboard',
+  '/register',
+  '/reports',
+  '/administration',
 ]
 
 const HEIGHTS = [600, 700, 900]
@@ -29,7 +29,7 @@ async function signIn(page: import('@playwright/test').Page) {
   await page.getByLabel('Email address').fill('admin@erm.local')
   await page.getByLabel('Password').fill('Admin#2026')
   await page.getByRole('button', { name: 'Sign in' }).click()
-  await page.waitForURL(/\/app\//)
+  await page.waitForURL(/\/dashboard/)
 }
 
 /** How far the document itself can scroll. Must be zero inside the shell. */
@@ -48,7 +48,7 @@ for (const height of HEIGHTS) {
     }
 
     // A risk with a long action list is the densest page in the product.
-    await page.goto('/app/register')
+    await page.goto('/register')
     await page.evaluate(() => {
       const key = 'erm-risk-management-v3-state'
       const state = JSON.parse(localStorage.getItem(key)!)
@@ -83,11 +83,11 @@ for (const height of HEIGHTS) {
     })
     await page.reload()
     await page.waitForTimeout(400)
-    expect(await page.evaluate(documentOverflow), '/app/register seeded').toBe(0)
+    expect(await page.evaluate(documentOverflow), '/register seeded').toBe(0)
 
     await page.locator('.register-table__title').first().click()
     await page.waitForTimeout(500)
-    expect(await page.evaluate(documentOverflow), '/app/risks/:id').toBe(0)
+    expect(await page.evaluate(documentOverflow), '/risks/:id').toBe(0)
 
     // Scrolling the main region to the end must not move the rail.
     const railBefore = await page.locator('.rail').evaluate((el) => el.getBoundingClientRect().bottom)

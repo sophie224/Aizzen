@@ -13,7 +13,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { createContext, runInContext } from 'node:vm'
 
 const REPO = process.cwd()
-const source = readFileSync(`${REPO}/app.html`, 'utf8').split('\n')
+const source = readFileSync(`${REPO}/legacy/app.html`, 'utf8').split('\n')
 
 // 1-based inclusive line ranges, located by grep against app.html.
 const slice = (from, to) => source.slice(from - 1, to).join('\n')

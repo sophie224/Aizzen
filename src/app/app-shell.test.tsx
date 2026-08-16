@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { pickLanguage } from '../domain/localisation/index.ts'
 import { dictionary, translate } from '../i18n/index.ts'
+import { legacyAppTarget } from './legacy-app-path.ts'
 import { renderApp, SEEDED } from './test-harness.tsx'
 import { resetSessionStore } from './session/session-store.ts'
 
@@ -15,12 +16,12 @@ afterEach(() => {
 
 describe('routes render', () => {
   it('renders the dashboard for an administrator', async () => {
-    renderApp({ route: '/app/dashboard', signedInAs: SEEDED.admin })
+    renderApp({ route: '/dashboard', signedInAs: SEEDED.admin })
     expect(await screen.findByRole('heading', { name: 'Dashboard', level: 1 })).toBeInTheDocument()
   })
 
   it('renders the register', async () => {
-    renderApp({ route: '/app/register', signedInAs: SEEDED.admin })
+    renderApp({ route: '/register', signedInAs: SEEDED.admin })
     expect(await screen.findByRole('heading', { name: 'Risk Register', level: 1 })).toBeInTheDocument()
   })
 
@@ -28,19 +29,19 @@ describe('routes render', () => {
     // The seeded state carries no risks, so the real view resolves this ID to
     // its not-available state — which still proves the param route matched.
     // Populated-risk rendering is covered in src/features/risk-view.
-    renderApp({ route: '/app/risks/risk_001', signedInAs: SEEDED.admin })
+    renderApp({ route: '/risks/risk_001', signedInAs: SEEDED.admin })
     expect(
       await screen.findByRole('heading', { name: 'Risk not available', level: 1 }),
     ).toBeInTheDocument()
   })
 
   it('renders reports', async () => {
-    renderApp({ route: '/app/reports', signedInAs: SEEDED.admin })
+    renderApp({ route: '/reports', signedInAs: SEEDED.admin })
     expect(await screen.findByRole('heading', { name: 'Reports', level: 1 })).toBeInTheDocument()
   })
 
   it('renders risk administration', async () => {
-    renderApp({ route: '/app/administration', signedInAs: SEEDED.admin })
+    renderApp({ route: '/administration', signedInAs: SEEDED.admin })
     expect(
       await screen.findByRole('heading', { name: 'Risk Administration', level: 1 }),
     ).toBeInTheDocument()
@@ -70,14 +71,39 @@ describe('routes render', () => {
     ).toBeInTheDocument()
   })
 
-  it('redirects /app to the dashboard', async () => {
+  it('renders a not-found page for an unknown route', async () => {
+    renderApp({ route: '/nowhere', signedInAs: SEEDED.admin })
+    expect(await screen.findByRole('heading', { name: 'Page not found', level: 1 })).toBeInTheDocument()
+  })
+
+  it('sends an unknown route to the public home page without a session', async () => {
+    renderApp({ route: '/nowhere' })
+    expect(
+      await screen.findByRole('heading', { name: /Turn risk decisions/i, level: 1 }),
+    ).toBeInTheDocument()
+  })
+})
+
+// --- retired /app prefix ----------------------------------------------------
+
+describe('legacy /app links', () => {
+  it('redirects bare /app to the dashboard', async () => {
     renderApp({ route: '/app', signedInAs: SEEDED.admin })
     expect(await screen.findByRole('heading', { name: 'Dashboard', level: 1 })).toBeInTheDocument()
   })
 
-  it('renders a not-found page for an unknown /app route', async () => {
-    renderApp({ route: '/app/nowhere', signedInAs: SEEDED.admin })
-    expect(await screen.findByRole('heading', { name: 'Page not found', level: 1 })).toBeInTheDocument()
+  it('redirects a prefixed page to its top-level path', async () => {
+    renderApp({ route: '/app/register', signedInAs: SEEDED.admin })
+    expect(await screen.findByRole('heading', { name: 'Risk Register', level: 1 })).toBeInTheDocument()
+  })
+
+  it('strips the prefix while keeping the query string and hash', () => {
+    expect(legacyAppTarget('/app')).toBe('/dashboard')
+    expect(legacyAppTarget('/app/')).toBe('/dashboard')
+    expect(legacyAppTarget('/app/register')).toBe('/register')
+    expect(legacyAppTarget('/app/risks/risk_1')).toBe('/risks/risk_1')
+    expect(legacyAppTarget('/app/register', '?status=Monitoring')).toBe('/register?status=Monitoring')
+    expect(legacyAppTarget('/app/dashboard', '?status=Open', '#top')).toBe('/dashboard?status=Open#top')
   })
 })
 
@@ -85,19 +111,19 @@ describe('routes render', () => {
 
 describe('unauthenticated access', () => {
   it('redirects a protected route to sign-in rather than rendering blank', async () => {
-    renderApp({ route: '/app/register' })
+    renderApp({ route: '/register' })
     expect(await screen.findByRole('heading', { name: /Sign in/i, level: 1 })).toBeInTheDocument()
   })
 
   it('redirects administration to sign-in', async () => {
-    renderApp({ route: '/app/administration' })
+    renderApp({ route: '/administration' })
     expect(await screen.findByRole('heading', { name: /Sign in/i, level: 1 })).toBeInTheDocument()
   })
 })
 
 describe('authorised but denied', () => {
   it('shows Access Denied — never a blank screen — for a risk owner on administration', async () => {
-    renderApp({ route: '/app/administration', signedInAs: SEEDED.riskOwner })
+    renderApp({ route: '/administration', signedInAs: SEEDED.riskOwner })
 
     const alert = await screen.findByRole('alert')
     expect(within(alert).getByRole('heading', { name: 'Access denied', level: 1 })).toBeInTheDocument()
@@ -106,7 +132,7 @@ describe('authorised but denied', () => {
 
   it('denies every non-administrator role access to administration', async () => {
     for (const roleUser of [SEEDED.riskManager, SEEDED.riskOwner, SEEDED.controlOwner, SEEDED.actionOwner, SEEDED.auditor]) {
-      const view = renderApp({ route: '/app/administration', signedInAs: roleUser })
+      const view = renderApp({ route: '/administration', signedInAs: roleUser })
       expect(await screen.findByRole('alert'), roleUser).toBeInTheDocument()
       view.unmount()
     }
@@ -118,12 +144,12 @@ describe('authorised but denied', () => {
   })
 
   it('denies reports to a control owner, who holds reports: none', async () => {
-    renderApp({ route: '/app/reports', signedInAs: SEEDED.controlOwner })
+    renderApp({ route: '/reports', signedInAs: SEEDED.controlOwner })
     expect(await screen.findByRole('alert')).toBeInTheDocument()
   })
 
   it('allows an auditor to read the register', async () => {
-    renderApp({ route: '/app/register', signedInAs: SEEDED.auditor })
+    renderApp({ route: '/register', signedInAs: SEEDED.auditor })
     expect(await screen.findByRole('heading', { name: 'Risk Register', level: 1 })).toBeInTheDocument()
   })
 })
@@ -151,7 +177,7 @@ describe('shell layout', () => {
 
   it('hides the ADMINISTRATION entry point from every other role', async () => {
     for (const roleUser of [SEEDED.riskManager, SEEDED.riskOwner, SEEDED.controlOwner, SEEDED.actionOwner, SEEDED.auditor]) {
-      const view = renderApp({ route: '/app/dashboard', signedInAs: roleUser })
+      const view = renderApp({ route: '/dashboard', signedInAs: roleUser })
       const nav = await screen.findByRole('navigation', { name: 'Primary navigation' })
       expect(within(nav).queryByRole('link', { name: 'Administration' }), roleUser).toBeNull()
       view.unmount()
@@ -252,7 +278,7 @@ describe('bilingual UI', () => {
   })
 
   it('translates page headings too, not just navigation', async () => {
-    renderApp({ route: '/app/register', signedInAs: SEEDED.admin, language: 'ka' })
+    renderApp({ route: '/register', signedInAs: SEEDED.admin, language: 'ka' })
     expect(
       await screen.findByRole('heading', { name: 'რისკების რეესტრი', level: 1 }),
     ).toBeInTheDocument()

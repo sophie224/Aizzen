@@ -39,7 +39,7 @@ export default defineConfig([
     'coverage',
     'playwright-report',
     'test-results',
-    'app.html',
+    'legacy',
   ]),
 
   // Base configuration for all application source.

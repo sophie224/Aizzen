@@ -113,7 +113,7 @@ export function AppShell() {
 
       {/* Top-left: the AIZEN brand heads the dark navigation rail. */}
       <nav className="rail" aria-label={t('nav.primary')}>
-        <Link to="/app/dashboard" className="rail__brand">
+        <Link to="/dashboard" className="rail__brand">
           <BrandMark label={t('app.brandAlt')} className="rail__mark" />
           <span className="rail__brand-text">
             <span className="rail__brand-name">AIZEN</span>
@@ -123,19 +123,19 @@ export function AppShell() {
 
         <div className="rail__nav">
           {canAccess(context, 'dashboard', 'read') ? (
-            <NavLink to="/app/dashboard" className="rail__link">
+            <NavLink to="/dashboard" className="rail__link">
               <IconGauge />
               {t('nav.dashboard')}
             </NavLink>
           ) : null}
           {canAccess(context, 'register', 'read') ? (
-            <NavLink to="/app/register" className="rail__link">
+            <NavLink to="/register" className="rail__link">
               <IconList />
               {t('nav.register')}
             </NavLink>
           ) : null}
           {canAccess(context, 'reports', 'read') ? (
-            <NavLink to="/app/reports" className="rail__link">
+            <NavLink to="/reports" className="rail__link">
               <IconChart />
               {t('nav.reports')}
             </NavLink>
@@ -155,7 +155,7 @@ export function AppShell() {
             </NavLink>
           ) : null}
           {showAdministration ? (
-            <NavLink to="/app/administration" className="rail__admin-link">
+            <NavLink to="/administration" className="rail__admin-link">
               <IconSettings />
               {t('nav.administration')}
             </NavLink>

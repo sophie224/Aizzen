@@ -8,8 +8,8 @@ for (const width of [1280, 1440]) {
     await page.getByLabel('Email address').fill('admin@erm.local')
     await page.getByLabel('Password').fill('Admin#2026')
     await page.getByRole('button', { name: 'Sign in' }).click()
-    await page.waitForURL(/\/app\//)
-    await page.goto('/app/dashboard')
+    await page.waitForURL(/\/dashboard/)
+    await page.goto('/dashboard')
     await page.waitForTimeout(600)
 
     const rows = await page.locator('.dash-filters label').evaluateAll((nodes) => {
