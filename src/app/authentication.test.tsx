@@ -320,7 +320,7 @@ describe('read-only roles surface no mutation controls', () => {
 describe('sign-in page presentation', () => {
   it('states plainly that this is not production security', async () => {
     renderApp({ route: '/login' })
-    expect(await screen.findByText(/not production security/i)).toBeInTheDocument()
+    expect(await screen.findByText(/not production-secure/i)).toBeInTheDocument()
   })
 
   it('labels both fields and marks the password field as a password', async () => {
@@ -340,6 +340,26 @@ describe('sign-in page presentation', () => {
     expect(screen.getByLabelText('Email address')).toHaveValue(CREDENTIALS.admin.email)
     // Still on the sign-in page: filling the form does not authenticate.
     expect(screen.getByRole('heading', { name: /Sign in/i, level: 1 })).toBeInTheDocument()
+  })
+
+  it('returns to the public website from the brand panel link', async () => {
+    renderApp({ route: '/login' })
+    const user = userEvent.setup()
+
+    await user.click(await screen.findByRole('button', { name: /Back to website/i }))
+
+    expect(
+      await screen.findByRole('heading', { name: /Turn risk decisions/i, level: 1 }),
+    ).toBeInTheDocument()
+  })
+
+  it('switches language from the sign-in page itself', async () => {
+    renderApp({ route: '/login' })
+    const user = userEvent.setup()
+
+    await user.click(await screen.findByRole('button', { name: 'KA' }))
+
+    expect(await screen.findByLabelText('ელფოსტის მისამართი')).toBeInTheDocument()
   })
 
   it('renders in Georgian', async () => {

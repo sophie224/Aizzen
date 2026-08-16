@@ -47,7 +47,7 @@ describe('public home page', () => {
     const signIn = await screen.findByRole('button', { name: 'Sign in to platform' })
     await userEvent.click(signIn)
 
-    expect(await screen.findByRole('heading', { name: 'Sign in to Aizzen' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Sign in', level: 1 })).toBeInTheDocument()
   })
 
   it('sends a signed-in user straight into the dashboard', async () => {

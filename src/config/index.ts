@@ -41,6 +41,12 @@ function readAdapter(value: string | undefined): StorageAdapterName {
  *   VITE_STORAGE_ADAPTER = local | onPremiseApi | awsApi   (default: local)
  *   VITE_API_BASE_URL    = https://…                        (API adapters only)
  */
+/**
+ * Product version, shown on the sign-in brand panel exactly as the v7 build
+ * showed it. One constant, so the badge can never drift from what ships.
+ */
+export const APP_VERSION = '3.3'
+
 export const appConfig: AppConfig = {
   storageAdapter: readAdapter(import.meta.env.VITE_STORAGE_ADAPTER as string | undefined),
   apiBaseUrl: (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '',

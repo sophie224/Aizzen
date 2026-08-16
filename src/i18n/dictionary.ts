@@ -43,7 +43,6 @@ export const dictionary = {
   'session.signIn': { en: 'Sign in', ka: 'შესვლა' },
   'session.signOut': { en: 'Sign out', ka: 'გასვლა' },
   'session.signedInAs': { en: 'Signed in as', ka: 'შესული ხართ როგორც' },
-  'session.title': { en: 'Sign in to Aizzen', ka: 'შედით Aizzen-ში' },
   'session.email': { en: 'Email address', ka: 'ელფოსტის მისამართი' },
   'session.password': { en: 'Password', ka: 'პაროლი' },
   // One generic message for every failure — never reveals whether an account
@@ -59,9 +58,35 @@ export const dictionary = {
     ka: 'შესვლა ვერ მოხერხდა. ანგარიში წინასწარ უნდა შექმნას ადმინისტრატორმა.',
   },
   'session.or': { en: 'or', ka: 'ან' },
-  'session.phase1Notice': {
-    en: 'Phase 1 demo sign-in. Credentials are not production security; Sign in with Google arrives in a later phase.',
-    ka: 'Phase 1 სატესტო შესვლა. მონაცემები არ წარმოადგენს საწარმოო უსაფრთხოებას; Google-ით შესვლა დაემატება მოგვიანებით.',
+  'session.backToWebsite': { en: 'Back to website', ka: 'ვებსაიტზე დაბრუნება' },
+  'session.offlinePrototype': {
+    en: 'Offline browser prototype',
+    ka: 'ლოკალური ბრაუზერის პროტოტიპი',
+  },
+  'session.localSecurityNotice': {
+    en: 'Demo-only local authentication. Passwords and data are stored in this browser and are not production-secure.',
+    ka: 'მხოლოდ სატესტო ლოკალური ავტორიზაცია. პაროლები და მონაცემები ინახება ამ ბრაუზერში და production-ისთვის უსაფრთხო არ არის.',
+  },
+  'session.phase2Sso': {
+    en: 'Microsoft 365 / Okta SAML will be activated in Phase 2 when a secure backend and HTTPS callback are available.',
+    ka: 'Microsoft 365 / Okta SAML გააქტიურდება მე-2 ფაზაში, უსაფრთხო backend-ისა და HTTPS callback-ის დამატების შემდეგ.',
+  },
+  'session.brand.eyebrow': { en: 'AVAILABLE SOLUTION', ka: 'ხელმისაწვდომი გადაწყვეტა' },
+  'session.brand.title': {
+    en: 'Risk Management workspace',
+    ka: 'რისკების მართვის სამუშაო სივრცე',
+  },
+  'session.brand.body': {
+    en: 'Sign in to identify, assess, own and monitor enterprise risks. Website-management access is reserved for the Super Administrator.',
+    ka: 'შედით საწარმოს რისკების იდენტიფიკაციის, შეფასების, მფლობელობისა და მონიტორინგისთვის. ვებსაიტის მართვის წვდომა განკუთვნილია მხოლოდ სუპერ ადმინისტრატორისთვის.',
+  },
+  'session.brand.phaseOne': {
+    en: 'Risk Management · available now',
+    ka: 'Risk Management · ხელმისაწვდომია',
+  },
+  'session.brand.phaseTwo': {
+    en: 'Compliance & Audit · coming soon',
+    ka: 'Compliance & Audit · მალე',
   },
 
   // --- language -----------------------------------------------------------
