@@ -31,14 +31,21 @@ describe('public home page', () => {
     expect(screen.getAllByText('Coming soon').length).toBeGreaterThan(0)
   })
 
-  it('offers the public navigation on every public page', async () => {
+  /*
+   * The nav items are links, not buttons: each one is an address the visitor
+   * can copy, open in a new tab and reach with the back button.
+   */
+  it('offers the public navigation as addressable links', async () => {
     renderApp({ route: '/' })
 
     const nav = await screen.findByRole('navigation', { name: 'Public website navigation' })
-    expect(within(nav).getByRole('button', { name: 'Home' })).toBeInTheDocument()
-    expect(within(nav).getByRole('button', { name: 'Solutions' })).toBeInTheDocument()
-    expect(within(nav).getByRole('button', { name: 'Product demo' })).toBeInTheDocument()
-    expect(within(nav).getByRole('button', { name: 'About us' })).toBeInTheDocument()
+    expect(within(nav).getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/')
+    expect(within(nav).getByRole('link', { name: 'Solutions' })).toHaveAttribute(
+      'href',
+      '/#solutions',
+    )
+    expect(within(nav).getByRole('link', { name: 'Product demo' })).toHaveAttribute('href', '/#demo')
+    expect(within(nav).getByRole('link', { name: 'About us' })).toHaveAttribute('href', '/about')
   })
 
   it('sends a signed-out visitor to sign-in, not into the platform', async () => {
@@ -63,15 +70,69 @@ describe('public home page', () => {
     renderApp({ route: '/' })
 
     const nav = await screen.findByRole('navigation', { name: 'Public website navigation' })
-    await userEvent.click(within(nav).getByRole('button', { name: 'About us' }))
+    await userEvent.click(within(nav).getByRole('link', { name: 'About us' }))
 
     expect(await screen.findByRole('heading', { name: /About AIZEN/i, level: 1 })).toBeInTheDocument()
+  })
+
+  /*
+   * Clicking a section must put that section in the URL — otherwise the page
+   * scrolls to somewhere the visitor cannot link to, and the header has no way
+   * of knowing which item to highlight.
+   */
+  it('puts the section in the URL and marks it current', async () => {
+    renderApp({ route: '/' })
+
+    const nav = await screen.findByRole('navigation', { name: 'Public website navigation' })
+    expect(within(nav).getByRole('link', { name: 'Home' })).toHaveAttribute(
+      'aria-current',
+      'location',
+    )
+
+    await userEvent.click(within(nav).getByRole('link', { name: 'Solutions' }))
+
+    expect(within(nav).getByRole('link', { name: 'Solutions' })).toHaveAttribute(
+      'aria-current',
+      'location',
+    )
+    expect(within(nav).getByRole('link', { name: 'Home' })).not.toHaveAttribute('aria-current')
+
+    await userEvent.click(within(nav).getByRole('link', { name: 'Product demo' }))
+
+    expect(within(nav).getByRole('link', { name: 'Product demo' })).toHaveAttribute(
+      'aria-current',
+      'location',
+    )
+    expect(within(nav).getByRole('link', { name: 'Solutions' })).not.toHaveAttribute('aria-current')
+  })
+
+  it('opens a shared section link with that section current', async () => {
+    renderApp({ route: '/#demo' })
+
+    const nav = await screen.findByRole('navigation', { name: 'Public website navigation' })
+    expect(within(nav).getByRole('link', { name: 'Product demo' })).toHaveAttribute(
+      'aria-current',
+      'location',
+    )
+  })
+
+  it('returns to the top of the page without a fragment', async () => {
+    renderApp({ route: '/#solutions' })
+
+    const nav = await screen.findByRole('navigation', { name: 'Public website navigation' })
+    await userEvent.click(within(nav).getByRole('link', { name: 'Home' }))
+
+    expect(within(nav).getByRole('link', { name: 'Home' })).toHaveAttribute(
+      'aria-current',
+      'location',
+    )
+    expect(within(nav).getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/')
   })
 
   it('renders Georgian copy when the language is Georgian', async () => {
     renderApp({ route: '/', language: 'ka' })
 
-    expect(await screen.findByRole('button', { name: 'მთავარი' })).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'მთავარი' })).toBeInTheDocument()
     expect(
       screen.getByRole('heading', { name: /გადააქციეთ რისკის გადაწყვეტილებები/, level: 1 }),
     ).toBeInTheDocument()

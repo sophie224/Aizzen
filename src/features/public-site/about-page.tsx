@@ -47,7 +47,7 @@ export function PublicAboutPage() {
         <a className="skip-link" href="#public-main">
           {t('nav.skipToContent')}
         </a>
-        <PublicHeader active="about" />
+        <PublicHeader />
         <main id="public-main">
           <p className="aizen-public-loading">{t('state.loading')}</p>
         </main>
@@ -99,7 +99,7 @@ export function PublicAboutPage() {
         {t('nav.skipToContent')}
       </a>
 
-      <PublicHeader active="about" />
+      <PublicHeader />
 
       <main id="public-main">
         <section className="aizen-about-hero">

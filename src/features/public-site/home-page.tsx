@@ -1,5 +1,5 @@
-import { useEffect, type CSSProperties } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { type CSSProperties } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAppData } from '../../data/app-data-context.ts'
 import { canAccess } from '../../domain/permissions/index.ts'
 import type { SiteSolution } from '../../domain/types/index.ts'
@@ -8,9 +8,9 @@ import { useCurrentUser } from '../../app/session/use-current-user.ts'
 import { HeroCarousel } from './hero-carousel.tsx'
 import { PublicFooter } from './public-footer.tsx'
 import { PublicHeader } from './public-header.tsx'
-import { scrollToSection, scrollToTop } from './scrolling.ts'
 import { SiteIcon, type SiteIconName } from './site-icons.tsx'
 import { SiteVideo } from './site-video.tsx'
+import { useHashScroll } from './use-hash-scroll.ts'
 import './public-site.css'
 
 /*
@@ -42,9 +42,12 @@ export function PublicHomePage() {
   const { user, context } = useCurrentUser()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    scrollToTop(false)
-  }, [])
+  /*
+   * Moves to the section named in the URL — `/#solutions` from the header, a
+   * shared link, or the back button — and to the top when there is none.
+   * Waits for siteContent, because before it the sections do not exist.
+   */
+  useHashScroll(state?.siteContent !== undefined)
 
   /*
    * The loading branch keeps the same element order as the loaded page —
@@ -55,10 +58,10 @@ export function PublicHomePage() {
   if (!content) {
     return (
       <div className="aizen-public-site">
-        <a className="skip-link" href="#public-main">
+        {/* <a className="skip-link" href="#public-main">
           {t('nav.skipToContent')}
-        </a>
-        <PublicHeader active="home" />
+        </a> */}
+        <PublicHeader />
         <main id="public-main">
           <p className="aizen-public-loading">{t('state.loading')}</p>
         </main>
@@ -81,11 +84,11 @@ export function PublicHomePage() {
 
   return (
     <div className="aizen-public-site">
-      <a className="skip-link" href="#public-main">
+      {/* <a className="skip-link" href="#public-main">
         {t('nav.skipToContent')}
-      </a>
+      </a> */}
 
-      <PublicHeader active="home" />
+      <PublicHeader />
 
       <main id="public-main">
         <section className="aizen-hero" id="home">
@@ -109,16 +112,11 @@ export function PublicHomePage() {
               >
                 {text(content.heroPrimaryCta, content.heroPrimaryCtaKa)}
               </button>
-              <button
-                type="button"
-                className="aizen-btn aizen-btn--secondary aizen-btn--lg"
-                onClick={() => {
-                  scrollToSection('demo')
-                }}
-              >
+              {/* Same destination as the header's Product demo, so same link. */}
+              <Link to="/#demo" className="aizen-btn aizen-btn--secondary aizen-btn--lg">
                 <SiteIcon name="play" size={16} />
                 {text(content.heroSecondaryCta, content.heroSecondaryCtaKa)}
-              </button>
+              </Link>
             </div>
 
             <div className="aizen-proof-row">

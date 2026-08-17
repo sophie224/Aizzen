@@ -61,7 +61,7 @@ describe('routes render', () => {
     expect(
       await screen.findByRole('heading', { name: /Turn risk decisions/i, level: 1 }),
     ).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: 'About us' }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('link', { name: 'About us' }).length).toBeGreaterThan(0)
   })
 
   it('renders the public about page without a session', async () => {

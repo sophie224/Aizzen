@@ -1,20 +1,29 @@
 import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAppData } from '../../data/app-data-context.ts'
 import { canAccess, canOpenWebsiteAdministration } from '../../domain/permissions/index.ts'
 import { pickLanguage, useTranslation } from '../../i18n/index.ts'
 import { useAuth } from '../../app/session/use-auth.ts'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
-import { scrollToSection, scrollToTop } from './scrolling.ts'
+import { activeNavKey, hrefForTarget, PUBLIC_NAV_TARGETS } from './sections.ts'
 import { siteAssets } from './site-assets.ts'
 import { SiteIcon } from './site-icons.tsx'
+import { useSectionSpy } from './use-section-spy.ts'
 
 /*
  * Public website header (PRD public site; ARCHITECTURE.md §8.5).
  *
  * Navigation is Home / Solutions / Product demo / About us, exactly as the v7
- * build shipped it. Solutions and Product demo are anchors inside the home
- * page, so they scroll when already there and navigate-then-scroll otherwise.
+ * build shipped it. Solutions and Product demo are sections of the home page,
+ * addressed by URL fragment — `/#solutions`, `/#demo`.
+ *
+ * They are ANCHORS, not buttons: a destination the visitor can open in a new
+ * tab, copy, bookmark and reach with the back button is a link, and the
+ * browser gives that behaviour for free. `useHashScroll` on the page performs
+ * the jump; `useSectionSpy` writes the fragment back as the visitor scrolls.
+ * The highlighted item is derived from the router — pathname plus fragment —
+ * never passed in by whichever page rendered the header, so the URL and the
+ * highlight cannot drift apart.
  *
  * The header shows what the visitor can actually reach: signed out, one
  * "Sign in" button; signed in, a route into the platform, plus Website
@@ -22,11 +31,7 @@ import { SiteIcon } from './site-icons.tsx'
  * the route guards remain the enforcement point.
  */
 
-export type PublicNavKey = 'home' | 'solutions' | 'demo' | 'about'
-
-interface PublicHeaderProps {
-  active?: PublicNavKey
-}
+export type { PublicNavKey } from './sections.ts'
 
 /** AIZEN cotton-flower mark, top-left on every public page. */
 export function BrandLockup({ brandName, descriptor }: { brandName: string; descriptor: string }) {
@@ -43,7 +48,7 @@ export function BrandLockup({ brandName, descriptor }: { brandName: string; desc
   )
 }
 
-export function PublicHeader({ active = 'home' }: PublicHeaderProps) {
+export function PublicHeader() {
   const { t, language, setLanguage } = useTranslation()
   const { state } = useAppData()
   const { user, context } = useCurrentUser()
@@ -65,57 +70,48 @@ export function PublicHeader({ active = 'home' }: PublicHeaderProps) {
     navigate(canOpenPlatform ? '/dashboard' : '/login')
   }
 
-  const go = (path: string, sectionId = '') => {
-    setMenuOpen(false)
+  const active = activeNavKey(location.pathname, location.hash)
 
-    if (path === location.pathname) {
-      if (sectionId) scrollToSection(sectionId)
-      else scrollToTop()
-      return
-    }
+  // Only the home page carries sections, and only once its content is on screen.
+  useSectionSpy(location.pathname === '/' && content !== undefined)
 
-    navigate(path)
-    // The target section only exists once the destination page has mounted.
-    if (sectionId) {
-      window.setTimeout(() => {
-        scrollToSection(sectionId)
-      }, 180)
-    }
+  const navLabels: Record<string, string> = {
+    home: t('public.nav.home'),
+    solutions: t('public.nav.solutions'),
+    demo: t('public.nav.demo'),
+    about: t('public.nav.about'),
   }
-
-  const navItems: Array<{ key: PublicNavKey; label: string; go: () => void }> = [
-    { key: 'home', label: t('public.nav.home'), go: () => go('/') },
-    { key: 'solutions', label: t('public.nav.solutions'), go: () => go('/', 'solutions') },
-    { key: 'demo', label: t('public.nav.demo'), go: () => go('/', 'demo') },
-    { key: 'about', label: t('public.nav.about'), go: () => go('/about') },
-  ]
 
   const renderNav = (className: string) => (
     <nav className={className} aria-label={t('public.nav.aria')}>
-      {navItems.map((item) => (
-        <button
-          key={item.key}
-          type="button"
-          className={active === item.key ? 'active' : ''}
-          aria-current={active === item.key ? 'page' : undefined}
-          onClick={item.go}
+      {PUBLIC_NAV_TARGETS.map((target) => (
+        <Link
+          key={target.key}
+          to={hrefForTarget(target)}
+          className={active === target.key ? 'active' : ''}
+          /*
+           * `page` for a route, `location` for a section within the page the
+           * visitor is already on — the distinction a screen reader needs.
+           */
+          aria-current={
+            active === target.key ? (target.sectionId ? 'location' : 'page') : undefined
+          }
+          onClick={() => {
+            setMenuOpen(false)
+          }}
         >
-          {item.label}
-        </button>
+          {navLabels[target.key]}
+        </Link>
       ))}
     </nav>
   )
 
   return (
     <header className="aizen-public-header">
-      <button
-        type="button"
-        className="aizen-public-brand"
-        onClick={() => go('/')}
-        aria-label={brandName}
-      >
+      {/* The brand is a link home, like every site header on the web. */}
+      <Link to="/" className="aizen-public-brand" aria-label={brandName}>
         <BrandLockup brandName={brandName} descriptor={descriptor} />
-      </button>
+      </Link>
 
       {renderNav('aizen-public-nav')}
 

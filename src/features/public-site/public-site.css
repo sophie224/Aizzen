@@ -16,6 +16,8 @@
   --aizen-line: var(--success-soft);
   --aizen-line-strong: var(--border);
   --aizen-muted: var(--text-secondary);
+  /* Height of the sticky header; also the offset a fragment link must clear. */
+  --aizen-header-height: 82px;
 
   min-height: 100vh;
   background: var(--surface);
@@ -88,14 +90,26 @@
 
 /* --- header --------------------------------------------------------------- */
 
+/*
+ * A section addressed by URL fragment must land below the sticky header, not
+ * behind it — the browser's own offset mechanism, so it applies to a pasted
+ * link and to `scrollIntoView` alike.
+ */
+.aizen-hero,
+.aizen-section {
+  scroll-margin-block-start: var(--aizen-header-height);
+}
+
 .aizen-public-header {
-  height: 82px;
+  position: fixed;
+  width: 100%;
+  height: var(--aizen-header-height);
   padding: 0 clamp(24px, 5vw, 84px);
   display: flex;
   align-items: center;
   gap: 30px;
   justify-content: space-between;
-  position: sticky;
+  /* position: sticky; */
   top: 0;
   z-index: var(--layer-header);
   background: color-mix(in oklab, var(--surface) 90%, transparent);
@@ -178,7 +192,7 @@
   margin-inline-start: auto;
 }
 
-.aizen-public-nav button {
+.aizen-public-nav a {
   border: 0;
   background: transparent;
   border-radius: var(--radius-card);
@@ -186,6 +200,7 @@
   color: var(--text-secondary);
   font-weight: 730;
   font-size: 13px;
+  text-decoration: none;
   transition:
     background-color var(--motion-state) var(--ease),
     border-color var(--motion-state) var(--ease),
@@ -193,8 +208,8 @@
   cursor: pointer;
 }
 
-.aizen-public-nav button:hover,
-.aizen-public-nav button.active {
+.aizen-public-nav a:hover,
+.aizen-public-nav a.active {
   background: var(--surface-sunken);
   color: var(--aizen-navy);
 }
@@ -1465,7 +1480,7 @@
     box-shadow: 0 20px 50px color-mix(in oklab, var(--brand-ink) 16%, transparent);
   }
 
-  .aizen-mobile-nav button {
+  .aizen-mobile-nav a {
     border: 0;
     background: transparent;
     text-align: left;
@@ -1473,11 +1488,12 @@
     border-radius: var(--radius-card);
     color: var(--text-secondary);
     font-weight: 750;
+    text-decoration: none;
     cursor: pointer;
   }
 
-  .aizen-mobile-nav button:hover,
-  .aizen-mobile-nav button.active {
+  .aizen-mobile-nav a:hover,
+  .aizen-mobile-nav a.active {
     background: var(--surface-sunken);
     color: var(--aizen-navy);
   }
@@ -1558,8 +1574,11 @@
 }
 
 @media (max-width: 780px) {
+  .aizen-public-site {
+    --aizen-header-height: 72px;
+  }
+
   .aizen-public-header {
-    height: 72px;
     padding: 0 18px;
   }
 
