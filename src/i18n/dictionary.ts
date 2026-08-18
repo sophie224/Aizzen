@@ -681,7 +681,26 @@ export const dictionary = {
   'site.group.about': { en: 'About us', ka: 'ჩვენ შესახებ' },
   'site.group.team': { en: 'Team members', ka: 'გუნდის წევრები' },
   'site.group.video': { en: 'Demo media', ka: 'დემო მედია' },
+  'site.group.requestDemo': { en: 'Request-demo page', ka: 'დემოს გვერდი' },
+  'site.group.requests': { en: 'Demo requests', ka: 'დემოს მოთხოვნები' },
   'site.group.footer': { en: 'Contact and footer', ka: 'კონტაქტი და ფუტერი' },
+  'site.requests.empty': {
+    en: 'No demo requests have been submitted yet.',
+    ka: 'დემოს მოთხოვნები ჯერ არ არის გაგზავნილი.',
+  },
+  'site.requests.submitted': { en: 'Submitted', ka: 'გაგზავნილია' },
+  'site.requests.contact': { en: 'Contact', ka: 'კონტაქტი' },
+  'site.requests.company': { en: 'Company', ka: 'კომპანია' },
+  'site.requests.interest': { en: 'Interest', ka: 'ინტერესი' },
+  'site.requests.status': { en: 'Status', ka: 'სტატუსი' },
+  'site.requests.message': { en: 'Message', ka: 'შეტყობინება' },
+  'site.requests.handled': { en: 'Last updated by', ka: 'ბოლოს განაახლა' },
+  // The status change is saved on its own, not with the content form — it is a
+  // different record and carries its own audit event.
+  'site.requests.statusHint': {
+    en: 'Changing a status saves immediately and is recorded in the audit trail.',
+    ka: 'სტატუსის შეცვლა ინახება მაშინვე და აისახება აუდიტის ჟურნალში.',
+  },
   'site.english': { en: 'English', ka: 'ინგლისური' },
   'site.georgian': { en: 'Georgian', ka: 'ქართული' },
   'site.addTeamMember': { en: 'Add team member', ka: 'გუნდის წევრის დამატება' },
@@ -982,6 +1001,69 @@ export const dictionary = {
   'public.footer.rights': { en: '© 2026 AIZEN', ka: '© 2026 AIZEN' },
   'public.footer.localOnly': { en: 'Local-only prototype', ka: 'მხოლოდ ლოკალური პროტოტიპი' },
   'public.demoTitle': { en: 'AIZEN product demo', ka: 'AIZEN პროდუქტის დემო' },
+  'public.requestDemo': { en: 'Request demo', ka: 'დემოს მოთხოვნა' },
+
+  // --- request a demo -----------------------------------------------------
+  // Chrome only. The headline, description, highlights, consent wording and
+  // acknowledgement are site content, edited in Website Administration.
+  'demo.formTitle': { en: 'Request a demo', ka: 'დემოს მოთხოვნა' },
+  'demo.formIntro': {
+    en: 'Fields marked with an asterisk are required.',
+    ka: 'ვარსკვლავით მონიშნული ველები სავალდებულოა.',
+  },
+  'demo.field.firstName': { en: 'First name', ka: 'სახელი' },
+  'demo.field.lastName': { en: 'Last name', ka: 'გვარი' },
+  'demo.field.email': { en: 'Work email', ka: 'სამსახურის ელფოსტა' },
+  'demo.field.jobTitle': { en: 'Job title', ka: 'თანამდებობა' },
+  'demo.field.company': { en: 'Company', ka: 'კომპანია' },
+  'demo.field.country': { en: 'Country', ka: 'ქვეყანა' },
+  'demo.field.phone': { en: 'Phone number', ka: 'ტელეფონის ნომერი' },
+  'demo.field.solutions': { en: 'Solutions of interest', ka: 'საინტერესო გადაწყვეტები' },
+  'demo.field.message': { en: 'Anything we should prepare?', ka: 'რა უნდა მოვამზადოთ?' },
+  'demo.optional': { en: 'Optional', ka: 'არასავალდებულო' },
+  'demo.countryPlaceholder': { en: 'Select a country', ka: 'აირჩიეთ ქვეყანა' },
+  'demo.submit': { en: 'Submit request', ka: 'მოთხოვნის გაგზავნა' },
+  'demo.submitting': { en: 'Submitting…', ka: 'იგზავნება…' },
+  'demo.contactDirect': { en: 'Prefer to talk first?', ka: 'გირჩევნიათ ჯერ გვესაუბროთ?' },
+  // Phase 1 is honest about where the submission goes — no promise of a
+  // server-side pipeline the prototype does not have.
+  'demo.storageNotice': {
+    en: 'Prototype notice: this request is stored in this browser only. It creates no account and grants no access to the platform.',
+    ka: 'პროტოტიპის შენიშვნა: მოთხოვნა ინახება მხოლოდ ამ ბრაუზერში. ის არ ქმნის ანგარიშს და არ იძლევა პლატფორმაზე წვდომას.',
+  },
+  'demo.error.summary': {
+    en: 'Please check the highlighted fields and try again.',
+    ka: 'გთხოვთ შეამოწმოთ მონიშნული ველები და სცადოთ ხელახლა.',
+  },
+  'demo.error.required': { en: 'This field is required.', ka: 'ველის შევსება სავალდებულოა.' },
+  'demo.error.tooLong': { en: 'This value is too long.', ka: 'მნიშვნელობა ძალიან გრძელია.' },
+  'demo.error.email': {
+    en: 'Enter a valid email address.',
+    ka: 'შეიყვანეთ ელფოსტის სწორი მისამართი.',
+  },
+  'demo.error.phone': {
+    en: 'Enter a valid phone number.',
+    ka: 'შეიყვანეთ ტელეფონის სწორი ნომერი.',
+  },
+  'demo.error.country': { en: 'Select a country.', ka: 'აირჩიეთ ქვეყანა.' },
+  'demo.error.solutions': {
+    en: 'Select at least one solution.',
+    ka: 'აირჩიეთ სულ მცირე ერთი გადაწყვეტა.',
+  },
+  'demo.error.consent': {
+    en: 'Your consent is required before we can store these details.',
+    ka: 'მონაცემების შესანახად საჭიროა თქვენი თანხმობა.',
+  },
+  'demo.error.save': {
+    en: 'The request could not be saved. Please try again.',
+    ka: 'მოთხოვნის შენახვა ვერ მოხერხდა. სცადეთ ხელახლა.',
+  },
+  'demo.success.title': { en: 'Request received', ka: 'მოთხოვნა მიღებულია' },
+  'demo.success.another': { en: 'Submit another request', ka: 'კიდევ ერთი მოთხოვნის გაგზავნა' },
+  'demo.status.New': { en: 'New', ka: 'ახალი' },
+  'demo.status.Contacted': { en: 'Contacted', ka: 'დაკავშირებული' },
+  'demo.status.Qualified': { en: 'Qualified', ka: 'კვალიფიცირებული' },
+  'demo.status.Closed': { en: 'Closed', ka: 'დახურული' },
 
   // --- generic actions ----------------------------------------------------
   'action.cancel': { en: 'Cancel', ka: 'გაუქმება' },

@@ -39,7 +39,7 @@ const EXPECTED_PERMISSIONS: Record<string, Record<ModuleName, PermissionLevel>> 
 describe('seed state', () => {
   it('is at the current schema version', () => {
     expect(createSeedState().schemaVersion).toBe(SCHEMA_VERSION)
-    expect(SCHEMA_VERSION).toBe(11)
+    expect(SCHEMA_VERSION).toBe(12)
   })
 
   it('passes canonical validation', () => {

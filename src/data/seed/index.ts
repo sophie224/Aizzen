@@ -68,6 +68,8 @@ export function createSeedState(): AppState {
     dashboards: createSeedDashboards(),
     reportTemplates: createSeedReportTemplates(),
     auditEvents: [],
+    // Intake starts empty: demo requests only ever arrive from the public form.
+    demoRequests: [],
 
     branding: createSeedBranding(),
     ssoConfig: createSeedSsoConfig(),

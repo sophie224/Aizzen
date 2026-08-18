@@ -68,7 +68,28 @@
   ],
   "videoUrl": "",
   "videoData": "",
+  "requestDemoEyebrow": "Request a demo",
+  "requestDemoEyebrowKa": "დემოს მოთხოვნა",
+  "requestDemoTitle": "See AIZEN Risk Management on your own register",
+  "requestDemoTitleKa": "იხილეთ AIZEN Risk Management თქვენს რეესტრზე",
+  "requestDemoDescription": "Tell us a little about your organisation and we will walk you through the risk register, the configurable rating matrix, ownership and reporting — using scenarios that match how your team already works.",
+  "requestDemoDescriptionKa": "მოგვწერეთ თქვენი ორგანიზაციის შესახებ და გაჩვენებთ რისკების რეესტრს, კონფიგურირებად შეფასების მატრიცას, პასუხისმგებლობებსა და ანგარიშგებას — თქვენს სამუშაო პროცესზე მორგებული სცენარებით.",
+  "requestDemoHighlights": [
+    "A 45-minute guided walkthrough, tailored to your risk taxonomy",
+    "Answers on the 2026 rating matrix, ownership model and access scopes",
+    "A follow-up plan for a pilot on your own business units"
+  ],
+  "requestDemoHighlightsKa": [
+    "45-წუთიანი გაცნობითი სესია თქვენს რისკების ტაქსონომიაზე მორგებით",
+    "პასუხები 2026 წლის შეფასების მატრიცაზე, პასუხისმგებლობებსა და წვდომებზე",
+    "შემდგომი გეგმა პილოტისთვის თქვენს ბიზნეს-ერთეულებზე"
+  ],
+  "requestDemoConsent": "I agree that AIZEN may store these details in order to contact me about this request.",
+  "requestDemoConsentKa": "ვეთანხმები, რომ AIZEN შეინახავს ამ მონაცემებს ამ მოთხოვნაზე დასაკავშირებლად.",
+  "requestDemoSuccess": "Thank you — your request has been received. A member of the AIZEN team will contact you shortly.",
+  "requestDemoSuccessKa": "გმადლობთ — თქვენი მოთხოვნა მიღებულია. AIZEN-ის გუნდი მალე დაგიკავშირდებათ.",
   "contactEmail": "hello@aizen.local",
+  "contactPhone": "+995 32 2 000 000",
   "footerText": "Plan clearly. Manage accountably. Grow with confidence.",
   "footerTextKa": "დაგეგმეთ მკაფიოდ. მართეთ პასუხისმგებლობით. გაიზარდეთ თავდაჯერებით.",
   "solutions": [

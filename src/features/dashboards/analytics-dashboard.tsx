@@ -148,6 +148,17 @@ export function AnalyticsDashboard() {
   const setFilters = (next: RiskFilters, nextBasis: AssessmentType = effectiveBasis) => {
     const search = filtersToParams(next)
     if (nextBasis !== 'residual') search.set('basis', nextBasis)
+    /*
+     * An empty query is what re-applies the user's default view, so it cannot
+     * also mean "the user chose exactly the defaults" — a visitor whose default
+     * view is on Target could never switch the heat map back to Residual: the
+     * choice emptied the query and the view immediately reinstated Target.
+     *
+     * Writing the basis keeps a deliberate choice in the URL, where it is also
+     * shareable and survives a reload. `applyView` solves the same ambiguity
+     * with its own marker.
+     */
+    if (search.toString().length === 0) search.set('basis', nextBasis)
     setParams(search)
   }
 

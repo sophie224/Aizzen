@@ -1,0 +1,399 @@
+/*
+ * Public "Request a demo" page.
+ *
+ * Same two-panel idea as the About hero — brand copy on one side, the thing the
+ * visitor came to do on the other — so the page reads as part of the site
+ * rather than a bolted-on form. Every colour, radius and duration comes from a
+ * token; this surface renders no rating, so no risk colour appears here.
+ */
+
+.aizen-request-demo-page main {
+  background: var(--surface-page);
+}
+
+.aizen-request-demo {
+  /*
+   * The public header is fixed, so the first line of the page has to clear it
+   * — at narrow widths the header is taller than the padding would otherwise
+   * be, and the eyebrow would slide underneath it.
+   */
+  padding: calc(var(--aizen-header-height) + clamp(24px, 3vw, 40px)) clamp(24px, 7vw, 110px)
+    clamp(72px, 8vw, 120px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 560px);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: start;
+  background:
+    radial-gradient(circle at 88% 8%, color-mix(in oklab, var(--brand-primary) 16%, transparent), transparent 34%),
+    linear-gradient(180deg, var(--surface), var(--surface-sunken));
+}
+
+/* --- copy panel ----------------------------------------------------------- */
+
+.aizen-request-demo-copy {
+  position: sticky;
+  /* Clears the sticky header when the form is taller than the copy. */
+  top: calc(var(--aizen-header-height) + var(--space-32));
+}
+
+.aizen-request-demo-copy h1 {
+  font-size: clamp(38px, 4.6vw, 62px);
+  line-height: 1.04;
+  letter-spacing: -0.05em;
+  color: var(--aizen-ink);
+  margin: 0 0 var(--space-24);
+  max-width: 15ch;
+}
+
+.aizen-request-demo-copy > p {
+  font-size: clamp(16px, 1.4vw, 19px);
+  line-height: 1.72;
+  color: var(--text-secondary);
+  max-width: 60ch;
+  margin: 0;
+}
+
+.aizen-request-demo-highlights {
+  list-style: none;
+  margin: var(--space-32) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-12);
+  max-width: 60ch;
+}
+
+.aizen-request-demo-highlights li {
+  display: flex;
+  align-items: start;
+  gap: var(--space-12);
+  color: var(--aizen-ink);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.aizen-request-demo-highlights svg {
+  color: var(--site-indigo);
+  flex: none;
+  margin-block-start: 2px;
+}
+
+.aizen-request-demo-contact {
+  margin-block-start: var(--space-40);
+  padding-block-start: var(--space-24);
+  border-block-start: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-16);
+}
+
+.aizen-request-demo-contact > span {
+  font-size: 12px;
+  font-weight: 750;
+  color: var(--text-secondary);
+}
+
+.aizen-request-demo-contact a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--aizen-navy);
+  text-decoration: none;
+  border-block-end: 1px solid transparent;
+  transition: border-color var(--motion-state) var(--ease);
+}
+
+.aizen-request-demo-contact a:hover {
+  border-block-end-color: var(--aizen-navy);
+}
+
+/* --- form card ------------------------------------------------------------ */
+
+.aizen-request-demo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-modal);
+  box-shadow: 0 28px 64px color-mix(in oklab, var(--brand-ink) 12%, transparent);
+  padding: clamp(24px, 3vw, 40px);
+}
+
+.aizen-request-demo-form-head {
+  margin-block-end: var(--space-24);
+}
+
+.aizen-request-demo-form-head h2 {
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--aizen-ink);
+  margin: 0 0 var(--space-4);
+}
+
+.aizen-request-demo-form-head p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.aizen-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-16);
+}
+
+.aizen-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.aizen-field--wide {
+  grid-column: 1 / -1;
+}
+
+.aizen-field label,
+.aizen-field-set legend,
+.aizen-consent span {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--aizen-ink);
+}
+
+/* The required marker; the label text already carries the meaning. */
+.aizen-field label b,
+.aizen-field-set legend b {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.aizen-field label i {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.aizen-field input,
+.aizen-field select,
+.aizen-field textarea {
+  font: inherit;
+  font-size: 14px;
+  color: var(--aizen-ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-12);
+  height: 44px;
+  width: 100%;
+  transition:
+    border-color var(--motion-state) var(--ease),
+    background-color var(--motion-state) var(--ease);
+}
+
+.aizen-field textarea {
+  height: auto;
+  padding-block: var(--space-12);
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.aizen-field input:hover,
+.aizen-field select:hover,
+.aizen-field textarea:hover {
+  border-color: var(--border-strong);
+}
+
+.aizen-field input:focus-visible,
+.aizen-field select:focus-visible,
+.aizen-field textarea:focus-visible,
+.aizen-choice input:focus-visible,
+.aizen-consent input:focus-visible {
+  outline: 2px solid var(--brand-primary-ring);
+  outline-offset: 2px;
+}
+
+/* Invalid state is never colour alone — a message renders beneath the field. */
+.aizen-field [aria-invalid='true'],
+.aizen-consent input[aria-invalid='true'] {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.aizen-field-error {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--danger);
+}
+
+.aizen-form-alert {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--danger);
+  background: var(--danger-soft);
+  border: 1px solid color-mix(in oklab, var(--danger) 30%, transparent);
+  border-radius: var(--radius-control);
+  padding: var(--space-12);
+  margin: 0 0 var(--space-16);
+}
+
+/* --- solutions of interest ------------------------------------------------ */
+
+.aizen-field-set {
+  border: 0;
+  padding: 0;
+  margin: var(--space-24) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.aizen-field-set legend {
+  padding: 0;
+  margin-block-end: var(--space-12);
+}
+
+.aizen-choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.aizen-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: var(--space-8) var(--space-16);
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--aizen-ink);
+  cursor: pointer;
+  transition:
+    border-color var(--motion-state) var(--ease),
+    background-color var(--motion-state) var(--ease);
+}
+
+.aizen-choice:hover {
+  border-color: var(--border-strong);
+}
+
+.aizen-choice:has(input:checked) {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-soft);
+}
+
+.aizen-choice input,
+.aizen-consent input {
+  accent-color: var(--brand-primary);
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* The optional message sits below the choices, not against them. */
+.aizen-field-set + .aizen-field {
+  margin-block-start: var(--space-24);
+}
+
+/* --- consent, submit, notice ---------------------------------------------- */
+
+.aizen-consent {
+  display: flex;
+  align-items: start;
+  gap: var(--space-12);
+  margin-block-start: var(--space-24);
+  cursor: pointer;
+}
+
+.aizen-consent span {
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.aizen-consent input {
+  margin-block-start: 2px;
+}
+
+.aizen-consent + .aizen-field-error {
+  display: block;
+  margin-block-start: var(--space-8);
+}
+
+.aizen-request-demo-submit {
+  width: 100%;
+  margin-block-start: var(--space-24);
+}
+
+.aizen-request-demo-notice {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin: var(--space-16) 0 0;
+}
+
+/* --- acknowledgement ------------------------------------------------------ */
+
+.aizen-request-demo-success {
+  text-align: center;
+  padding-block: var(--space-24);
+}
+
+.aizen-request-demo-tick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-pill);
+  background: var(--success-soft);
+  color: var(--success);
+  margin-block-end: var(--space-24);
+}
+
+.aizen-request-demo-success h2 {
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  color: var(--aizen-ink);
+  margin: 0 0 var(--space-12);
+}
+
+.aizen-request-demo-success p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin: 0 auto;
+  max-width: 44ch;
+}
+
+.aizen-request-demo-success-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  margin-block-start: var(--space-32);
+}
+
+/* --- narrow viewports ----------------------------------------------------- */
+
+@media (width <= 980px) {
+  .aizen-request-demo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .aizen-request-demo-copy {
+    position: static;
+  }
+}
+
+@media (width <= 560px) {
+  .aizen-field-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

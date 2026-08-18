@@ -349,3 +349,71 @@ describe('bilingual dashboard', () => {
     expect(screen.getByText('ღია რისკები')).toBeInTheDocument()
   })
 })
+
+/*
+ * A default view is applied whenever the URL carries no query of its own. That
+ * makes the empty query ambiguous — "nothing chosen yet" and "chosen exactly
+ * the defaults" look identical — so any choice that produces an empty query
+ * has to be written into the URL explicitly, or the default view undoes it the
+ * moment it is made.
+ */
+describe('a default view does not override a deliberate choice', () => {
+  async function seedDefaultTargetView() {
+    await seed((state) => {
+      state.dashboardViews = [
+        {
+          id: 'dview_default',
+          name: 'Target view',
+          userId: 'usr_admin',
+          filters: {},
+          basis: 'target',
+          isDefault: true,
+        },
+      ]
+    })
+  }
+
+  it('lets the user switch back to Residual from a default Target view', async () => {
+    await seedDefaultTargetView()
+    renderDashboard()
+    await screen.findByRole('heading', { name: 'Dashboard', level: 1 })
+
+    // The default view opens the page on Target.
+    expect(screen.getByRole('radio', { name: 'Target' })).toBeChecked()
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('radio', { name: 'Residual' }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('radio', { name: 'Residual' })).toBeChecked()
+    })
+    expect(screen.getByRole('radio', { name: 'Target' })).not.toBeChecked()
+    // The choice is in the URL, so it survives a reload and can be shared.
+    expect(url()).toContain('basis=residual')
+  })
+
+  it('lets the user clear the last filter without the default view snapping back', async () => {
+    await seed((state) => {
+      state.dashboardViews = [
+        {
+          id: 'dview_default',
+          name: 'Target view',
+          userId: 'usr_admin',
+          filters: {},
+          basis: 'target',
+          isDefault: true,
+        },
+      ]
+    })
+    renderDashboard('usr_admin', '/dashboard?status=Monitoring')
+    await screen.findByRole('heading', { name: 'Dashboard', level: 1 })
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: /Risk status: Monitoring/i }))
+
+    await waitFor(() => {
+      expect(url()).not.toContain('status=Monitoring')
+    })
+    expect(screen.getByRole('radio', { name: 'Residual' })).toBeChecked()
+  })
+})

@@ -1,5 +1,6 @@
 import type {
   AttributeType,
+  DemoRequestStatus,
   EntityStatus,
   Language,
   PermissionSet,
@@ -306,7 +307,28 @@ export interface SiteContent {
   /** Base64 data URL for an uploaded demo clip. */
   videoData: string
 
+  /** Copy for the public "Request a demo" page. */
+  requestDemoEyebrow: string
+  requestDemoEyebrowKa: string
+  requestDemoTitle: string
+  requestDemoTitleKa: string
+  requestDemoDescription: string
+  requestDemoDescriptionKa: string
+  requestDemoHighlights: string[]
+  requestDemoHighlightsKa: string[]
+  /**
+   * Consent wording shown beside the opt-in box. Editable because it is a
+   * legal statement, not chrome — it must be changeable without a release.
+   */
+  requestDemoConsent: string
+  requestDemoConsentKa: string
+  /** Acknowledgement shown after a request is accepted. */
+  requestDemoSuccess: string
+  requestDemoSuccessKa: string
+
   contactEmail: string
+  /** Shown on the request-demo page beside the contact email; may be blank. */
+  contactPhone: string
   footerText: string
   footerTextKa: string
 
@@ -314,6 +336,54 @@ export interface SiteContent {
 
   updatedAt: string
   updatedBy: string
+}
+
+/**
+ * A demo request submitted from the public website.
+ *
+ * Marketing intake, deliberately outside the risk domain: it carries no
+ * assessment, takes part in no rating and never grants access. Submitting one
+ * creates NO user account and no permission — an administrator still creates
+ * the account by hand, which is what keeps auto-provisioning off the table
+ * (ARCHITECTURE.md §6.2).
+ *
+ * `solutionIds` references `SiteSolution.id`, never a display label, so
+ * renaming a solution card leaves historical requests readable.
+ *
+ * Phase 1 note: this record holds personal data and, like all Phase 1 state,
+ * lives in the visitor's own browser storage. Nothing here is a substitute for
+ * the server-side intake endpoint Phase 2 introduces.
+ */
+export interface DemoRequest {
+  /** `demo_<timestamp>_<random>`. */
+  id: string
+  /** UTC ISO 8601. */
+  submittedAt: string
+
+  firstName: string
+  lastName: string
+  /** Normalised to lower case; the intake key a follow-up is matched on. */
+  email: string
+  jobTitle: string
+  company: string
+  country: string
+  phone: string
+  /** Ids of the `SiteSolution` cards the visitor asked about. */
+  solutionIds: string[]
+  /** Optional free text from the visitor. */
+  message: string
+  /** Explicit opt-in for storing the submission. Never defaulted to true. */
+  consent: boolean
+  /** Language the form was submitted in, so the reply can match it. */
+  language: Language
+
+  status: DemoRequestStatus
+  /** User id of whoever last changed the status; empty while untouched. */
+  handledBy: string
+  /** UTC ISO 8601 of that change; empty while untouched. */
+  handledAt: string
+  /** Internal follow-up notes, never shown on the public site. */
+  notes: string
 }
 
 /** Session-local, non-authoritative UI preferences. */

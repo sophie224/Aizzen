@@ -38,7 +38,7 @@ describe('legacy v7 -> current migration', () => {
   it('produces state that satisfies canonical validation', () => {
     const { state } = migrate(baseline)
     expect(validateAppState(state).ok).toBe(true)
-    expect(state.schemaVersion).toBe(11)
+    expect(state.schemaVersion).toBe(12)
   })
 
   it('preserves every collection count', () => {
@@ -549,5 +549,119 @@ describe('repair: rating matrix', () => {
     const { state } = migrate(seeded)
     expect(state.matrix.cells).toHaveLength(25)
     expect(state.matrix.colors.Low).toBe('#00B050')
+  })
+})
+
+describe('repair: public demo requests (schema 12)', () => {
+  const request = {
+    id: 'demo_1',
+    submittedAt: '2026-08-17T09:30:00.000Z',
+    firstName: 'Nino',
+    lastName: 'Beridze',
+    email: 'nino@example.com',
+    jobTitle: 'Head of Risk',
+    company: 'Example Bank',
+    country: 'GE',
+    phone: '+995 32 200 00 00',
+    solutionIds: ['solution_risk'],
+    message: '',
+    consent: true,
+    language: 'en',
+    status: 'Contacted',
+    handledBy: 'usr_super_admin',
+    handledAt: '2026-08-17T10:00:00.000Z',
+    notes: '',
+  }
+
+  it('adds the collection to state that predates it', () => {
+    const seeded = createSeedState()
+    delete (seeded as Partial<AppState>).demoRequests
+
+    const { state } = migrate(seeded)
+    expect(state.demoRequests).toEqual([])
+  })
+
+  it('leaves a valid request untouched', () => {
+    const seeded = createSeedState()
+    seeded.demoRequests = [structuredClone(request) as AppState['demoRequests'][number]]
+
+    const { state } = migrate(seeded)
+    expect(state.demoRequests).toEqual([request])
+  })
+
+  /*
+   * The one collection an unauthenticated visitor can append to, so what comes
+   * back off storage is treated as untrusted input rather than trusted state.
+   */
+  it('coerces a tampered record instead of trusting it', () => {
+    const seeded = createSeedState()
+    seeded.demoRequests = [
+      {
+        ...request,
+        status: 'Archived',
+        language: 'fr',
+        consent: 'yes',
+        solutionIds: ['solution_risk', 'solution_ghost'],
+        notes: 42,
+      } as unknown as AppState['demoRequests'][number],
+    ]
+
+    const { state } = migrate(seeded)
+    const [repaired] = state.demoRequests
+
+    expect(repaired.status).toBe('New')
+    expect(repaired.language).toBe('en')
+    expect(repaired.consent).toBe(false)
+    expect(repaired.solutionIds).toEqual(['solution_risk'])
+    expect(repaired.notes).toBe('')
+  })
+
+  it('drops entries that are not objects at all', () => {
+    const seeded = createSeedState()
+    seeded.demoRequests = [
+      structuredClone(request) as AppState['demoRequests'][number],
+      'nonsense' as unknown as AppState['demoRequests'][number],
+    ]
+
+    const { state, notes } = migrate(seeded)
+    expect(state.demoRequests).toHaveLength(1)
+    expect(notes.join(' ')).toContain('unreadable')
+  })
+
+  it('is idempotent', () => {
+    const seeded = createSeedState()
+    seeded.demoRequests = [structuredClone(request) as AppState['demoRequests'][number]]
+
+    const once = migrate(seeded).state
+    const twice = migrate(once).state
+    expect(twice.demoRequests).toEqual(once.demoRequests)
+  })
+})
+
+describe('repair: site content fields', () => {
+  /*
+   * Content saved before a schema step must not leave the page it feeds blank
+   * — the request-demo copy arrived in 12 and every earlier record lacks it.
+   */
+  it('fills fields a stored record predates without touching configured ones', () => {
+    const seeded = createSeedState()
+    seeded.siteContent.heroTitle = 'Our own headline'
+    delete (seeded.siteContent as Partial<AppState['siteContent']>).requestDemoTitle
+    delete (seeded.siteContent as Partial<AppState['siteContent']>).requestDemoHighlights
+
+    const { state, notes } = migrate(seeded)
+
+    expect(state.siteContent.heroTitle).toBe('Our own headline')
+    expect(state.siteContent.requestDemoTitle.length).toBeGreaterThan(0)
+    expect(state.siteContent.requestDemoHighlights.length).toBeGreaterThan(0)
+    expect(notes.join(' ')).toContain('site content')
+  })
+
+  it('keeps a field an administrator deliberately emptied', () => {
+    const seeded = createSeedState()
+    seeded.siteContent.contactPhone = ''
+
+    const { state } = migrate(seeded)
+    expect(state.siteContent.contactPhone).toBe('')
   })
 })

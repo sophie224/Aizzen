@@ -82,7 +82,12 @@ export function PublicHeader() {
     about: t('public.nav.about'),
   }
 
-  const renderNav = (className: string) => (
+  /*
+   * `withRequestDemo` is the mobile menu only: the action buttons collapse at
+   * phone widths, so without this the demo request would be unreachable from
+   * the header on the devices most likely to be reading a marketing page.
+   */
+  const renderNav = (className: string, withRequestDemo = false) => (
     <nav className={className} aria-label={t('public.nav.aria')}>
       {PUBLIC_NAV_TARGETS.map((target) => (
         <Link
@@ -103,6 +108,19 @@ export function PublicHeader() {
           {navLabels[target.key]}
         </Link>
       ))}
+
+      {withRequestDemo && !user ? (
+        <Link
+          to="/request-demo"
+          className={location.pathname === '/request-demo' ? 'active' : ''}
+          aria-current={location.pathname === '/request-demo' ? 'page' : undefined}
+          onClick={() => {
+            setMenuOpen(false)
+          }}
+        >
+          {t('public.requestDemo')}
+        </Link>
+      ) : null}
     </nav>
   )
 
@@ -173,15 +191,30 @@ export function PublicHeader() {
             </button>
           </>
         ) : (
-          <button
-            type="button"
-            className="aizen-btn aizen-btn--primary aizen-btn--sm"
-            onClick={() => {
-              navigate('/login')
-            }}
-          >
-            {t('public.signInToPlatform')}
-          </button>
+          <>
+            {/*
+             * A link, not a button: the demo request is a page a visitor can
+             * open in a new tab, bookmark and share — the same reasoning as the
+             * navigation above. It is offered to visitors only; someone who is
+             * already signed in has the product itself.
+             */}
+            <Link
+              to="/request-demo"
+              className="aizen-btn aizen-btn--secondary aizen-btn--sm"
+              aria-current={location.pathname === '/request-demo' ? 'page' : undefined}
+            >
+              {t('public.requestDemo')}
+            </Link>
+            <button
+              type="button"
+              className="aizen-btn aizen-btn--primary aizen-btn--sm"
+              onClick={() => {
+                navigate('/login')
+              }}
+            >
+              {t('public.signInToPlatform')}
+            </button>
+          </>
         )}
 
         <button
@@ -197,7 +230,7 @@ export function PublicHeader() {
         </button>
       </div>
 
-      {menuOpen ? renderNav('aizen-mobile-nav') : null}
+      {menuOpen ? renderNav('aizen-mobile-nav', true) : null}
     </header>
   )
 }

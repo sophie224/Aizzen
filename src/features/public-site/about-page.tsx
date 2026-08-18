@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAppData } from '../../data/app-data-context.ts'
 import { canAccess } from '../../domain/permissions/index.ts'
 import { pickLanguage, useTranslation } from '../../i18n/index.ts'
@@ -188,6 +188,9 @@ export function PublicAboutPage() {
             >
               {t('public.openRiskManagement')}
             </button>
+            <Link to="/request-demo" className="aizen-btn aizen-btn--secondary aizen-btn--lg">
+              {t('public.requestDemo')}
+            </Link>
             <button
               type="button"
               className="aizen-btn aizen-btn--secondary aizen-btn--lg"

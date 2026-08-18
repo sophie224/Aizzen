@@ -1,5 +1,5 @@
 import { useId, useState, type FormEvent } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom'
 import { APP_VERSION } from '../../config/index.ts'
 import { useAppData } from '../../data/app-data-context.ts'
 import { isSuperAdministrator } from '../../domain/permissions/index.ts'
@@ -12,7 +12,6 @@ import { useAuthService } from '../session/auth-service-context.ts'
 import { useAuth } from '../session/use-auth.ts'
 import { useCurrentUser } from '../session/use-current-user.ts'
 import './sign-in.css'
-
 /*
  * Phase 1 sign-in (ARCHITECTURE.md §6.1).
  *
@@ -98,14 +97,13 @@ export function SignInPage() {
     <main className="login-page">
       <section className="login-brand-panel">
         <div className="login-brand-top">
-          <span className="login-wordmark">
+          <Link to="/" className="login-wordmark">
             <BrandMark label={t('app.brandAlt')} className="login-wordmark__mark" />
             <span className="login-wordmark__text">
               <strong>{brandName}</strong>
               <small>{brandDescriptor}</small>
             </span>
-          </span>
-          <span className="login-version">v{APP_VERSION}</span>
+          </Link>
         </div>
 
         <div className="login-brand-copy">

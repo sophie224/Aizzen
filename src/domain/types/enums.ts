@@ -118,6 +118,15 @@ export type ActionPriority = (typeof ACTION_PRIORITIES)[number]
 export const ATTRIBUTE_TYPES = ['text', 'number', 'date', 'select', 'user'] as const
 export type AttributeType = (typeof ATTRIBUTE_TYPES)[number]
 
+/**
+ * Handling state of a public demo request.
+ *
+ * A request is never deleted — it is worked through this vocabulary and kept,
+ * so the trail of who was contacted stays resolvable (ARCHITECTURE.md §3.7).
+ */
+export const DEMO_REQUEST_STATUSES = ['New', 'Contacted', 'Qualified', 'Closed'] as const
+export type DemoRequestStatus = (typeof DEMO_REQUEST_STATUSES)[number]
+
 export const ENTITY_STATUSES = ['Active', 'Inactive'] as const
 export type EntityStatus = (typeof ENTITY_STATUSES)[number]
 

@@ -1,7 +1,20 @@
 import { useState } from 'react'
 import { useAppData, useAppDataStore } from '../../data/app-data-context.ts'
-import type { SiteContent, SiteSolution, SiteTeamMember } from '../../domain/types/index.ts'
-import { useTranslation, type TranslationKey } from '../../i18n/index.ts'
+import {
+  countDemoRequestsByStatus,
+  countryName,
+  demoRequestName,
+  sortDemoRequests,
+} from '../../domain/demo-requests/index.ts'
+import { DEMO_REQUEST_STATUSES } from '../../domain/types/index.ts'
+import type {
+  DemoRequest,
+  DemoRequestStatus,
+  SiteContent,
+  SiteSolution,
+  SiteTeamMember,
+} from '../../domain/types/index.ts'
+import { pickLanguage, useTranslation, type TranslationKey } from '../../i18n/index.ts'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
 import './site-admin.css'
 
@@ -108,10 +121,29 @@ const GROUPS: Group[] = [
     lists: [{ en: 'videoHighlights', ka: 'videoHighlightsKa' }],
   },
   {
+    id: 'requestDemo',
+    labelKey: 'site.group.requestDemo',
+    fields: [
+      { en: 'requestDemoEyebrow', ka: 'requestDemoEyebrowKa' },
+      { en: 'requestDemoTitle', ka: 'requestDemoTitleKa', long: true },
+      { en: 'requestDemoDescription', ka: 'requestDemoDescriptionKa', long: true },
+      { en: 'requestDemoConsent', ka: 'requestDemoConsentKa', long: true },
+      { en: 'requestDemoSuccess', ka: 'requestDemoSuccessKa', long: true },
+    ],
+    lists: [{ en: 'requestDemoHighlights', ka: 'requestDemoHighlightsKa' }],
+  },
+  {
+    // Submissions, not content: read-only detail plus the handling status.
+    id: 'requests',
+    labelKey: 'site.group.requests',
+    fields: [],
+  },
+  {
     id: 'footer',
     labelKey: 'site.group.footer',
     fields: [
       { en: 'contactEmail' },
+      { en: 'contactPhone' },
       { en: 'footerText', ka: 'footerTextKa', long: true },
     ],
   },
@@ -267,6 +299,8 @@ export function SiteAdminPage() {
           {activeGroup === 'team' ? (
             <TeamEditor team={content.team} onChange={(team) => { patch({ team }) }} />
           ) : null}
+
+          {activeGroup === 'requests' ? <DemoRequestsPanel /> : null}
         </div>
       </div>
     </section>
@@ -417,6 +451,132 @@ function TeamEditor({
       <button type="button" onClick={() => { onChange([...team, blank()]) }}>
         {t('site.addTeamMember')}
       </button>
+    </>
+  )
+}
+
+// --- demo requests ----------------------------------------------------------
+
+/*
+ * The public intake queue.
+ *
+ * Read-only detail: nothing a visitor submitted can be edited here, because a
+ * record of what someone actually sent is worth more than a tidied one. Only
+ * the handling status moves, and it saves on its own through the same mutation
+ * transaction with its own audit event — it belongs to a different record from
+ * the site content the surrounding form edits.
+ *
+ * Requests are never deleted, for the same reason categories and users are
+ * not: they are referenced by the audit trail (ARCHITECTURE.md §3.7).
+ */
+function DemoRequestsPanel() {
+  const { t, language } = useTranslation()
+  const { state } = useAppData()
+  const store = useAppDataStore()
+  const { user } = useCurrentUser()
+
+  if (!state || !user) return null
+
+  const requests = sortDemoRequests(state.demoRequests)
+  const counts = countDemoRequestsByStatus(requests)
+
+  const solutionName = (id: string): string => {
+    const solution = state.siteContent.solutions.find((candidate) => candidate.id === id)
+    return solution ? pickLanguage(solution.name, solution.nameKa, language) : id
+  }
+
+  const userName = (id: string): string =>
+    state.users.find((candidate) => candidate.id === id)?.name ?? id
+
+  const setStatus = async (request: DemoRequest, status: DemoRequestStatus) => {
+    const handledAt = new Date().toISOString()
+
+    await store.update({
+      mutate: (next) => {
+        const target = next.demoRequests.find((candidate) => candidate.id === request.id)
+        if (!target) return
+        target.status = status
+        target.handledBy = user.id
+        target.handledAt = handledAt
+      },
+      audit: {
+        actorId: user.id,
+        action: 'demo_request.status_changed',
+        entityType: 'DemoRequest',
+        entityId: request.id,
+        summary: `Demo request from ${request.company || request.email} marked ${status}`,
+        changes: [`status: ${request.status} → ${status}`],
+      },
+    })
+  }
+
+  if (requests.length === 0) {
+    return <p className="panel__meta">{t('site.requests.empty')}</p>
+  }
+
+  return (
+    <>
+      <p className="panel__meta">
+        {DEMO_REQUEST_STATUSES.map((status) => `${t(`demo.status.${status}`)}: ${String(counts[status])}`).join(' · ')}
+      </p>
+      <p className="panel__meta">{t('site.requests.statusHint')}</p>
+
+      <ul className="site-list">
+        {requests.map((request) => (
+          <li key={request.id} className="site-list__item site-request">
+            <div className="site-request__identity">
+              <strong>{demoRequestName(request)}</strong>
+              <small>
+                {request.jobTitle} · {request.company}
+              </small>
+              <small>{countryName(request.country, language)}</small>
+            </div>
+
+            <div className="site-request__contact">
+              <span>{t('site.requests.contact')}</span>
+              <a href={`mailto:${request.email}`}>{request.email}</a>
+              <a href={`tel:${request.phone.replace(/[^+\d]/g, '')}`}>{request.phone}</a>
+            </div>
+
+            <div className="site-request__meta">
+              <span>{t('site.requests.submitted')}</span>
+              {/* ISO, like every other timestamp the product shows. */}
+              <time dateTime={request.submittedAt}>
+                {request.submittedAt.slice(0, 16).replace('T', ' ')}
+              </time>
+              {request.handledAt ? (
+                <small>
+                  {t('site.requests.handled')}: {userName(request.handledBy)}
+                </small>
+              ) : null}
+            </div>
+
+            <div className="site-request__interest">
+              <span>{t('site.requests.interest')}</span>
+              <p>{request.solutionIds.map(solutionName).join(', ')}</p>
+              {request.message ? (
+                <p className="site-request__message">{request.message}</p>
+              ) : null}
+            </div>
+
+            <label className="site-request__status">
+              <span>{t('site.requests.status')}</span>
+              <select
+                value={request.status}
+                onChange={(event) => {
+                  void setStatus(request, event.target.value as DemoRequestStatus)
+                }}
+              >
+                {DEMO_REQUEST_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {t(`demo.status.${status}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </li>
+        ))}
+      </ul>
     </>
   )
 }

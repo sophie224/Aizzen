@@ -5,7 +5,9 @@ import {
   CONTROL_AUTOMATION,
   CONTROL_EFFECTIVENESS,
   CONTROL_TYPES,
+  DEMO_REQUEST_STATUSES,
   ENTITY_STATUSES,
+  LANGUAGES,
   MODULE_NAMES,
   OUTLOOKS,
   PERMISSION_LEVELS,
@@ -22,7 +24,9 @@ import type {
   ControlAutomation,
   ControlEffectiveness,
   ControlType,
+  DemoRequestStatus,
   EntityStatus,
+  Language,
   Outlook,
   PermissionLevel,
   RatingLabel,
@@ -84,6 +88,10 @@ export const isActionPriority = memberOf(ACTION_PRIORITIES) as (
 ) => value is ActionPriority
 export const isAttributeType = memberOf(ATTRIBUTE_TYPES) as (value: unknown) => value is AttributeType
 export const isEntityStatus = memberOf(ENTITY_STATUSES) as (value: unknown) => value is EntityStatus
+export const isDemoRequestStatus = memberOf(DEMO_REQUEST_STATUSES) as (
+  value: unknown,
+) => value is DemoRequestStatus
+export const isLanguage = memberOf(LANGUAGES) as (value: unknown) => value is Language
 
 /** A score carries impact and likelihood only — never a stored score or rating. */
 export function isScore(value: unknown): boolean {

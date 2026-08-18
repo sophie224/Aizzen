@@ -227,9 +227,15 @@ export function PublicHomePage() {
               ))}
             </div>
 
-            <button type="button" className="aizen-btn aizen-btn--light" onClick={openPlatform}>
-              {t('public.accessRiskModule')}
-            </button>
+            <div className="aizen-hero-actions">
+              <button type="button" className="aizen-btn aizen-btn--light" onClick={openPlatform}>
+                {t('public.accessRiskModule')}
+              </button>
+              {/* Watching the demo and asking for one belong side by side. */}
+              <Link to="/request-demo" className="aizen-btn aizen-btn--secondary">
+                {t('public.requestDemo')}
+              </Link>
+            </div>
           </div>
 
           <SiteVideo
@@ -268,6 +274,9 @@ export function PublicHomePage() {
             >
               {t('public.openRiskManagement')}
             </button>
+            <Link to="/request-demo" className="aizen-btn aizen-btn--secondary aizen-btn--lg">
+              {t('public.requestDemo')}
+            </Link>
             {content.contactEmail ? (
               <a
                 href={`mailto:${content.contactEmail}`}

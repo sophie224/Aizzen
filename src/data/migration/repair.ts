@@ -1,8 +1,22 @@
-import type { AppState, BusinessUnit, PermissionSet, RatingMatrix } from '../../domain/types/index.ts'
+import type {
+  AppState,
+  BusinessUnit,
+  DemoRequest,
+  PermissionSet,
+  RatingMatrix,
+} from '../../domain/types/index.ts'
 import { MODULE_NAMES, SCALE_VALUES } from '../../domain/types/index.ts'
 import { normaliseCompactColumns } from '../../domain/export/index.ts'
 import { RISK_DESCRIPTION_MAX_LENGTH } from '../../domain/risk-editor/index.ts'
-import { isPermissionLevel, isRatingLabel, isRecord } from '../../domain/validation/guards.ts'
+import {
+  isDemoRequestStatus,
+  isLanguage,
+  isNonEmptyString,
+  isPermissionLevel,
+  isRatingLabel,
+  isRecord,
+  isStringArray,
+} from '../../domain/validation/guards.ts'
 import { createSeedMatrix } from '../seed/matrix.ts'
 import {
   createSeedDashboards,
@@ -232,10 +246,37 @@ export function repairDefaults(state: AppState, notes: RepairNotes): void {
   if (!isRecord(state.siteContent) || Object.keys(state.siteContent).length === 0) {
     state.siteContent = createSeedSiteContent()
     notes.push('restored default public site content')
+  } else {
+    repairSiteContentFields(state, notes)
   }
   if (!isRecord(state.branding)) {
     state.branding = { clientLogo: null }
     notes.push('restored default branding')
+  }
+}
+
+/**
+ * Fills site-content fields a stored record predates.
+ *
+ * Every schema step that adds public copy — the request-demo page in 12 — would
+ * otherwise render blank for an organisation whose content was saved before it.
+ * Only ABSENT keys are filled: a value an administrator configured, including a
+ * deliberately emptied one, is never overwritten.
+ */
+function repairSiteContentFields(state: AppState, notes: RepairNotes): void {
+  const defaults = createSeedSiteContent() as unknown as Record<string, unknown>
+  const content = state.siteContent as unknown as Record<string, unknown>
+  const filled: string[] = []
+
+  for (const [key, value] of Object.entries(defaults)) {
+    if (content[key] === undefined) {
+      content[key] = structuredClone(value)
+      filled.push(key)
+    }
+  }
+
+  if (filled.length > 0) {
+    notes.push(`site content: filled ${String(filled.length)} missing field(s)`)
   }
 }
 
@@ -397,4 +438,65 @@ export function repairMatrix(state: AppState, notes: RepairNotes): void {
   }
 
   if (!Array.isArray(state.matrixVersions)) state.matrixVersions = []
+}
+
+/**
+ * Normalises the public demo-request intake (schema 12).
+ *
+ * The collection is appended to by unauthenticated visitors, so stored records
+ * are treated as untrusted input on the way back in: every field is coerced to
+ * its declared type, the handling state falls back to `New`, and unknown
+ * solution references are dropped rather than left dangling. Entries that are
+ * not objects at all are the one thing removed — there is nothing in them to
+ * preserve.
+ */
+export function repairDemoRequests(state: AppState, notes: RepairNotes): void {
+  if (!Array.isArray(state.demoRequests)) {
+    state.demoRequests = []
+    return
+  }
+
+  const solutionIds = new Set(
+    (Array.isArray(state.siteContent.solutions) ? state.siteContent.solutions : []).map(
+      (solution) => solution.id,
+    ),
+  )
+
+  const dropped = state.demoRequests.length
+  const repaired: DemoRequest[] = []
+
+  state.demoRequests.forEach((candidate, index) => {
+    if (!isRecord(candidate)) return
+
+    const raw = candidate as unknown as Record<string, unknown>
+    const text = (key: string): string => (typeof raw[key] === 'string' ? (raw[key] as string) : '')
+
+    repaired.push({
+      id: isNonEmptyString(raw.id) ? raw.id : `demo_recovered_${String(index)}`,
+      submittedAt: text('submittedAt'),
+      firstName: text('firstName'),
+      lastName: text('lastName'),
+      email: text('email'),
+      jobTitle: text('jobTitle'),
+      company: text('company'),
+      country: text('country'),
+      phone: text('phone'),
+      solutionIds: (isStringArray(raw.solutionIds) ? raw.solutionIds : []).filter((id) =>
+        solutionIds.has(id),
+      ),
+      message: text('message'),
+      consent: raw.consent === true,
+      language: isLanguage(raw.language) ? raw.language : 'en',
+      status: isDemoRequestStatus(raw.status) ? raw.status : 'New',
+      handledBy: text('handledBy'),
+      handledAt: text('handledAt'),
+      notes: text('notes'),
+    })
+  })
+
+  state.demoRequests = repaired
+
+  if (repaired.length !== dropped) {
+    notes.push(`demo requests: dropped ${String(dropped - repaired.length)} unreadable entry(ies)`)
+  }
 }

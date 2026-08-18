@@ -107,12 +107,12 @@ The risk record therefore stores **only `impact` and `likelihood`** per assessme
 
 ```
 AppState {
-  schemaVersion      // current: 8
+  schemaVersion      // current: 12
   users[]            roles[]            categories[]
   businessUnits[]    customAttributes[] matrix
   risks[]            savedViews[]       dashboards[]
   reportTemplates[]  auditEvents[]      branding
-  ssoConfig          siteContent
+  ssoConfig          siteContent        demoRequests[]
   // + local session references (not authoritative business data)
 }
 ```
@@ -128,6 +128,7 @@ action.ownerId        → user.id
 user.roleIds          → role.id[]
 user.businessUnitIds  → businessUnit.id[]
 reportSection.dashboardId → dashboard.id
+demoRequest.solutionIds   → siteSolution.id[]
 ```
 
 ### 3.2 Risk
@@ -247,7 +248,7 @@ interface AppRepository {
 
 ### 4.1 Schema migration and repair
 
-Current `schemaVersion = 11` (9 added the manual `Risk.description` from CR-002; 10 adds the configurable rating matrix from CR-003 — matrix version, scale name, level display names, criterion descriptions and percentage bands, plus `matrixVersions` and the `matrixVersion` stamp on assessment snapshots; 11 adds the Dashboard module's saved views and per-user widget layouts from CR-004. Every step is additive and migration fills what is missing without overwriting configured values. The legacy `app.html` is at 7 — the migration path must handle it). Migration is **idempotent**, never intentionally deletes valid risk data, fills missing collections with defaults, repairs invalid references conservatively, and persists only after a successful migration.
+Current `schemaVersion = 12` (9 added the manual `Risk.description` from CR-002; 10 adds the configurable rating matrix from CR-003 — matrix version, scale name, level display names, criterion descriptions and percentage bands, plus `matrixVersions` and the `matrixVersion` stamp on assessment snapshots; 11 adds the Dashboard module's saved views and per-user widget layouts from CR-004; 12 adds the public demo-request intake — the `demoRequests` collection and the site-content copy the form renders. Every step is additive and migration fills what is missing without overwriting configured values. The legacy `app.html` is at 7 — the migration path must handle it). Migration is **idempotent**, never intentionally deletes valid risk data, fills missing collections with defaults, repairs invalid references conservatively, and persists only after a successful migration.
 
 | Problem | Repair |
 |---|---|
@@ -258,6 +259,8 @@ Current `schemaVersion = 11` (9 added the manual `Risk.description` from CR-002;
 | User references a deleted BU | remove the invalid BU ID |
 | Saved View lacks columns/mode | add default `visibleColumns` / `viewMode` |
 | Missing dashboards / reports / site content | restore seed defaults |
+| Site content missing fields a later schema added | fill only the absent keys from the seed; a configured (or deliberately emptied) value is never overwritten |
+| Demo request with a bad status, language, consent flag or unknown solution reference | coerce to the declared type, reset handling state to `New`, drop the dangling reference; entries that are not objects are removed |
 | Incomplete matrix | merge/restore default cells and colours |
 
 Migration must preserve: risk IDs and references, scores, controls/actions, valid ownership references, assessment history, audit events, dashboard/report definitions, custom values.
@@ -456,6 +459,7 @@ Existing references never change when a Business Unit is later edited; a new ris
 |---|---|---|
 | `/` | public website — home | none (no session required) |
 | `/about` | public website — About Us | none (no session required) |
+| `/request-demo` | public website — demo request form | none (no session required) |
 | `/login` | sign-in | none |
 | `/dashboard` | view and (with rights) manage dashboards | `dashboard: read` |
 | `/register` | Risk Register | `register: read` **and** `risks: read` |
@@ -517,6 +521,8 @@ Print/PDF uses the browser print dialog in Phase 1; Phase 2 recommends server-si
 Sidebar selection switches the workspace from URL/state; unsaved modal drafts do not persist across module changes.
 
 **Branding.** The client company logo (top-right) is uploaded in Risk Administration, stored as a base64 data URL in `AppState` in Phase 1, restored from storage on refresh, and removable back to the placeholder. The **AIZEN cotton-flower logo (top-left) and public-site content belong to Website Administration / Super Admin scope** — a Risk Administrator can change the client logo but not AIZEN's website copy or team members. Phase 2 moves logos to S3/object storage with MIME/size validation, optimisation and signed upload.
+
+**Website Administration** additionally edits the request-demo page copy (headline, description, highlights, consent wording, acknowledgement, contact phone) and holds the **demo-request intake queue**: submissions from `/request-demo`, newest first, read-only apart from a handling status (`New → Contacted → Qualified → Closed`) that saves through the one mutation transaction with its own audit event. A request is marketing intake only — it creates no account, grants no permission and is never deleted. Validation lives in `src/domain/demo-requests`, so Phase 2 runs the identical rules server-side, where they become the authoritative check rather than a convenience.
 
 **Administration audit** covers category, BU, custom attribute, user, role, matrix, branding, SSO, import and reset changes. Administration changes are high-risk privileged actions; Phase 2 audit must carry actor snapshot, before/after, changed fields, reason/ticket, session/request/IP, approval where required, and tamper-evident retention.
 
@@ -615,6 +621,7 @@ Any change to the left column requires retesting the right column:
 | Custom attribute | risk editor, register columns, saved views, report columns, export/import |
 | User deactivation | login, owner pickers, historical display, assignments |
 | Dashboard deletion | report sections and print |
+| Site solution rename or removal | request-demo form choices, stored `demoRequest.solutionIds`, the intake queue |
 | Schema change | old backup import, current data persistence, reset seed |
 
 The referenced build's QA baseline is 305/305 across architecture/build (58), seed/domain (34), public site (31), authentication (32), RBAC (32), Super Admin CMS (15), dashboard (12), register/risk (44), reports (18), administration (16) and migration/persistence/accessibility (13). That baseline records tested behaviour — it does not remove the Phase 1 security limitations or substitute for production penetration and performance testing.

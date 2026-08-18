@@ -53,8 +53,12 @@ export function hrefForTarget(target: PublicNavTarget): string {
  *
  * Derived, never stored: the header reads the router rather than being told by
  * whichever page rendered it, so the URL and the highlighted item cannot drift.
+ *
+ * `null` on a public page that is not in the navigation — Request a demo, for
+ * one. Highlighting Home there would tell the visitor they are somewhere they
+ * are not.
  */
-export function activeNavKey(pathname: string, hash: string): PublicNavKey {
+export function activeNavKey(pathname: string, hash: string): PublicNavKey | null {
   const page = PUBLIC_NAV_TARGETS.find(
     (target) => target.sectionId === undefined && target.path === pathname,
   )
@@ -64,6 +68,8 @@ export function activeNavKey(pathname: string, hash: string): PublicNavKey {
   const section = PUBLIC_NAV_TARGETS.find(
     (target) => target.path === pathname && target.sectionId === sectionId,
   )
+  if (section) return section.key
 
-  return section?.key ?? 'home'
+  // The home page with no fragment, or one whose fragment names no section.
+  return pathname === '/' ? 'home' : null
 }

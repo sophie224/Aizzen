@@ -4,6 +4,7 @@ import type {
   BusinessUnit,
   Category,
   CustomAttribute,
+  DemoRequest,
   MatrixVersion,
   RatingMatrix,
   Role,
@@ -27,11 +28,13 @@ import type {
  * name, level display names, criterion descriptions and percentage bands,
  * AppState gains `matrixVersions`, and assessment snapshots record the matrix
  * version they were taken against. 11 adds the Dashboard module's saved views
- * and per-user widget layouts (CR-004). Every step is additive — migration
- * fills what is missing and overwrites nothing that was configured. The legacy
- * `app.html` build persists version 7; migration handles that gap too.
+ * and per-user widget layouts (CR-004). 12 adds the public "Request a demo"
+ * intake: the `demoRequests` collection and the site-content copy the form
+ * renders. Every step is additive — migration fills what is missing and
+ * overwrites nothing that was configured. The legacy `app.html` build persists
+ * version 7; migration handles that gap too.
  */
-export const SCHEMA_VERSION = 11
+export const SCHEMA_VERSION = 12
 
 /**
  * Browser storage key. Retained deliberately from the v3 build for backward
@@ -72,6 +75,12 @@ export interface AppState {
 
   /** Global trail powering Recent Activity and Administration review. */
   auditEvents: AuditEvent[]
+
+  /**
+   * Public website demo requests, newest first. Marketing intake only — a
+   * request never becomes a user account on its own.
+   */
+  demoRequests: DemoRequest[]
 
   branding: Branding
   ssoConfig: SsoConfig

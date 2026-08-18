@@ -40,7 +40,7 @@ describe('LocalStorageRepository.getState', () => {
   it('seeds and persists when storage is empty', async () => {
     const state = await repository.getState()
 
-    expect(state.schemaVersion).toBe(11)
+    expect(state.schemaVersion).toBe(12)
     expect(storage.map.has(STORAGE_KEY)).toBe(true)
     expect(validateAppState(state).ok).toBe(true)
   })
@@ -54,12 +54,12 @@ describe('LocalStorageRepository.getState', () => {
     storage.map.set(STORAGE_KEY, JSON.stringify(baseline.state))
 
     const state = await repository.getState()
-    expect(state.schemaVersion).toBe(11)
+    expect(state.schemaVersion).toBe(12)
     expect(state.risks).toHaveLength(8)
 
     // The upgrade is persisted, so it happens once rather than on every load.
     const stored: unknown = JSON.parse(storage.map.get(STORAGE_KEY) ?? '{}')
-    expect((stored as { schemaVersion: number }).schemaVersion).toBe(11)
+    expect((stored as { schemaVersion: number }).schemaVersion).toBe(12)
   })
 
   it('does not rewrite storage when the payload is already current', async () => {
@@ -78,7 +78,7 @@ describe('LocalStorageRepository.getState', () => {
     storage.map.set(STORAGE_KEY, '{ corrupt json')
 
     const state = await repository.getState()
-    expect(state.schemaVersion).toBe(11)
+    expect(state.schemaVersion).toBe(12)
     // The unreadable original is preserved so the user can still recover it.
     expect(storage.map.get(STORAGE_KEY)).toBe('{ corrupt json')
   })
@@ -89,7 +89,7 @@ describe('LocalStorageRepository.saveState', () => {
     const state = await repository.getState()
     const saved = await repository.saveState({ ...state, schemaVersion: 3 })
 
-    expect(saved.schemaVersion).toBe(11)
+    expect(saved.schemaVersion).toBe(12)
   })
 
   it('raises RepositoryWriteError when storage refuses the write', async () => {
@@ -119,7 +119,7 @@ describe('LocalStorageRepository import/export', () => {
     expect(payload).toMatchObject({
       exportedAt: '2026-01-05T10:00:00.000Z',
       app: 'AIZEN Risk & Compliance',
-      schemaVersion: 11,
+      schemaVersion: 12,
     })
   })
 
@@ -127,7 +127,7 @@ describe('LocalStorageRepository import/export', () => {
     await repository.getState()
 
     const imported = await repository.importJson(JSON.stringify(baseline))
-    expect(imported.schemaVersion).toBe(11)
+    expect(imported.schemaVersion).toBe(12)
     expect(imported.risks).toHaveLength(8)
     expect(imported.risks.map((risk) => risk.ref)).toContain('IT-001')
   })
@@ -177,7 +177,7 @@ describe('AppDataStore mutation pipeline', () => {
     await store.load()
 
     expect(store.getSnapshot().status).toBe('ready')
-    expect(store.getSnapshot().state?.schemaVersion).toBe(11)
+    expect(store.getSnapshot().state?.schemaVersion).toBe(12)
   })
 
   it('applies the mutator to a clone, never to published state', async () => {

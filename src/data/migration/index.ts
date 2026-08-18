@@ -7,6 +7,7 @@ import { isLegacyV7Shape, migrateLegacyV7Shape } from './legacy-v7.ts'
 import {
   repairBusinessUnitTree,
   repairDefaults,
+  repairDemoRequests,
   repairMatrix,
   repairRisks,
   repairRoles,
@@ -42,6 +43,7 @@ const ARRAY_COLLECTIONS = [
   'dashboardLayouts',
   'reportTemplates',
   'auditEvents',
+  'demoRequests',
 ] as const
 
 function ensureCollections(state: Record<string, unknown>): void {
@@ -90,6 +92,8 @@ export function migrateState(raw: unknown): MigrationOutcome {
   // After repairDefaults, so a restored seed template is normalised too.
   repairReportSections(state, notes)
   repairMatrix(state, notes)
+  // After repairDefaults, so solution references resolve against restored content.
+  repairDemoRequests(state, notes)
 
   const validated = validateAppState(state)
   if (!validated.ok) return { ok: false, errors: validated.errors }

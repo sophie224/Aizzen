@@ -119,6 +119,7 @@ function makeValidState(overrides: Partial<AppState> = {}): AppState {
     dashboards: [],
     reportTemplates: [],
     auditEvents: [],
+    demoRequests: [],
     branding: { clientLogo: null },
     ssoConfig: {
       enabled: false, providerName: '', entityId: '', metadataUrl: '',

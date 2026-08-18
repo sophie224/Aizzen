@@ -8,8 +8,10 @@ import {
   isControlAutomation,
   isControlEffectiveness,
   isControlType,
+  isDemoRequestStatus,
   isEntityStatus,
   isFiniteNumber,
+  isLanguage,
   isNonEmptyString,
   isOutlook,
   isPermissionSet,
@@ -56,6 +58,7 @@ const REQUIRED_COLLECTIONS = [
   'dashboardLayouts',
   'reportTemplates',
   'auditEvents',
+  'demoRequests',
 ] as const
 
 /**
@@ -333,6 +336,38 @@ function validateRisks(risks: unknown[], bag: ErrorBag): void {
 }
 
 /**
+ * Public demo requests.
+ *
+ * Every field is checked, because this collection is the one an unauthenticated
+ * visitor can append to. `status`, `handledBy` and `handledAt` are handling
+ * state the public form never sets, so a payload that carries a bad one is
+ * rejected here rather than trusted.
+ */
+function validateDemoRequests(requests: unknown[], bag: ErrorBag): void {
+  requests.forEach((request, index) => {
+    const path = `demoRequests[${index}]`
+    if (!isRecord(request)) return void bag.add(path, 'expected an object')
+
+    bag.require(isNonEmptyString(request.id), `${path}.id`, 'required')
+    bag.require(isNonEmptyString(request.submittedAt), `${path}.submittedAt`, 'required')
+    bag.require(isNonEmptyString(request.email), `${path}.email`, 'required')
+
+    for (const field of ['firstName', 'lastName', 'jobTitle', 'company', 'country', 'phone', 'message', 'handledBy', 'handledAt', 'notes'] as const) {
+      bag.require(isString(request[field]), `${path}.${field}`, 'expected a string')
+    }
+
+    bag.require(isStringArray(request.solutionIds), `${path}.solutionIds`, 'expected a string array')
+    bag.require(isBoolean(request.consent), `${path}.consent`, 'expected a boolean')
+    bag.require(isLanguage(request.language), `${path}.language`, 'expected en or ka')
+    bag.require(
+      isDemoRequestStatus(request.status),
+      `${path}.status`,
+      'unknown demo request status',
+    )
+  })
+}
+
+/**
  * Full canonical validation, applied AFTER migration and before persisting.
  *
  * Complements the permissive import gate: this is what guarantees the state
@@ -361,6 +396,7 @@ export function validateAppState(value: unknown): ValidationResult<AppState> {
   if (Array.isArray(value.businessUnits)) validateBusinessUnits(value.businessUnits, bag)
   if (Array.isArray(value.customAttributes)) validateCustomAttributes(value.customAttributes, bag)
   if (Array.isArray(value.risks)) validateRisks(value.risks, bag)
+  if (Array.isArray(value.demoRequests)) validateDemoRequests(value.demoRequests, bag)
   validateMatrix(value.matrix, bag)
 
   if (bag.errors.length > 0) return { ok: false, errors: bag.errors }

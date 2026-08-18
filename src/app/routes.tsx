@@ -8,6 +8,7 @@ import { AdministrationPage } from '../features/administration/administration-pa
 import { DashboardPage } from '../features/dashboards/dashboard-page.tsx'
 import { PublicAboutPage } from '../features/public-site/about-page.tsx'
 import { PublicHomePage } from '../features/public-site/home-page.tsx'
+import { PublicRequestDemoPage } from '../features/public-site/request-demo-page.tsx'
 import { ReportsPage } from '../features/reports/reports-page.tsx'
 import { RegisterPage } from '../features/register/register-page.tsx'
 import { RiskViewPage } from '../features/risk-view/risk-view-page.tsx'
@@ -24,6 +25,7 @@ import { useCurrentUser } from './session/use-current-user.ts'
  *
  *   /                     public website — home
  *   /about                public website — about us
+ *   /request-demo         public website — demo request form
  *   /dashboard            dashboard: read
  *   /register             register: read AND risks: read
  *   /risks/:id            record visibility (enforced per record in M9)
@@ -73,6 +75,7 @@ export function AppRoutes() {
     <Routes>
       <Route path="/" element={<PublicHomePage />} />
       <Route path="/about" element={<PublicAboutPage />} />
+      <Route path="/request-demo" element={<PublicRequestDemoPage />} />
       <Route path="/login" element={<SignInPage />} />
 
       {/* Pathless layout route: shared shell, no `/app` segment in the URL. */}

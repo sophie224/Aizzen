@@ -23,6 +23,8 @@ export type SiteIconName =
   | 'logout'
   | 'dashboard'
   | 'register'
+  | 'mail'
+  | 'phone'
 
 const paths: Record<SiteIconName, string> = {
   shield: 'M12 3l7 3v6c0 4.4-3 8-7 9-4-1-7-4.6-7-9V6l7-3z',
@@ -41,6 +43,9 @@ const paths: Record<SiteIconName, string> = {
   logout: 'M15 17l5-5-5-5M20 12H9M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h5',
   dashboard: 'M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z',
   register: 'M4 6h16M4 12h16M4 18h10',
+  mail: 'M3 6.5h18v11H3zM3 7l9 6 9-6',
+  phone:
+    'M6.5 3.5h3l1.5 4-2 1.5a12 12 0 006 6l1.5-2 4 1.5v3a1.5 1.5 0 01-1.6 1.5A17 17 0 015 5.1 1.5 1.5 0 016.5 3.5z',
 }
 
 export interface SiteIconProps {
