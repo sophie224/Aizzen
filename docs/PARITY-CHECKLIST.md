@@ -472,7 +472,7 @@ Fixture tree: Enterprise → Technology Division → {Information Security, IT O
 
 Visual baseline for comparing the refactored UI against the legacy build.
 
-**Status: not captured.** Requires driving `app.html` in a browser. See the M0 completion note — this is the one M0 deliverable outstanding.
+**Status: not captured, and no longer capturable from source.** This required driving the legacy single-file build in a browser; that build has been removed from the repository. Recovering it would mean restoring it from git history. See the M0 completion note — this was the one M0 deliverable outstanding.
 
 Required coverage once captured — each in **English and ქართული**:
 

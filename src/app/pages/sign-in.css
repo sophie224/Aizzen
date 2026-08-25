@@ -1,6 +1,6 @@
 /*
  * Phase 1 sign-in — the two-panel login ported from the v7 build
- * (legacy/app.html, `.login-page`).
+ * (`.login-page`).
  *
  * Every colour resolves through a token in src/styles/tokens.css: the v7
  * literals are expressed as color-mix over the brand palette, so re-theming the

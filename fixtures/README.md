@@ -6,7 +6,7 @@ The frozen legacy dataset — the **canonical baseline for the refactor**. It de
 
 | | |
 |---|---|
-| Source | `app.html` (AIZEN Risk & Compliance 4.1.0, the single-file v7 build) |
+| Source | the single-file v7 build (AIZEN Risk & Compliance 4.1.0), since removed from the repository |
 | Schema version | 7 |
 | Storage key | `erm-risk-management-v3-state` |
 | Shape | `{ exportedAt, app, schemaVersion, state }` — identical to Data Tools → *Export full JSON backup* |
@@ -38,16 +38,12 @@ These counts are asserted in `src/domain/validation/baseline-fixture.test.ts`. *
 
 ### How it was produced
 
-```bash
-node scripts/extract-legacy-baseline.mjs
-```
+A generator script (`scripts/extract-legacy-baseline.mjs`, removed alongside the legacy build) ran the legacy `ERM.createSeedState()` factory in an isolated Node VM context, using two line ranges lifted from the v7 single-file build (the ERM helper header, and the seed namespace). Neither range touched the DOM, React or `localStorage`, so no browser was required.
 
-The script runs the legacy `ERM.createSeedState()` factory in an isolated Node VM context, using two line ranges lifted from `app.html` (the ERM helper header, and the seed namespace). Neither range touches the DOM, React or `localStorage`, so no browser is required and the result is reproducible in CI.
+The result is equivalent to loading the v7 build in a clean browser profile and exporting immediately: it seeded this exact state when storage was empty, and *Reset demo data* restored it.
 
-This is equivalent to loading `app.html` in a clean browser profile and exporting immediately: the app seeds this exact state when storage is empty, and *Reset demo data* restores it.
-
-**One deliberate change.** The legacy `uid()` draws on `Date.now()` and `Math.random()`, so audit-event IDs differed on every run. The script pins the generator to a counter (`audit_baseline_0001`, …), making the fixture byte-stable so migration tests can assert exact equality. The IDs are opaque, and cross-references between `globalAudit` and `risk.audit` remain consistent because both read the same call.
+**One deliberate change.** The legacy `uid()` drew on `Date.now()` and `Math.random()`, so audit-event IDs differed on every run. The script pinned the generator to a counter (`audit_baseline_0001`, …), making the fixture byte-stable so migration tests can assert exact equality. The IDs are opaque, and cross-references between `globalAudit` and `risk.audit` remain consistent because both read the same call.
 
 ### Regenerating
 
-Re-running the script overwrites the fixture. Only do this deliberately — the counts above are a test contract, and changing the baseline invalidates the parity evidence gathered against it. If `app.html` is ever updated, regenerate, re-run `npm run test`, and update `docs/PARITY-CHECKLIST.md` and this file together.
+**Not regenerable.** The legacy build and its extraction script are no longer in the repository, so this fixture is frozen — treat it as the committed contract. The counts above are asserted by tests; changing them by hand invalidates the parity evidence gathered against the baseline. Recovering the generator would mean restoring both files from git history (`git log --diff-filter=D -- legacy/app.html`).

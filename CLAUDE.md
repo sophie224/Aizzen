@@ -223,8 +223,6 @@ Categories, business units, custom attributes and users are deactivated, never h
 
 ```
 docs/Request_for_Change_Control_Registers.pdf  the CR-2026 change request
-legacy/app.html     legacy single-file build (reference for parity; do not extend)
-                    (not at the repo root: Vite's HTML fallback would serve it at /app)
 docs/RM_Platform.pdf the spec — source of truth
 index.html          Vite entry
 src/                the refactored SPA (in progress)

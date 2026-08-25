@@ -14,8 +14,8 @@ import './sign-in.css'
 /*
  * Phase 1 sign-in (ARCHITECTURE.md §6.1).
  *
- * The two-panel layout is ported from the v7 build (legacy/app.html
- * `LoginPage`): a dark brand panel carrying the product story, and a light
+ * The two-panel layout is ported from the v7 build (`LoginPage`):
+ * a dark brand panel carrying the product story, and a light
  * form panel carrying the credential form, the local-security notice, the
  * Phase 2 SSO placeholder and the demo directory.
  *

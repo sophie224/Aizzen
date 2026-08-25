@@ -11,7 +11,7 @@ Ordered, independently-testable milestones for refactoring `app.html` (single 2.
 - **Milestones are ordered.** M2 depends on M1, and so on. Where two milestones are genuinely parallelisable it says so.
 - **Independently testable** means: at the end of the milestone you can run a defined check and get a pass/fail answer without needing the next milestone's code.
 - **Acceptance criteria** are the pass conditions. A milestone is not done until every box is checked and the **standing regression gate** (below) is green.
-- **Legacy parity** is judged against `app.html` running side by side, except where the PRD explicitly overrides the as-built behaviour.
+- **Legacy parity** is judged against `docs/PARITY-CHECKLIST.md` and `fixtures/legacy-state.json`, except where the PRD explicitly overrides the as-built behaviour. The v7 single-file build is no longer in the repository, so side-by-side comparison needs it restored from git history first.
 
 ### Standing regression gate (applies to every milestone from M3 onward)
 
@@ -298,7 +298,7 @@ Ordered, independently-testable milestones for refactoring `app.html` (single 2.
 - [ ] Import accepts the current schema and the legacy schema-7 fixture; invalid import leaves state unchanged.
 - [ ] Reset requires confirmation and restores the seed exactly.
 - [ ] Audit export is valid JSON.
-- [ ] Every Site Administration capability present in `app.html` still works; the parity checklist for this page is fully green.
+- [ ] Every Site Administration capability recorded for the v7 build still works; the parity checklist for this page is fully green.
 
 ---
 

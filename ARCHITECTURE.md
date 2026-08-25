@@ -476,7 +476,7 @@ Existing references never change when a Business Unit is later edited; a new ris
 | `/administration` | Risk Administration | Administrator / Super Administrator |
 | Website Administration | public-site CMS | Super Administrator only |
 
-The platform pages sit at the top level and share `AppShell` through a pathless layout route. They previously lived under an `/app` prefix; `/app/*` now redirects to the equivalent top-level path (`src/app/legacy-app-path.ts`), preserving query string and hash, so older links keep working. The prefix must not come back: the legacy reference build is a file named `app.html`, and Vite's dev-server HTML fallback resolves a request for `/app` to it — which is why that file lives in `legacy/`, not at the repository root.
+The platform pages sit at the top level and share `AppShell` through a pathless layout route. They previously lived under an `/app` prefix; `/app/*` now redirects to the equivalent top-level path (`src/app/legacy-app-path.ts`), preserving query string and hash, so older links keep working. The prefix must not come back: any HTML file named `app.html` at the repository root would be resolved by Vite's dev-server HTML fallback for a request to `/app` and shadow the route.
 
 ### 8.1.1 Control Register and Control Deficiency Register (CR-2026)
 
