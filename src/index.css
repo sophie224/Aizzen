@@ -481,6 +481,58 @@ select.field-control,
   color: var(--success);
 }
 
+/*
+ * Configured-colour variant (Design Uplift v2 §6.2).
+ *
+ * For a level whose colour an administrator chooses at runtime — control
+ * effectiveness, maturity, assurance, finding classification. Text sits on a
+ * heavy tint and uses the standard text token, so it clears 4.5:1 whatever hue
+ * is configured; the configured colour itself appears only as the leading bar,
+ * which is a non-text indicator and needs 3:1. Both values are computed by
+ * `levelBadgeColors` and passed in, never mixed here, so the same numbers can
+ * be asserted in a test (§6.3).
+ */
+.pill--level {
+  gap: var(--space-8);
+  padding-inline: var(--space-8);
+  background: var(--pill-level-surface, var(--surface-sunken));
+  /*
+   * A hairline of the indicator, not a heavy bar: at pill radius a thick
+   * `border-inline-start` renders as a clipped crescent. The border keeps the
+   * badge defined against both the page and the row-hover tint, which the
+   * fill alone cannot do for a pale configured colour (§8.1).
+   */
+  border-color: color-mix(in oklab, var(--pill-level-indicator, var(--border)) 40%, transparent);
+  color: var(--text-primary);
+}
+
+/*
+ * The configured colour itself, as a dot — the non-text indicator from §6.2.
+ * `levelBadgeColors()` has already darkened it far enough to clear 3:1 against
+ * the badge surface and the page, so the dot is legible for any configured
+ * hue.
+ */
+.pill--level::before {
+  content: '';
+  flex: none;
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--pill-level-indicator, var(--border));
+}
+
+/*
+ * Enhanced tier (§3.2): `rlh` ties the dot to the line it sits on, so it stays
+ * proportional if the type scale changes. The `rem` above is the baseline —
+ * identical at the current scale, so nothing is lost where `rlh` is missing.
+ */
+@supports (block-size: 1rlh) {
+  .pill--level::before {
+    inline-size: 0.5rlh;
+    block-size: 0.5rlh;
+  }
+}
+
 /* Initials avatar. Decorative — the name is always rendered beside it. */
 .avatar {
   display: inline-grid;

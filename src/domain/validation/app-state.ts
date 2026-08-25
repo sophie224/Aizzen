@@ -58,6 +58,10 @@ const REQUIRED_COLLECTIONS = [
   'dashboardLayouts',
   'reportTemplates',
   'auditEvents',
+  'controls',
+  'controlDeficiencies',
+  'controlRiskLinks',
+  'controlColumnPreferences',
   'demoRequests',
 ] as const
 
@@ -368,6 +372,72 @@ function validateDemoRequests(requests: unknown[], bag: ErrorBag): void {
 }
 
 /**
+ * Control Register, findings and their join records (CR-2026).
+ *
+ * Structural only: a scale value is deliberately NOT checked against the
+ * configured levels, because a level an administrator later removes must not
+ * make previously valid state unloadable. The UI renders such a value as its
+ * stored key instead.
+ */
+function validateControlRegister(state: Record<string, unknown>, bag: ErrorBag): void {
+  if (Array.isArray(state.controls)) {
+    state.controls.forEach((control, index) => {
+      const path = `controls[${index}]`
+      if (!isRecord(control)) return void bag.add(path, 'expected an object')
+
+      bag.require(isNonEmptyString(control.id), `${path}.id`, 'required')
+      bag.require(isNonEmptyString(control.ref), `${path}.ref`, 'required')
+      bag.require(isNonEmptyString(control.businessUnitId), `${path}.businessUnitId`, 'required')
+      for (const field of ['name', 'objective', 'ownerId', 'effectiveness', 'maturity', 'assurance'] as const) {
+        bag.require(isString(control[field]), `${path}.${field}`, 'expected a string')
+      }
+      bag.require(Array.isArray(control.evidence), `${path}.evidence`, 'expected an array')
+      bag.require(isRecord(control.custom), `${path}.custom`, 'expected an object')
+    })
+  }
+
+  if (Array.isArray(state.controlDeficiencies)) {
+    state.controlDeficiencies.forEach((deficiency, index) => {
+      const path = `controlDeficiencies[${index}]`
+      if (!isRecord(deficiency)) return void bag.add(path, 'expected an object')
+
+      bag.require(isNonEmptyString(deficiency.id), `${path}.id`, 'required')
+      bag.require(isNonEmptyString(deficiency.ref), `${path}.ref`, 'required')
+      bag.require(isNonEmptyString(deficiency.controlId), `${path}.controlId`, 'required')
+      bag.require(isNonEmptyString(deficiency.businessUnitId), `${path}.businessUnitId`, 'required')
+      for (const field of ['description', 'classification', 'remediationOwnerId', 'remediationDescription', 'targetDate'] as const) {
+        bag.require(isString(deficiency[field]), `${path}.${field}`, 'expected a string')
+      }
+      bag.require(isRecord(deficiency.custom), `${path}.custom`, 'expected an object')
+    })
+  }
+
+  if (Array.isArray(state.controlRiskLinks)) {
+    state.controlRiskLinks.forEach((link, index) => {
+      const path = `controlRiskLinks[${index}]`
+      if (!isRecord(link)) return void bag.add(path, 'expected an object')
+
+      bag.require(isNonEmptyString(link.id), `${path}.id`, 'required')
+      bag.require(isNonEmptyString(link.riskId), `${path}.riskId`, 'required')
+      bag.require(isNonEmptyString(link.controlId), `${path}.controlId`, 'required')
+    })
+  }
+
+  if (isRecord(state.controlConfig)) {
+    for (const scale of ['effectiveness', 'maturity', 'assurance', 'classifications'] as const) {
+      bag.require(Array.isArray(state.controlConfig[scale]), `controlConfig.${scale}`, 'expected an array')
+    }
+    bag.require(
+      Array.isArray(state.controlConfig.customColumns),
+      'controlConfig.customColumns',
+      'expected an array',
+    )
+  } else {
+    bag.add('controlConfig', 'expected an object')
+  }
+}
+
+/**
  * Full canonical validation, applied AFTER migration and before persisting.
  *
  * Complements the permissive import gate: this is what guarantees the state
@@ -397,6 +467,7 @@ export function validateAppState(value: unknown): ValidationResult<AppState> {
   if (Array.isArray(value.customAttributes)) validateCustomAttributes(value.customAttributes, bag)
   if (Array.isArray(value.risks)) validateRisks(value.risks, bag)
   if (Array.isArray(value.demoRequests)) validateDemoRequests(value.demoRequests, bag)
+  validateControlRegister(value, bag)
   validateMatrix(value.matrix, bag)
 
   if (bag.errors.length > 0) return { ok: false, errors: bag.errors }

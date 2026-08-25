@@ -1,0 +1,590 @@
+/*
+ * Control Register and Control Deficiency Register (CR-2026).
+ *
+ * Built from the existing design tokens and the platform's own primitives —
+ * `.btn`, `.editor-*`, `.scroll-x`, `.panel__meta` — so the new modules look
+ * like the Risk Register rather than like a second product. No literal hex,
+ * pixel radius or duration below this line (CR-005 §3).
+ *
+ * The one colour these screens introduce comes from configuration: a scale
+ * chip paints itself from `--control-chip-color`, published per chip from the
+ * administrator's control-scale settings.
+ */
+
+.control-register {
+  display: grid;
+  gap: var(--space-16);
+  align-content: start;
+}
+
+.control-register__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-16);
+  flex-wrap: wrap;
+}
+
+.control-register__head h1 {
+  margin: 0;
+}
+
+.control-register__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.control-register__hint {
+  margin: 0;
+}
+
+/* --- filters -------------------------------------------------------------- */
+
+.control-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.control-filters__search {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.control-filters__search input {
+  width: 100%;
+}
+
+/* --- grid ----------------------------------------------------------------- */
+
+.control-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-dense);
+  /* Numbers, IDs and dates line up column-wise (§9.2). */
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * `content-visibility: auto` is deliberately NOT used here.
+ *
+ * §12.2 recommends it for long lists, but on a single `<tbody>` it is one
+ * containment unit rather than one per row, so it buys almost nothing — while
+ * skipping rendered rows lets an auto-layout table resize its columns as the
+ * user scrolls, which breaks the stable-column-width requirement in §9.2.
+ * Revisit if the register moves to per-row virtualisation, where the trade is
+ * worth making and `contain-intrinsic-size` can be set from a measured row.
+ */
+
+.control-table th,
+.control-table td {
+  padding: var(--space-8) var(--space-12);
+  text-align: start;
+  vertical-align: top;
+  border-block-end: 1px solid var(--color-border);
+  /*
+   * SC 2.4.11 — a focused cell must not end up under the sticky header when
+   * the browser scrolls it into view.
+   */
+  scroll-margin-block-start: 3rem;
+}
+
+/* Counts read as numbers, so they are end-aligned (§9.2). */
+.control-table td:has(> .control-table__count),
+.control-table th.control-table__th--numeric {
+  text-align: end;
+}
+
+.control-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: var(--layer-sticky);
+  background: var(--color-card);
+  white-space: nowrap;
+  font-size: var(--text-11);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-muted);
+  cursor: grab;
+}
+
+:lang(en) .control-table thead th {
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+}
+
+/* The column being dragged stays visible but recedes. */
+.control-table__th--dragging {
+  opacity: 0.5;
+}
+
+.control-table__sort {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  /* A button resets these, and the heading row must read as one row. */
+  text-transform: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.control-table__sort:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+.control-table__sort:focus-visible,
+.control-table__title:focus-visible,
+.control-typeahead__list button:focus-visible,
+.link-button:focus-visible,
+.control-table__move button:focus-visible {
+  outline: 2px solid var(--brand-primary-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.control-table__sort:active,
+.control-table__title:active {
+  color: var(--brand-primary-active);
+}
+
+/* Direction is carried by an arrow as well as `aria-sort` (§9.4). */
+.control-table__sort[data-sort]::after {
+  content: '↑';
+  margin-inline-start: var(--space-4);
+  font-size: var(--text-11);
+}
+
+.control-table__sort[data-sort='descending']::after {
+  content: '↓';
+}
+
+/*
+ * Keyboard equivalent of the drag. Always in the DOM so it is reachable by
+ * tab; shown on hover or focus so the header stays quiet at rest.
+ */
+/*
+ * Keyboard equivalent of the column drag — SC 2.5.7 requires a non-dragging
+ * alternative. Always in the DOM so it is reachable by tab; revealed on hover
+ * or focus so the header stays quiet at rest.
+ */
+.control-table__move {
+  display: inline-flex;
+  gap: var(--space-4);
+  margin-inline-start: var(--space-4);
+  opacity: 0;
+  transition: opacity var(--motion-state) var(--ease);
+}
+
+.control-table th:hover .control-table__move,
+.control-table__move:focus-within {
+  opacity: 1;
+}
+
+.control-table__move button {
+  /*
+   * 24px meets SC 2.5.8; the pair sits inside a dense header where AIZEN's
+   * stricter 32px bar is impractical, and the WCAG spacing exception applies
+   * because no other target sits within the 24px circle (§8.2).
+   */
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  line-height: 1;
+  padding: 0 var(--space-4);
+  cursor: pointer;
+}
+
+.control-table__move button:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+/*
+ * Row hover via `:has()` so a hovered nested control does not double-highlight
+ * the row (§9.4). Hover changes colour only — nothing lifts or shifts (§7).
+ */
+.control-table tbody tr:hover:not(:has(button:hover, a:hover)) {
+  background: var(--color-hover);
+}
+
+.control-table__title {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  color: var(--color-primary);
+  text-align: start;
+  cursor: pointer;
+}
+
+.control-table__title:hover {
+  text-decoration: underline;
+}
+
+.control-table__objective {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /*
+   * §11.4 — never size a column to the English string. The cap stops a long
+   * objective from crowding out the status columns; it is not what decides the
+   * table's width, which is set by the column set itself (see PLAN.md,
+   * STOP-AND-REPORT #2).
+   */
+  max-inline-size: 18rem;
+}
+
+
+/*
+ * Enhanced tier (§3.2): `text-wrap: pretty` is newly available and engines
+ * differ in what they optimise. Without it the text wraps normally, which is
+ * the baseline experience — nothing depends on it.
+ */
+@supports (text-wrap: pretty) {
+  .control-table__objective,
+  .control-table td {
+    text-wrap: pretty;
+  }
+}
+
+.control-table--preview td {
+  vertical-align: top;
+}
+
+.control-row--rejected {
+  background: var(--color-danger-surface);
+}
+
+/* --- badges ----------------------------------------------------------------
+
+ * The scale badge is `.pill --level` from the primitives layer, not a chip of
+ * this feature's own (Design Uplift v2 §4.4). Only the overdue marker and the
+ * date cell are defined here.
+ */
+
+.control-badge {
+  display: inline-block;
+  margin-inline-start: var(--space-4);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-11);
+  font-weight: var(--weight-semibold);
+}
+
+.control-badge--overdue {
+  background: var(--color-danger-surface);
+  color: var(--color-danger);
+}
+
+.control-target-date {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- editable scale cell ---------------------------------------------------
+
+ * The badge, made operable in place. A native `<select>` covers the pill, so
+ * the whole badge is the hit target while the accessible name, keyboard
+ * behaviour and mobile picker all come from the platform (§5). The visible
+ * text is the span underneath; the select itself is transparent.
+ */
+
+.level-select {
+  position: relative;
+  padding-inline-end: var(--space-20);
+  cursor: pointer;
+  transition: border-color var(--motion-state) var(--ease);
+}
+
+/* Caret — the affordance that says the value can be changed. */
+.level-select::after {
+  content: '';
+  position: absolute;
+  inset-inline-end: var(--space-8);
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+  border-inline-end: 1px solid currentcolor;
+  border-block-end: 1px solid currentcolor;
+  rotate: 45deg;
+  translate: 0 -25%;
+  opacity: 0.55;
+}
+
+.level-select__control {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  /* The badge below provides every visual; this only provides behaviour. */
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* The six states, drawn on the badge rather than the transparent select. */
+.level-select:hover {
+  border-color: color-mix(in oklab, var(--pill-level-indicator, var(--border)) 75%, transparent);
+}
+
+.level-select:has(.level-select__control:focus-visible) {
+  outline: 2px solid var(--brand-primary-ring);
+  outline-offset: 2px;
+}
+
+.level-select:has(.level-select__control:active) {
+  background: color-mix(in oklab, var(--pill-level-surface) 80%, var(--color-text));
+}
+
+.level-select[data-loading='true'] {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.level-select:has(.level-select__control:disabled) {
+  cursor: default;
+}
+
+/* --- editors and dialogs --------------------------------------------------- */
+
+.control-dialog {
+  max-width: 52rem;
+}
+
+.control-form .editor-grid {
+  margin-block-end: var(--space-16);
+}
+
+.control-evidence__item {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 2fr) minmax(0, 2fr) auto;
+  align-items: end;
+}
+
+.control-typeahead {
+  margin-block-end: var(--space-16);
+}
+
+.control-typeahead__selected {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  margin: 0;
+}
+
+.control-typeahead__list {
+  list-style: none;
+  margin: var(--space-8) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.control-typeahead__list button {
+  width: 100%;
+  text-align: start;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  padding: var(--space-4) var(--space-8);
+  font: inherit;
+  cursor: pointer;
+}
+
+.control-typeahead__list button:hover {
+  border-color: var(--color-border);
+  background: var(--color-hover);
+}
+
+.control-upload__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+  margin-block-end: var(--space-12);
+}
+
+/* The input is the label; the native control itself never renders. */
+.control-upload__file input {
+  display: none;
+}
+
+.control-upload__columns {
+  margin-block-end: var(--space-12);
+  font-size: var(--text-dense);
+  color: var(--color-text-muted);
+}
+
+.control-upload__summary {
+  margin: 0 0 var(--space-12);
+}
+
+.control-import__result {
+  margin: var(--space-12) 0 0;
+  padding: var(--space-8) var(--space-12);
+  border-radius: var(--radius-md);
+  background: var(--success-soft);
+  color: var(--success);
+  font-weight: var(--weight-semibold);
+}
+
+/* --- risk-side linked controls panel --------------------------------------- */
+
+.linked-controls {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.linked-controls__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+  padding: var(--space-8) var(--space-12);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+}
+
+.linked-controls__name {
+  flex: 1;
+  min-width: 12rem;
+}
+
+.linked-controls__picker {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.linked-controls__options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+/*
+ * Specific enough to beat `.editor-panel label`, which lays labels out as a
+ * grid: inside the risk editor these rows must stay one line.
+ */
+.linked-controls__picker .linked-controls__options label {
+  display: flex;
+  /* `.editor-panel label` stacks its children; a pick row is one line. */
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-sm);
+}
+
+.linked-controls__picker .linked-controls__options label:hover {
+  background: var(--color-hover);
+}
+
+.linked-controls__picker .linked-controls__options input {
+  width: auto;
+  flex: none;
+}
+
+.link-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: var(--color-primary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 60rem) {
+  .control-evidence__item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/*
+ * Administration → Control scales. Uses the admin layout primitives; only the
+ * save/cancel row is new, and it matches the spacing of the other sections.
+ */
+.admin-actions {
+  display: flex;
+  gap: var(--space-8);
+  margin-block-start: var(--space-16);
+}
+
+/*
+ * The editors put their footer inside the <form> so submit still works, so the
+ * form — not the panel — is the flex column and the panel is what scrolls.
+ * Without this the Save row scrolls out of a tall dialog.
+ */
+.control-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+/* --- loading state (§9.3) --------------------------------------------------
+
+ * Skeleton rows stand in at the real row height and column count, so the grid
+ * does not jump when data arrives (§12.2).
+ */
+.control-skeleton {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.control-skeleton__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--space-64), 1fr));
+  gap: var(--space-12);
+}
+
+.control-skeleton__cell {
+  block-size: 1.5rem;
+}
+
+/* Counts are numbers: end-aligned and tabular (§9.2). */
+.control-table__count {
+  display: block;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Pending state on the control that was clicked, never a global overlay
+ * (§7 loading, §10 saving). Opacity only — nothing moves.
+ */
+.btn[data-loading='true'] {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+/*
+ * Quiet confirmation of an inline save (§10): it stays where the eye already
+ * is, rather than appearing as a toast that vanishes before it is read. Also
+ * the polite live region that announces the change (§8.4).
+ */
+.control-register__saved {
+  margin: 0;
+  min-block-size: 1rem;
+  font-size: var(--text-xs);
+  color: var(--success);
+}

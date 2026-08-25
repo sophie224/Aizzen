@@ -92,7 +92,7 @@ Every master-data label is a pair: `*En` (required) and `*Ka` (optional). When t
 ### Persistence
 
 - Storage key is `erm-risk-management-v3-state` — **retained deliberately for backward compatibility. Do not rename it.**
-- Current `schemaVersion = 11`. The legacy `app.html` is at 7; the migration must handle it.
+- Current `schemaVersion = 13`. The legacy `app.html` is at 7; the migration must handle it.
 - Migration is **idempotent**, never intentionally deletes valid risk data, fills missing collections with defaults, repairs invalid references conservatively, and persists only after success.
 
 ### Audit and history are separate mechanisms
@@ -161,6 +161,8 @@ The **Dashboard module** (CR-004) is one aggregation — `src/domain/dashboard/a
 
 Modules: `dashboard`, `register`, `risks`, `controls`, `actions`, `reports`, `audit`, `administration`. Website Administration sits **outside** this matrix behind a Super Admin–only guard.
 
+The **Control Register** and **Control Deficiency Register** (CR-2026) consume the `controls` module permission and the existing OU hierarchy — they add no module and change no role. A control is mapped to exactly one business unit and is visible only inside that unit's effective scope. Both registers sit behind `appConfig.controlRegistersEnabled` (`VITE_FEATURE_CONTROL_REGISTERS=off` hides the navigation *and* unregisters the routes). `AppState.controls` is the organisation-wide register; `Risk.controls` is the per-risk narrative list and is a **different thing** — never merge them. Scale levels (`effectiveness`, `maturity`, `assurance`, `classifications`) follow the matrix rule: the stored `key` is stable, the label and colour are configuration, and every screen reads them through `src/domain/controls`.
+
 Record visibility: Super Admin / Admin / Risk Manager → all; Auditor → all but read-only; Risk Owner → own risks; Control Owner → risks holding a control they own; Action Owner → risks holding an action they own; custom role → effective BU scope.
 
 **Business Unit inheritance:** a direct grant on a parent covers the parent and *all* descendants including future ones; a grant on a child covers that child and its descendants only. **No upward and no sibling inheritance.**
@@ -220,6 +222,7 @@ Categories, business units, custom attributes and users are deactivated, never h
 ## Repository map
 
 ```
+docs/Request_for_Change_Control_Registers.pdf  the CR-2026 change request
 legacy/app.html     legacy single-file build (reference for parity; do not extend)
                     (not at the repo root: Vite's HTML fallback would serve it at /app)
 docs/RM_Platform.pdf the spec — source of truth

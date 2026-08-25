@@ -41,6 +41,10 @@ import { pickNamed, useTranslation, type TranslationKey } from '../../i18n/index
 import { IconClose, IconPlus, IconSave, IconTrash } from '../../ui/icons.tsx'
 import { initialsOf } from '../../ui/initials.ts'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
+import { linkedControlIds } from '../../domain/controls/index.ts'
+import { LinkedControlsPicker } from '../controls/linked-controls-picker.tsx'
+import { setRiskControlLinks } from '../controls/mutations.ts'
+import { visibleControls } from '../../domain/controls/index.ts'
 import { AssessmentMatrix } from '../risk-view/assessment-matrix.tsx'
 import { MatrixGuidance } from '../risk-view/matrix-guidance.tsx'
 import { RatingChip } from '../../ui/rating-chip.tsx'
@@ -114,6 +118,17 @@ function RiskEditor({ risk, initialTab, onClose, onSaved, state, user, context }
   const store = useAppDataStore()
 
   const [activeTab, setActiveTab] = useState<TabId>(initialTab ?? 'basic')
+  /*
+   * Control Register links (CR-2026 §6, change 1).
+   *
+   * Held beside the draft rather than on it: the risk record does not gain a
+   * field, and a risk still saves with nothing linked. The links are written
+   * to their own collection after the risk save succeeds.
+   */
+  const [linkedIds, setLinkedIds] = useState<string[]>(() =>
+    risk ? linkedControlIds(state.controlRiskLinks, risk.id) : [],
+  )
+  const initialLinkedIds = useRef(linkedIds)
   const [errors, setErrors] = useState<ValidationError[]>([])
   const [saving, setSaving] = useState(false)
   const [confirmingClose, setConfirmingClose] = useState(false)
@@ -239,6 +254,23 @@ function RiskEditor({ risk, initialTab, onClose, onSaved, state, user, context }
           changes: result.changes,
         },
       })
+      /*
+       * Additive follow-up write, and only when the selection actually
+       * changed: a risk edit that touches no link must not add a link audit
+       * event, which is what keeps the existing risk audit trail identical.
+       */
+      const linksChanged =
+        [...linkedIds].sort().join('|') !== [...initialLinkedIds.current].sort().join('|')
+      if (linksChanged) {
+        await setRiskControlLinks(
+          store,
+          user.id,
+          result.risk.id,
+          linkedIds,
+          visibleControls(context, state.controls).map((control) => control.id),
+        )
+      }
+
       onSaved?.(result.risk)
       onClose()
     } finally {
@@ -633,13 +665,16 @@ function RiskEditor({ risk, initialTab, onClose, onSaved, state, user, context }
           ) : null}
 
           {activeTab === 'controls' ? (
-            <ControlsTab
-              draft={draft}
-              onChange={(controls) => {
-                update({ controls })
-              }}
-              candidates={ownerCandidates(state.users, state.businessUnits, draft.businessUnitId, 'role_control_owner')}
-            />
+            <>
+              <ControlsTab
+                draft={draft}
+                onChange={(controls) => {
+                  update({ controls })
+                }}
+                candidates={ownerCandidates(state.users, state.businessUnits, draft.businessUnitId, 'role_control_owner')}
+              />
+              <LinkedControlsPicker selectedIds={linkedIds} onChange={setLinkedIds} />
+            </>
           ) : null}
 
           {activeTab === 'actions' ? (

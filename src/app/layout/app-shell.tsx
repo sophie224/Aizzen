@@ -1,10 +1,20 @@
 import { useEffect, useRef } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { appConfig } from '../../config/index.ts'
 import { useAppData } from '../../data/app-data-context.ts'
 import { canAccess, canOpenAdministration, canOpenWebsiteAdministration } from '../../domain/permissions/index.ts'
 import { useTranslation } from '../../i18n/index.ts'
 import { BrandMark } from '../../ui/brand-mark.tsx'
-import { IconChart, IconGauge, IconGlobe, IconList, IconSettings, IconSignOut } from '../../ui/icons.tsx'
+import {
+  IconChart,
+  IconGauge,
+  IconGlobe,
+  IconList,
+  IconSettings,
+  IconShield,
+  IconSignOut,
+  IconWarning,
+} from '../../ui/icons.tsx'
 import { initialsOf } from '../../ui/initials.ts'
 import { RiskPalette } from './risk-palette.tsx'
 import { useAuth } from '../session/use-auth.ts'
@@ -133,6 +143,24 @@ export function AppShell() {
               <IconList />
               {t('nav.register')}
             </NavLink>
+          ) : null}
+          {/*
+           * Control Register sits directly under Risk Register and before
+           * Reports, and the Deficiency Register under it — the placement the
+           * change request specifies (FR-CR-01, FR-CD-01, QA-01). Both are
+           * behind the feature flag.
+           */}
+          {appConfig.controlRegistersEnabled && canAccess(context, 'controls', 'read') ? (
+            <>
+              <NavLink to="/controls" className="rail__link">
+                <IconShield />
+                {t('nav.controls')}
+              </NavLink>
+              <NavLink to="/control-deficiencies" className="rail__link rail__link--sub">
+                <IconWarning />
+                {t('nav.deficiencies')}
+              </NavLink>
+            </>
           ) : null}
           {canAccess(context, 'reports', 'read') ? (
             <NavLink to="/reports" className="rail__link">

@@ -6,6 +6,11 @@ import type {
   RatingMatrix,
 } from '../../domain/types/index.ts'
 import { MODULE_NAMES, SCALE_VALUES } from '../../domain/types/index.ts'
+import {
+  createDefaultControlConfig,
+  nextControlRef,
+  nextDeficiencyRef,
+} from '../../domain/controls/index.ts'
 import { normaliseCompactColumns } from '../../domain/export/index.ts'
 import { RISK_DESCRIPTION_MAX_LENGTH } from '../../domain/risk-editor/index.ts'
 import {
@@ -499,4 +504,122 @@ export function repairDemoRequests(state: AppState, notes: RepairNotes): void {
   if (repaired.length !== dropped) {
     notes.push(`demo requests: dropped ${String(dropped - repaired.length)} unreadable entry(ies)`)
   }
+}
+
+/**
+ * Control Register, findings, links and configuration (CR-2026).
+ *
+ * Additive and conservative, in that order of priority:
+ *
+ *   - a missing collection or configuration is created from defaults;
+ *   - a configured scale is NEVER overwritten, only completed when a whole
+ *     scale is missing, so an administrator's levels and colours survive;
+ *   - a control whose business unit no longer exists is re-homed to the root
+ *     unit rather than deleted — the CR forbids destructive repair, and a
+ *     control still carries its evidence and its findings;
+ *   - only genuinely unresolvable records are dropped: a finding pointing at
+ *     no control, and a link pointing at no risk or no control.
+ */
+export function repairControlRegister(state: AppState, notes: RepairNotes): void {
+  if (!isRecord(state.controlConfig)) {
+    state.controlConfig = createDefaultControlConfig()
+    notes.push('Seeded the default control scales.')
+  } else {
+    const defaults = createDefaultControlConfig()
+    for (const scale of ['effectiveness', 'maturity', 'assurance', 'classifications'] as const) {
+      const configured = state.controlConfig[scale]
+      if (!Array.isArray(configured) || configured.length === 0) {
+        state.controlConfig[scale] = defaults[scale]
+        notes.push(`Restored the default ${scale} scale.`)
+      }
+    }
+    if (!Array.isArray(state.controlConfig.customColumns)) state.controlConfig.customColumns = []
+    if (typeof state.controlConfig.version !== 'number') state.controlConfig.version = 1
+  }
+
+  const rootUnit = state.businessUnits.find((unit) => unit.parentId === null) ?? state.businessUnits[0]
+  const unitIds = new Set(state.businessUnits.map((unit) => unit.id))
+  const userIds = new Set(state.users.map((user) => user.id))
+
+  const seenRefs = new Set<string>()
+  state.controls = state.controls.filter(isRecord).map((control, index) => {
+    if (!isNonEmptyString(control.id)) control.id = `ctl_recovered_${String(index)}`
+
+    // References must stay unique: they are the register's business key.
+    if (!isNonEmptyString(control.ref) || seenRefs.has(control.ref)) {
+      control.ref = nextControlRef(state.controls.filter((other) => other !== control))
+      notes.push(`Reissued the Control ID for control ${control.id}.`)
+    }
+    seenRefs.add(control.ref)
+
+    if (!unitIds.has(control.businessUnitId) && rootUnit) {
+      notes.push(`Control ${control.ref} pointed at a missing business unit; re-homed to ${rootUnit.code}.`)
+      control.businessUnitId = rootUnit.id
+    }
+    if (control.ownerId !== '' && !userIds.has(control.ownerId)) {
+      notes.push(`Control ${control.ref} pointed at a missing owner; ownership cleared.`)
+      control.ownerId = ''
+    }
+    if (!Array.isArray(control.evidence)) control.evidence = []
+    if (!isRecord(control.custom)) control.custom = {}
+    return control
+  })
+
+  const controlIds = new Set(state.controls.map((control) => control.id))
+
+  const findingsBefore = state.controlDeficiencies.length
+  const seenFindingRefs = new Set<string>()
+  state.controlDeficiencies = state.controlDeficiencies
+    .filter(isRecord)
+    .filter((deficiency) => controlIds.has(deficiency.controlId))
+    .map((deficiency, index) => {
+      if (!isNonEmptyString(deficiency.id)) deficiency.id = `cdf_recovered_${String(index)}`
+      if (!isNonEmptyString(deficiency.ref) || seenFindingRefs.has(deficiency.ref)) {
+        deficiency.ref = nextDeficiencyRef(
+          state.controlDeficiencies.filter((other) => other !== deficiency),
+        )
+      }
+      seenFindingRefs.add(deficiency.ref)
+
+      if (!unitIds.has(deficiency.businessUnitId)) {
+        // A finding follows its control's unit, which the step above repaired.
+        const parent = state.controls.find((control) => control.id === deficiency.controlId)
+        deficiency.businessUnitId = parent?.businessUnitId ?? rootUnit?.id ?? ''
+      }
+      if (deficiency.remediationOwnerId !== '' && !userIds.has(deficiency.remediationOwnerId)) {
+        deficiency.remediationOwnerId = ''
+      }
+      if (!isRecord(deficiency.custom)) deficiency.custom = {}
+      return deficiency
+    })
+  if (state.controlDeficiencies.length !== findingsBefore) {
+    notes.push(
+      `Dropped ${String(findingsBefore - state.controlDeficiencies.length)} finding(s) with no matching control.`,
+    )
+  }
+
+  const riskIds = new Set(state.risks.map((risk) => risk.id))
+  const linksBefore = state.controlRiskLinks.length
+  const seenLinks = new Set<string>()
+  state.controlRiskLinks = state.controlRiskLinks.filter((link) => {
+    if (!isRecord(link)) return false
+    if (!riskIds.has(link.riskId) || !controlIds.has(link.controlId)) return false
+
+    const key = `${link.riskId}::${link.controlId}`
+    if (seenLinks.has(key)) return false
+    seenLinks.add(key)
+    return true
+  })
+  if (state.controlRiskLinks.length !== linksBefore) {
+    notes.push(
+      `Dropped ${String(linksBefore - state.controlRiskLinks.length)} risk–control link(s) that no longer resolve.`,
+    )
+  }
+
+  // A stale column preference must never block rendering, so it is repaired
+  // rather than trusted: unknown users go, unknown ids are filtered on read.
+  state.controlColumnPreferences = state.controlColumnPreferences.filter(
+    (preference) =>
+      isRecord(preference) && userIds.has(preference.userId) && Array.isArray(preference.columnIds),
+  )
 }

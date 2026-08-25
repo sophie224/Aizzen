@@ -16,6 +16,15 @@ export type StorageAdapterName = (typeof STORAGE_ADAPTERS)[number]
 
 export interface AppConfig {
   /**
+   * Control Register and Control Deficiency Register (CR-2026 §7.3).
+   *
+   * The change request requires the modules to ship behind a flag that can be
+   * turned off per environment without a redeployment. Off hides the
+   * navigation AND blocks the routes — the guard is the enforcement point, not
+   * the hidden link.
+   */
+  controlRegistersEnabled: boolean
+  /**
    * Origin of the Aizzen auth service. Empty disables Google sign-in and the
    * app falls back to Phase 1 credential login. Public by design — the client
    * secret lives only on the service.
@@ -39,6 +48,7 @@ function readAdapter(value: string | undefined): StorageAdapterName {
 /**
  * Resolved from Vite environment variables:
  *   VITE_STORAGE_ADAPTER = local | onPremiseApi | awsApi   (default: local)
+ *   VITE_FEATURE_CONTROL_REGISTERS = off                    (default: on)
  *   VITE_API_BASE_URL    = https://…                        (API adapters only)
  */
 /**
@@ -48,6 +58,8 @@ function readAdapter(value: string | undefined): StorageAdapterName {
 export const APP_VERSION = '3.3'
 
 export const appConfig: AppConfig = {
+  controlRegistersEnabled:
+    (import.meta.env.VITE_FEATURE_CONTROL_REGISTERS as string | undefined) !== 'off',
   storageAdapter: readAdapter(import.meta.env.VITE_STORAGE_ADAPTER as string | undefined),
   apiBaseUrl: (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '',
   authServiceUrl: (import.meta.env.VITE_AUTH_SERVICE_URL as string | undefined) ?? '',

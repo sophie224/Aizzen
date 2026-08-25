@@ -247,7 +247,7 @@ describe('data tools', () => {
     ]) {
       expect(payload.state, key).toHaveProperty(key)
     }
-    expect(payload.schemaVersion).toBe(12)
+    expect(payload.schemaVersion).toBe(13)
   })
 
   it('imports the legacy schema-7 backup, migrating it', async () => {
@@ -260,7 +260,7 @@ describe('data tools', () => {
     await waitFor(() => {
       expect(persisted().risks).toHaveLength(8)
     })
-    expect(persisted().schemaVersion).toBe(12)
+    expect(persisted().schemaVersion).toBe(13)
     expect(await screen.findByText('Backup imported.')).toBeInTheDocument()
   })
 

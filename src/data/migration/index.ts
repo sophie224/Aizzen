@@ -6,6 +6,7 @@ import { createSeedState } from '../seed/index.ts'
 import { isLegacyV7Shape, migrateLegacyV7Shape } from './legacy-v7.ts'
 import {
   repairBusinessUnitTree,
+  repairControlRegister,
   repairDefaults,
   repairDemoRequests,
   repairMatrix,
@@ -44,6 +45,10 @@ const ARRAY_COLLECTIONS = [
   'reportTemplates',
   'auditEvents',
   'demoRequests',
+  'controls',
+  'controlDeficiencies',
+  'controlRiskLinks',
+  'controlColumnPreferences',
 ] as const
 
 function ensureCollections(state: Record<string, unknown>): void {
@@ -94,6 +99,9 @@ export function migrateState(raw: unknown): MigrationOutcome {
   repairMatrix(state, notes)
   // After repairDefaults, so solution references resolve against restored content.
   repairDemoRequests(state, notes)
+  // Last: it resolves controls against the repaired unit tree, findings and
+  // links against the repaired controls, and risks that repairRisks kept.
+  repairControlRegister(state, notes)
 
   const validated = validateAppState(state)
   if (!validated.ok) return { ok: false, errors: validated.errors }

@@ -469,3 +469,104 @@ These come from the spec's own open-questions list. Each needs a Product/Risk an
 | 12 | Notification/reminder frequency | M18 |
 
 Until answered, implement documented Phase 1 behaviour and keep the Phase 2 control labelled separately — do not silently invent a rule.
+
+---
+
+## CR-2026 — Control Register & Control Deficiency Register
+
+Delivered from `docs/Request_for_Change_Control_Registers.pdf`. Additive by construction: new collections, new routes, one new administration section, and exactly the two integration points the change request permits.
+
+| Requirement | Where |
+|---|---|
+| FR-CR-01, FR-CD-01 navigation placement | `src/app/layout/app-shell.tsx`, `src/app/routes.tsx` |
+| FR-CR-02 framework libraries | `src/domain/controls/frameworks.ts` (ISO 27001, NIST CSF 2.0, ISO 31000, NIS2, SOX — versioned packages) |
+| FR-CR-03, FR-CD-03 sequential IDs | `nextControlRef`, `nextDeficiencyRef` |
+| FR-CR-04, FR-CR-05 risk linkage and propagation | `controlRiskLinks`, `linked-controls-picker.tsx`, `linked-controls-panel.tsx` |
+| FR-CR-06 bulk upload (.csv, .xlsx) | `src/domain/controls/import.ts` + `read-tabular-file.ts` (validate → preview → commit) |
+| FR-CR-07, FR-CD-05 column order per user | `controlColumnPreferences`, `use-column-order.ts` |
+| FR-CR-08, FR-CD-07 OU scoping | `visibleControls` / `visibleDeficiencies` over the existing hierarchy |
+| FR-CR-09 configurable scales | `controlConfig` + Administration → Control scales |
+| FR-CR-10 evidence list | `RegisterControl.evidence`, control editor |
+| FR-CR-11, FR-CD-06 custom columns | `controlConfig.customColumns`, `showInRiskView` |
+| §7.3 feature flag | `appConfig.controlRegistersEnabled` (`VITE_FEATURE_CONTROL_REGISTERS=off`) |
+| SEC-04 formula injection | `neutraliseCell` on every export |
+| SEC-10 audit | `src/features/controls/mutations.ts` |
+
+**Open items, deliberately not built here:** reporting over controls and findings (out of scope per CR §4.2), server-side pagination and the queued import job (Phase 2 concerns — the client-side registers are bounded by the same in-memory state as the Risk Register), and framework packages beyond the seeded starter sets.
+
+---
+
+## CR-2026 design pass — Design Uplift Request v2
+
+The two new registers were brought onto the uplift contract before sign-off. Recorded here in the form §15.4 asks for.
+
+**Screens affected:** Control Register, Control Deficiency Register, control editor, finding editor, framework import, bulk upload, linked-controls picker, linked-controls panel, Administration → Control scales.
+
+**Component implementations, before → after:** scale badge 2 → 1 (the bespoke `.control-chip` is gone; the registers use `.pill --level`, the platform's badge). The editable variant of that badge — `LevelSelect` — is the same pill with a native `<select>` filling it, so it is one implementation used in four places (effectiveness, maturity, assurance, finding classification), not a second badge. No other element gained an implementation: buttons, inputs, dialogs, empty states and skeletons are all existing primitives.
+
+**Inline scale editing.** The value a register exists to be scanned for is changed where it is read, without opening the record. The cell is a native `<select>` under the badge — platform-first (§5), so it needs no popover, no anchor positioning and no `z-index`, and keyboard, screen-reader and touch behaviour arrive correct. Permission is checked per record (`canEditControlRecord`: `controls: edit` plus OU scope) and a user who cannot edit gets the read-only badge, with the value still legible. The write rebuilds the draft from the stored record with exactly one field replaced — the field-level discipline the risk editor already uses — and goes through the audited mutation path, so the trail names the field that moved. The save is confirmed quietly in place and announced in a polite live region (§8.4, §10), never as a toast.
+
+| Uplift section | What it required | What was done |
+|---|---|---|
+| §4.4 | One implementation per element | `.control-chip` deleted; `.pill --level` added to the primitives layer |
+| §6.2 | Never put small text on a raw configured colour | `levelBadgeColors()` returns a tinted surface plus a darkened indicator; text uses `--text-primary` and the configured colour appears only as the leading bar |
+| §6.3 | Contrast test over the **live** configuration | `src/features/controls/badge-contrast.test.ts` reads config through the repository and asserts 4.5:1 text, 3:1 indicator and a non-empty name in EN **and** KA |
+| §7 | All six interactive states | `:focus-visible` rings, `:active`, disabled and `data-loading` pending state on the control that was clicked; hover changes colour only |
+| §8.2 / §8.3 | Target size, focus not obscured, SC 2.5.7 | Column reorder has ‹ › buttons at 24px under the documented dense-header exception; `scroll-margin-block-start` on cells so the sticky header never covers focus |
+| §9 | Data-table spec | `tabular-nums`, end-aligned counts, `:has()` row hover, sticky header, `aria-sort` **and** an arrow, stable column widths, loading / empty / filtered-empty as distinct states, 250 ms debounced search |
+| §11 | EN/KA typography | Uppercase and letter-spacing scoped to `:lang(en)`; both registers verified in Georgian at 1280 and 1440 |
+| §14.2 | Quality gates | Hex, `rgb()`, radius, duration, `z-index` and physical-property greps all clean across the module |
+| §16.1 | Screenshot matrix | `e2e/uplift-shots.spec.ts` extended with both registers — it navigates the rail by position, which the new entries had shifted |
+
+**SHOULD deviations, with reasons:**
+
+1. **`content-visibility: auto` not applied to the register tables** (§12.2 recommends it for long lists). On a single `<tbody>` it is one containment unit rather than one per row, so the benefit is negligible, while skipping rows lets an auto-layout table resize its columns mid-scroll — which breaks the stable-column-width requirement in §9.2. Documented in `controls.css`; revisit with per-row virtualisation.
+2. **Validation timing** stays on submit rather than on blur (§10). The Risk Editor validates on submit; matching it keeps one behaviour across the product, which §13 values more than the isolated improvement.
+
+```
+STOP-AND-REPORT #1
+Screen / component:   Scale badges (both registers, risk-side panel)
+Visual goal blocked:  None — the §6.2 pattern is implemented as specified
+Scope area touched:   none
+Issue:                §6.1's stated rationale is not correct. It says neither
+                      black nor white reaches 4.5:1 on a mid-luminance fill.
+                      The two contrast curves cross at 4.58:1, so the better of
+                      the two always clears 4.5 — by a hair. The pattern is
+                      still right, for a different reason: a 4.58:1 pass has no
+                      headroom once a row-hover tint sits behind it (§8.1
+                      requires contrast against the rendered surface), and a
+                      per-badge computed foreground flips between white and ink
+                      down a column. The test asserts those true properties
+                      instead, so it cannot pass for a wrong reason.
+Options:
+  A. Leave §6.1's wording as it is — the prescribed pattern is unaffected
+  B. Correct §6.1 to the headroom/stability argument
+Recommendation:       B, at the next revision of the brief
+Decision required from: Design sign-off
+```
+
+**Not covered by this pass** — these need the decisions §17 leaves open, or tooling the repo does not have: axe-core in CI (§14.3), Lighthouse budgets and INP/CLS/LCP measurement (§12.1), the metric-matched Georgian font fallback (§11.5, needs the webfont measured), and the manual screen-reader pass (§8.5).
+
+```
+STOP-AND-REPORT #2
+Screen / component:   Control Register grid, Georgian locale at 1280px
+Visual goal blocked:  The Effectiveness badge — the column a user scans this
+                      register for — sits past the right edge at 1280 in KA
+                      and needs a horizontal scroll. It fits at 1440 (badge
+                      right edge 1425px).
+Functional change:    Reordering the default columns so the status columns
+                      precede the free-text ones
+Scope area touched:   fields — §1.1 forbids reordering, and CR-2026 §5.2 fixes
+                      the field order this default follows
+Measured:             Narrowing the free-text columns changes nothing; the
+                      table is already at its minimum content width in KA, so
+                      this cannot be solved with CSS width alone.
+Options:
+  A. Accept horizontal scroll — matches the Risk Register today; users can
+     drag or keyboard-reorder columns and the order persists (FR-CR-07)
+  B. Change the default column order so status precedes objective — needs an
+     exception to §1.1 and a deviation from CR-2026 §5.2
+  C. Drop Control Objective from the default column set — same scope question
+Recommendation:       A now, B at the next CR revision if users ask for it
+Decision required from: Product + Design sign-off
+```

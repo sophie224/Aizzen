@@ -17,9 +17,16 @@ const PUBLIC = [
   { name: 'login', path: '/login' },
 ]
 
+/*
+ * Rail order, which this spec navigates by POSITION — keep it in step with
+ * `app-shell.tsx`. CR-2026 inserted the two control registers between the Risk
+ * Register and Reports.
+ */
 const APP = [
   { name: 'dashboard', path: '/dashboard' },
   { name: 'register', path: '/register' },
+  { name: 'controls', path: '/controls' },
+  { name: 'deficiencies', path: '/control-deficiencies' },
   { name: 'reports', path: '/reports' },
   { name: 'administration', path: '/administration' },
 ]

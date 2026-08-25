@@ -388,3 +388,13 @@
     padding: var(--space-16);
   }
 }
+
+/*
+ * Control Deficiency Register is a child of the Control Register in the
+ * navigation (CR-2026 FR-CD-01), so it is indented under it rather than
+ * presented as a peer of Dashboard and Register.
+ */
+.rail__link--sub {
+  padding-inline-start: var(--space-32);
+  font-size: var(--text-xs);
+}

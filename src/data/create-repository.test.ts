@@ -17,6 +17,7 @@ function config(overrides: Partial<AppConfig> = {}): AppConfig {
     storageAdapter: 'local',
     apiBaseUrl: 'https://rm.example.com/api',
     authServiceUrl: '',
+    controlRegistersEnabled: true,
     ...overrides,
   }
 }

@@ -13,6 +13,7 @@ import { IconChevronLeft, IconList, IconPencil, IconTrend } from '../../ui/icons
 import { initialsOf } from '../../ui/initials.ts'
 import { StatusPill } from '../../ui/status-pill.tsx'
 import { useCurrentUser } from '../../app/session/use-current-user.ts'
+import { LinkedControlsPanel } from '../controls/linked-controls-panel.tsx'
 import { RatingChip } from '../../ui/rating-chip.tsx'
 import { RiskEditorModal, type TabId as EditorTabId } from '../risk-editor/risk-editor-modal.tsx'
 import { AssessmentMatrix } from './assessment-matrix.tsx'
@@ -737,12 +738,24 @@ function AssessmentTab({
 function ControlsTab({ risk, userName }: { risk: Risk; userName: (id: string) => string }) {
   const { t } = useTranslation()
 
+  /*
+   * Register-linked controls sit above the risk's own control narrative
+   * (CR-2026 §6, change 2). Read-only, additive, and rendered even when the
+   * risk carries no narrative controls of its own — the two lists are
+   * different things and neither replaces the other.
+   */
   if (risk.controls.length === 0) {
-    return <EmptyState message={t('view.overview.noControls')} />
+    return (
+      <div className="risk-view__stack">
+        <LinkedControlsPanel riskId={risk.id} />
+        <EmptyState message={t('view.overview.noControls')} />
+      </div>
+    )
   }
 
   return (
     <div className="risk-view__stack">
+      <LinkedControlsPanel riskId={risk.id} />
       {risk.controls.map((control) => (
         <article key={control.id} className="panel">
           <h2>{control.title}</h2>

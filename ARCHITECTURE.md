@@ -107,12 +107,14 @@ The risk record therefore stores **only `impact` and `likelihood`** per assessme
 
 ```
 AppState {
-  schemaVersion      // current: 12
+  schemaVersion      // current: 13
   users[]            roles[]            categories[]
   businessUnits[]    customAttributes[] matrix
   risks[]            savedViews[]       dashboards[]
   reportTemplates[]  auditEvents[]      branding
   ssoConfig          siteContent        demoRequests[]
+  controls[]         controlDeficiencies[]  controlRiskLinks[]
+  controlConfig      controlColumnPreferences[]
   // + local session references (not authoritative business data)
 }
 ```
@@ -120,6 +122,10 @@ AppState {
 Entities reference each other by **stable opaque string IDs** (UUID/ULID in Phase 2):
 
 ```
+control.businessUnitId       → businessUnit.id   (exactly one OU per control)
+controlDeficiency.controlId  → control.id
+controlRiskLink.riskId       → risk.id
+controlRiskLink.controlId    → control.id
 risk.categoryId       → category.id
 risk.businessUnitId   → businessUnit.id
 risk.riskOwnerId      → user.id
@@ -463,12 +469,36 @@ Existing references never change when a Business Unit is later edited; a new ris
 | `/login` | sign-in | none |
 | `/dashboard` | view and (with rights) manage dashboards | `dashboard: read` |
 | `/register` | Risk Register | `register: read` **and** `risks: read` |
+| `/controls` | Control Register (CR-2026) | `controls: read` + feature flag |
+| `/control-deficiencies` | Control Deficiency Register (CR-2026) | `controls: read` + feature flag |
 | `/risks/:id` | Individual Risk View | record visibility |
 | `/reports` | Report template library + generated reports | `reports: read` |
 | `/administration` | Risk Administration | Administrator / Super Administrator |
 | Website Administration | public-site CMS | Super Administrator only |
 
 The platform pages sit at the top level and share `AppShell` through a pathless layout route. They previously lived under an `/app` prefix; `/app/*` now redirects to the equivalent top-level path (`src/app/legacy-app-path.ts`), preserving query string and hash, so older links keep working. The prefix must not come back: the legacy reference build is a file named `app.html`, and Vite's dev-server HTML fallback resolves a request for `/app` to it — which is why that file lives in `legacy/`, not at the repository root.
+
+### 8.1.1 Control Register and Control Deficiency Register (CR-2026)
+
+Two additive modules inside the Risk & Compliance module, delivered against the change request *Control Register & Control Deficiency Register*. Navigation places the Control Register directly under the Risk Register and before Reports, with the Deficiency Register beneath it (FR-CR-01, FR-CD-01).
+
+| Concern | Where it lives | Rule |
+|---|---|---|
+| Records | `AppState.controls`, `.controlDeficiencies` | New collections. `Risk.controls` — the narrative controls captured inside one risk — is a different concept and is untouched. |
+| Risk linkage | `AppState.controlRiskLinks` | A join record, so the `Risk` shape never changes (FR-CR-04). |
+| Scales | `AppState.controlConfig` | Effectiveness, maturity, assurance and finding classification are administrator-configurable, with a stable `key` per level and a version bumped on save (FR-CR-09). |
+| Custom columns | `controlConfig.customColumns` | Typed metadata only — never runtime schema. A column may be flagged to appear in the risk-side linked-controls view (FR-CR-11). |
+| Column order | `AppState.controlColumnPreferences` | Per user, per register; reconciled on read so a stale preference can never blank a grid (FR-CR-07, FR-CD-05). |
+| Domain logic | `src/domain/controls` | Pure: scales, sequence numbering, OU visibility, search, import planning. |
+| Writes | `src/features/controls/mutations.ts` | Every create/update/delete goes through the one transaction and writes an audit event (SEC-10). |
+| Framework libraries | `src/domain/controls/frameworks.ts` | Versioned seed packages: ISO 27001, NIST CSF 2.0, ISO 31000, NIS2, SOX (FR-CR-02). |
+| Feature flag | `appConfig.controlRegistersEnabled` | `VITE_FEATURE_CONTROL_REGISTERS=off` removes the navigation **and the routes** (§7.3, SEC-12, QA-16). |
+
+Identifiers: a manual control takes the next sequential `0001`, a framework control keeps its own UID (`A.5.1`, `GV.OC`) and never consumes a sequence number; findings number independently from `0001` (FR-CR-03, FR-CD-03). Visibility reuses the existing OU hierarchy through `hasBusinessUnitAccess` — the modules consume the platform's scope service rather than reimplementing it (FR-CR-08, FR-CD-07).
+
+Both registers follow the Design Uplift v2 contract: the scale badge is the platform `.pill --level`, not a component of their own; a configured colour never carries small text — `levelBadgeColors()` puts text on a tinted surface and uses the raw colour only as the leading indicator, verified against the live configuration by `badge-contrast.test.ts` (§6.3); uppercase and letter-spacing are scoped to `:lang(en)` so Georgian is never mapped to Mtavruli; and column reordering has a keyboard alternative (SC 2.5.7). See `PLAN.md` for the full section-by-section record, the two SHOULD deviations and the one stop-and-report item.
+
+Two existing screens are touched, both additively (CR §6): the risk editor gains an optional linked-controls picker inside its existing Controls tab, and the Individual Risk View gains a read-only linked-controls panel whose effectiveness and assurance are read from the control, so a change in the register shows on every linked risk without editing the risk (FR-CR-05).
 
 ### 8.2 Risk Management module
 

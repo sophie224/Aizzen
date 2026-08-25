@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { createDefaultControlConfig } from '../controls/index.ts'
 import { createDefaultMatrix } from '../risk-engine/default-matrix.ts'
 import legacyBaseline from '../../../fixtures/legacy-state.json'
 import { SCALE_VALUES } from '../types/enums.ts'
@@ -112,6 +113,11 @@ function makeValidState(overrides: Partial<AppState> = {}): AppState {
     customAttributes: [],
     matrix: makeMatrix(),
     risks: [],
+    controls: [],
+    controlDeficiencies: [],
+    controlRiskLinks: [],
+    controlConfig: createDefaultControlConfig(),
+    controlColumnPreferences: [],
     savedViews: [],
     matrixVersions: [],
     dashboardViews: [],

@@ -38,7 +38,7 @@ describe('legacy v7 -> current migration', () => {
   it('produces state that satisfies canonical validation', () => {
     const { state } = migrate(baseline)
     expect(validateAppState(state).ok).toBe(true)
-    expect(state.schemaVersion).toBe(12)
+    expect(state.schemaVersion).toBe(13)
   })
 
   it('preserves every collection count', () => {

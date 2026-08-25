@@ -5,6 +5,7 @@ import { useTranslation, type TranslationKey } from '../../i18n/index.ts'
 import { BusinessUnitsSection } from './business-units-section.tsx'
 import { CategoriesSection } from './categories-section.tsx'
 import { BrandingSection } from './branding-section.tsx'
+import { ControlScalesSection } from './control-scales-section.tsx'
 import { CustomAttributesSection } from './custom-attributes-section.tsx'
 import { DataToolsSection } from './data-tools-section.tsx'
 import { SsoSection } from './sso-section.tsx'
@@ -29,6 +30,7 @@ const SECTIONS = [
   { id: 'users', labelKey: 'admin.section.users', milestone: null },
   { id: 'roles', labelKey: 'admin.section.roles', milestone: null },
   { id: 'matrix', labelKey: 'admin.section.matrix', milestone: null },
+  { id: 'controlScales', labelKey: 'admin.section.controlScales', milestone: null },
   { id: 'branding', labelKey: 'admin.section.branding', milestone: null },
   { id: 'sso', labelKey: 'admin.section.sso', milestone: null },
   { id: 'dataTools', labelKey: 'admin.section.dataTools', milestone: null },
@@ -74,6 +76,7 @@ export function AdministrationPage() {
           {active === 'users' ? <UsersSection /> : null}
           {active === 'roles' ? <RolesSection /> : null}
           {active === 'matrix' ? <MatrixSection /> : null}
+          {active === 'controlScales' ? <ControlScalesSection /> : null}
           {active === 'branding' ? <BrandingSection /> : null}
           {active === 'sso' ? <SsoSection /> : null}
           {active === 'dataTools' ? <DataToolsSection /> : null}

@@ -1,6 +1,5 @@
 import { useId, useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom'
-import { APP_VERSION } from '../../config/index.ts'
 import { useAppData } from '../../data/app-data-context.ts'
 import { isSuperAdministrator } from '../../domain/permissions/index.ts'
 import { scaleName } from '../../domain/risk-engine/index.ts'

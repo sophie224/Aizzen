@@ -1,5 +1,12 @@
 import type { AuditEvent, Risk } from './risk.ts'
 import type {
+  ControlColumnPreference,
+  ControlConfig,
+  ControlDeficiency,
+  ControlRiskLink,
+  RegisterControl,
+} from './controls.ts'
+import type {
   Branding,
   BusinessUnit,
   Category,
@@ -32,9 +39,13 @@ import type {
  * intake: the `demoRequests` collection and the site-content copy the form
  * renders. Every step is additive — migration fills what is missing and
  * overwrites nothing that was configured. The legacy `app.html` build persists
- * version 7; migration handles that gap too.
+ * version 7; migration handles that gap too. 13 adds the Control Register and
+ * Control Deficiency Register (CR-2026): the `controls`, `controlDeficiencies`,
+ * `controlRiskLinks` and `controlColumnPreferences` collections plus the
+ * `controlConfig` scales. Purely additive — no existing collection or record
+ * changes shape, so state written by an older build still loads unchanged.
  */
-export const SCHEMA_VERSION = 12
+export const SCHEMA_VERSION = 13
 
 /**
  * Browser storage key. Retained deliberately from the v3 build for backward
@@ -64,6 +75,22 @@ export interface AppState {
   matrixVersions: MatrixVersion[]
 
   risks: Risk[]
+
+  /**
+   * Organisation-wide Control Register (CR-2026, FR-CR-01).
+   *
+   * Distinct from `Risk.controls`, the narrative controls captured inside a
+   * single risk — that list is untouched by this change.
+   */
+  controls: RegisterControl[]
+  /** Findings raised against register controls (FR-CD-01). */
+  controlDeficiencies: ControlDeficiency[]
+  /** Risk ⇄ control join, so the risk record itself never changes (FR-CR-04). */
+  controlRiskLinks: ControlRiskLink[]
+  /** Configurable control scales and custom columns (FR-CR-09, FR-CR-11). */
+  controlConfig: ControlConfig
+  /** Per-user column order for both registers (FR-CR-07, FR-CD-05). */
+  controlColumnPreferences: ControlColumnPreference[]
 
   savedViews: SavedView[]
   dashboards: Dashboard[]

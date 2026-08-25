@@ -105,6 +105,60 @@ export function tint(fill: string, amount: number): string {
   })
 }
 
+/**
+ * Badge colours for an administrator-configured level (Design Uplift v2 §6.2).
+ *
+ * Small text is NEVER placed on a raw configured fill: for a mid-luminance
+ * amber neither black nor white reaches 4.5:1, so any "pick the readable
+ * foreground" approach fails silently. Instead:
+ *
+ *   surface   — a heavy tint of the fill, light enough that the standard text
+ *               token clears 4.5:1 for ANY hue;
+ *   indicator — the fill itself, darkened only as far as it must be to clear
+ *               3:1 against the lightest adjacent surface, so it stays
+ *               recognisably the configured colour while meeting the
+ *               non-text contrast rule (WCAG 1.4.11).
+ *
+ * Computed here rather than with `color-mix()` in CSS so the same numbers can
+ * be asserted in a test against the live configuration (§6.3).
+ */
+export interface LevelBadgeColors {
+  surface: string
+  indicator: string
+}
+
+/** Share of the configured fill kept in the badge surface. */
+const BADGE_TINT = 0.14
+
+/** Non-text contrast floor for the indicator (WCAG 1.4.11). */
+export const INDICATOR_TARGET = 3
+
+export function levelBadgeColors(
+  fill: string,
+  pageSurface = '#ffffff',
+): LevelBadgeColors {
+  const surface = tint(fill, BADGE_TINT)
+  const colour = parseHex(fill)
+  const page = parseHex(pageSurface)
+  if (!colour || !page) return { surface, indicator: fill }
+
+  /*
+   * Darken in small steps until the indicator clears 3:1 against BOTH surfaces
+   * it touches — the page behind the badge and the badge's own tint, which is
+   * slightly darker and therefore the harder of the two. A configured pale
+   * yellow ends up a deeper gold: still the same hue, now actually visible.
+   */
+  const tinted = parseHex(surface) ?? page
+  let candidate = colour
+  for (let step = 0; step < 100; step += 1) {
+    const worst = Math.min(contrastRatio(candidate, page), contrastRatio(candidate, tinted))
+    if (worst >= INDICATOR_TARGET) break
+    candidate = { r: candidate.r * 0.94, g: candidate.g * 0.94, b: candidate.b * 0.94 }
+  }
+
+  return { surface, indicator: toHex(candidate) }
+}
+
 /** The four variables every rating level exposes (CR-005 §3.1). */
 export interface RiskColorSet {
   fill: string

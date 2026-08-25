@@ -7,6 +7,7 @@
 
 export * from './enums.ts'
 export * from './risk.ts'
+export * from './controls.ts'
 export * from './master-data.ts'
 export * from './reporting.ts'
 export * from './app-state.ts'

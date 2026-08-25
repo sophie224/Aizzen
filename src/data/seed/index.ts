@@ -1,5 +1,6 @@
 import type { AppState, Branding, SsoConfig } from '../../domain/types/index.ts'
 import { SCHEMA_VERSION } from '../../domain/types/index.ts'
+import { createDefaultControlConfig } from '../../domain/controls/index.ts'
 import { createSeedCategories } from './categories.ts'
 import { createSeedMatrix } from './matrix.ts'
 import {
@@ -61,6 +62,17 @@ export function createSeedState(): AppState {
     matrixVersions: [],
 
     risks: [],
+
+    /*
+     * The Control Register starts empty: controls arrive by manual entry,
+     * framework import or bulk upload (CR-2026 FR-CR-02/03/06). Only the
+     * configurable scales are seeded, so the registers are usable at once.
+     */
+    controls: [],
+    controlDeficiencies: [],
+    controlRiskLinks: [],
+    controlConfig: createDefaultControlConfig(),
+    controlColumnPreferences: [],
 
     savedViews: [],
     dashboardViews: [],

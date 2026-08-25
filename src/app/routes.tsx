@@ -5,6 +5,8 @@ import {
   RequireSuperAdministrator,
 } from './guards/route-guards.tsx'
 import { AdministrationPage } from '../features/administration/administration-page.tsx'
+import { ControlRegisterPage } from '../features/controls/control-register-page.tsx'
+import { DeficiencyRegisterPage } from '../features/controls/deficiency-register-page.tsx'
 import { DashboardPage } from '../features/dashboards/dashboard-page.tsx'
 import { PublicAboutPage } from '../features/public-site/about-page.tsx'
 import { PublicHomePage } from '../features/public-site/home-page.tsx'
@@ -13,6 +15,7 @@ import { ReportsPage } from '../features/reports/reports-page.tsx'
 import { RegisterPage } from '../features/register/register-page.tsx'
 import { RiskViewPage } from '../features/risk-view/risk-view-page.tsx'
 import { SiteAdminPage } from '../features/site-admin/site-admin-page.tsx'
+import { appConfig } from '../config/index.ts'
 import { AppShell } from './layout/app-shell.tsx'
 import { legacyAppTarget } from './legacy-app-path.ts'
 import { LoadingState } from './pages/loading-state.tsx'
@@ -100,6 +103,35 @@ export function AppRoutes() {
             </RequireAccess>
           }
         />
+
+        {/*
+          * Control Register and Control Deficiency Register (CR-2026).
+          *
+          * Registered only when the feature flag is on, so switching it off
+          * removes the routes themselves — a direct URL 404s to the not-found
+          * page rather than rendering a hidden module (SEC-12, QA-16).
+          */}
+        {appConfig.controlRegistersEnabled ? (
+          <Route
+            path="/controls"
+            element={
+              <RequireAccess module="controls">
+                <ControlRegisterPage />
+              </RequireAccess>
+            }
+          />
+        ) : null}
+
+        {appConfig.controlRegistersEnabled ? (
+          <Route
+            path="/control-deficiencies"
+            element={
+              <RequireAccess module="controls">
+                <DeficiencyRegisterPage />
+              </RequireAccess>
+            }
+          />
+        ) : null}
 
         <Route
           path="/risks/:riskId"
