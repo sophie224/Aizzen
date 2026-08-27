@@ -1,3 +1,11 @@
 node_modules
 dist
 playwright-report
+test-results
+coverage
+
+# Local environment. Holds the Google client secret and the session secret —
+# never commit any of these. Only the value-free template is tracked.
+.env
+.env.*
+!.env.example

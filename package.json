@@ -14,7 +14,8 @@
     "e2e": "playwright test",
     "verify": "npm run lint && npm run lint:css && npm run typecheck && npm run test && npm run build",
     "preview": "vite preview",
-    "auth": "tsx server/index.ts",
+    "auth": "npm run auth:directory && tsx --env-file-if-exists=.env server/index.ts",
+    "auth:directory": "tsx scripts/build-auth-directory.ts",
     "lint:css": "stylelint \"src/**/*.css\""
   },
   "dependencies": {

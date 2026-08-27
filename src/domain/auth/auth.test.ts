@@ -19,7 +19,7 @@ function user(overrides: Partial<User> = {}): User {
 const USERS: User[] = [
   user(),
   user({ id: 'usr_inactive', email: 'former.staff@erm.local', password: 'Old#2026', status: 'Inactive' }),
-  user({ id: 'usr_mixed', email: 'S.Phikidze@Aizzen.com', password: 'Admin#2026' }),
+  user({ id: 'usr_mixed', email: 'S.Pkhikidze@Aizzen.com', password: 'Admin#2026' }),
 ]
 
 describe('normalizeEmail', () => {
@@ -38,7 +38,7 @@ describe('findUserByEmail', () => {
   })
 
   it('matches a stored address that is itself mixed case', () => {
-    expect(findUserByEmail(USERS, 's.phikidze@aizzen.com')?.id).toBe('usr_mixed')
+    expect(findUserByEmail(USERS, 's.pkhikidze@aizzen.com')?.id).toBe('usr_mixed')
   })
 
   it('returns undefined for an unknown address', () => {

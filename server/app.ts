@@ -1,7 +1,7 @@
 import cookie from '@fastify/cookie'
 import rateLimit from '@fastify/rate-limit'
 import Fastify, { type FastifyInstance } from 'fastify'
-import type { AuthServiceConfig } from './config.ts'
+import { isGoogleClientConfigured, type AuthServiceConfig } from './config.ts'
 import {
   authorizeGoogleIdentity,
   loadDirectory,
@@ -39,7 +39,12 @@ export interface AuthAuditEvent {
   userId?: string
   /** Attempted address, for investigation. Never a token or a password. */
   email?: string
-  reason?: AuthorizationDenial | 'invalidState' | 'tokenInvalid' | 'exchangeFailed'
+  reason?:
+    | AuthorizationDenial
+    | 'invalidState'
+    | 'tokenInvalid'
+    | 'exchangeFailed'
+    | 'notConfigured'
   at: string
 }
 
@@ -101,6 +106,27 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   // --- start ----------------------------------------------------------------
 
   app.get('/auth/google/start', async (_request, reply) => {
+    /*
+     * Refuse to start a flow we cannot finish.
+     *
+     * Without this the empty (or placeholder) client ID is handed to Google,
+     * which answers `Error 400: invalid_request — Missing required parameter:
+     * client_id`. That message sends people hunting through the OAuth consent
+     * screen when the actual fault is local: the service was started without
+     * its environment. Fail here instead, naming the variable.
+     */
+    if (!isGoogleClientConfigured(config)) {
+      audit({ action: 'auth.google.error', reason: 'notConfigured', at: now() })
+
+      return reply.code(503).send({
+        error: 'google_sign_in_unconfigured',
+        message:
+          'GOOGLE_CLIENT_ID is not set. Copy .env.example to .env, fill in the real ' +
+          'client ID and secret, and start the service with `npm run auth` so the ' +
+          'environment file is loaded.',
+      })
+    }
+
     prunePending()
 
     const challenge = createLoginChallenge()

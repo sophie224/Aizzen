@@ -35,10 +35,13 @@ export interface AuthServiceConfig {
    * Path to a JSON export of AppState, used as the internal user directory.
    *
    * PHASE 1 BRIDGE. The authoritative directory still lives in the browser's
-   * AppState, so the service reads a snapshot exported from Administration →
-   * Data Tools. Both must agree on user IDs, which they do when the snapshot
-   * comes from the same state. M17/M18 collapse the two when the API owns
-   * AppState outright.
+   * AppState, so the service reads a snapshot of it. Both must agree on emails
+   * AND user IDs — the cookie carries an ID the SPA re-resolves against
+   * AppState — so the default points at `fixtures/auth-directory.dev.json`,
+   * generated from the same `createSeedUsers()` factory the SPA seeds from
+   * (`npm run auth:directory`). Once AppState has diverged from the seed,
+   * export it from Administration → Data Tools and set USER_DIRECTORY_PATH to
+   * that file. M17/M18 collapse the two when the API owns AppState outright.
    */
   userDirectoryPath: string
 
@@ -47,6 +50,22 @@ export interface AuthServiceConfig {
     /** Milliseconds. */
     windowMs: number
   }
+}
+
+/**
+ * Whether the Google client is actually configured.
+ *
+ * `.env.example` ships placeholders, and an unset variable falls back to the
+ * empty string, so both must be treated as "not configured". Sending either to
+ * Google produces an opaque `Error 400: invalid_request — Missing required
+ * parameter: client_id`, which points at the OAuth consent screen rather than
+ * at the real cause: the environment was never loaded.
+ */
+const PLACEHOLDER_VALUES = new Set(['your-google-client-id', 'your-google-client-secret'])
+
+export function isGoogleClientConfigured(config: AuthServiceConfig): boolean {
+  const { clientId } = config.google
+  return clientId.length > 0 && !PLACEHOLDER_VALUES.has(clientId)
 }
 
 function required(name: string, fallback?: string): string {
@@ -80,7 +99,7 @@ export function loadConfig(overrides: Partial<AuthServiceConfig> = {}): AuthServ
       secure: process.env.SESSION_COOKIE_SECURE !== 'false' && isProduction,
     },
 
-    userDirectoryPath: process.env.USER_DIRECTORY_PATH ?? 'fixtures/legacy-state.json',
+    userDirectoryPath: process.env.USER_DIRECTORY_PATH ?? 'fixtures/auth-directory.dev.json',
 
     rateLimit: {
       max: Number(process.env.AUTH_RATE_LIMIT_MAX ?? 10),

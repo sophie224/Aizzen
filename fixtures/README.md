@@ -1,5 +1,20 @@
 # Fixtures
 
+## `auth-directory.dev.json`
+
+The internal user directory the auth service checks during Google sign-in (`server/directory.ts`, ARCHITECTURE.md §6.2). Google identities are never auto-provisioned, so an address absent from this file is refused with `noInternalUser`.
+
+| | |
+|---|---|
+| Source | generated from `createSeedUsers()` — the same factory the SPA seeds AppState from |
+| Shape | `{ users: [...] }` — `User` minus `password` |
+| Regenerate | `npm run auth:directory` (also run automatically by `npm run auth`) |
+| Consumed by | `USER_DIRECTORY_PATH`, default in `server/config.ts` |
+
+Generated rather than hand-written because the session cookie carries a **user ID** that the SPA re-resolves against AppState: the directory and the seed must agree on emails *and* IDs, or a successful Google login lands on a user the app cannot find. `server/directory-snapshot.test.ts` fails if the two drift apart.
+
+Do **not** point `USER_DIRECTORY_PATH` at `legacy-state.json` — that fixture is the frozen v7 parity baseline with different addresses and no `usr_admin_sp`. Once AppState has diverged from the seed (users added through Administration), export it from Administration → Data Tools and point `USER_DIRECTORY_PATH` at the export.
+
 ## `legacy-state.json`
 
 The frozen legacy dataset — the **canonical baseline for the refactor**. It defines what "no regression" means (PLAN.md M0).

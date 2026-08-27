@@ -1,0 +1,122 @@
+{
+  "users": [
+    {
+      "id": "usr_super_admin",
+      "name": "AIZEN Super Admin",
+      "title": "Platform Owner",
+      "email": "superadmin@aizen.local",
+      "status": "Active",
+      "roleIds": [
+        "role_super_admin",
+        "role_admin"
+      ],
+      "businessUnitIds": [
+        "bu_enterprise"
+      ]
+    },
+    {
+      "id": "usr_admin",
+      "name": "ERM Administrator",
+      "title": "Platform Administrator",
+      "email": "admin@erm.local",
+      "status": "Active",
+      "roleIds": [
+        "role_admin"
+      ],
+      "businessUnitIds": [
+        "bu_enterprise"
+      ]
+    },
+    {
+      "id": "usr_admin_sp",
+      "name": "S. Pkhikidze",
+      "title": "Administration",
+      "email": "s.pkhikidze@aizzen.com",
+      "status": "Active",
+      "roleIds": [
+        "role_admin"
+      ],
+      "businessUnitIds": [
+        "bu_enterprise"
+      ]
+    },
+    {
+      "id": "usr_admin_db",
+      "name": "D. Baghdavadze",
+      "title": "Administration",
+      "email": "d.baghdavadze@aizzen.com",
+      "status": "Active",
+      "roleIds": [
+        "role_admin"
+      ],
+      "businessUnitIds": [
+        "bu_enterprise"
+      ]
+    },
+    {
+      "id": "usr_manager",
+      "name": "Risk Manager",
+      "title": "Risk Manager",
+      "email": "risk.manager@erm.local",
+      "status": "Active",
+      "roleIds": [
+        "role_risk_manager"
+      ],
+      "businessUnitIds": [
+        "bu_enterprise"
+      ]
+    },
+    {
+      "id": "usr_owner",
+      "name": "Nino Kapanadze",
+      "title": "Technology Risk Owner",
+      "email": "risk.owner@erm.local",
+      "status": "Active",
+      "roleIds": [
+        "role_risk_owner"
+      ],
+      "businessUnitIds": [
+        "bu_technology"
+      ]
+    },
+    {
+      "id": "usr_control",
+      "name": "Giorgi Maisuradze",
+      "title": "Security Control Owner",
+      "email": "control.owner@erm.local",
+      "status": "Active",
+      "roleIds": [
+        "role_control_owner"
+      ],
+      "businessUnitIds": [
+        "bu_security"
+      ]
+    },
+    {
+      "id": "usr_action",
+      "name": "Mariam Lomidze",
+      "title": "Remediation Lead",
+      "email": "action.owner@erm.local",
+      "status": "Active",
+      "roleIds": [
+        "role_action_owner"
+      ],
+      "businessUnitIds": [
+        "bu_enterprise"
+      ]
+    },
+    {
+      "id": "usr_auditor",
+      "name": "Internal Auditor",
+      "title": "Internal Audit",
+      "email": "auditor@erm.local",
+      "status": "Active",
+      "roleIds": [
+        "role_auditor"
+      ],
+      "businessUnitIds": [
+        "bu_enterprise"
+      ]
+    }
+  ]
+}

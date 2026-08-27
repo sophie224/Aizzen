@@ -364,7 +364,7 @@ Phase 1 client logic evaluates named-role branches **in order**, so a user holdi
 
 Email normalized-match → user must be `Active` → plain-text password equality → session user ID stored in browser state → session restored on refresh → logout clears the reference. Known gaps: unhashed passwords, no secure cookie, no MFA, no brute-force protection, editable local state, no server trust boundary. The Administration guard is client-side and is a *workflow simulation, not a security boundary*.
 
-**Demo users** (demo-only passwords): `admin@erm.local` (Administrator), `s.phikidze@aizzen.com` (Administrator), `d.baghdavadze@aizzen.com` (Administrator), plus a Super Admin account with both front-page management and risk-module access.
+**Demo users** (demo-only passwords): `admin@erm.local` (Administrator), `s.pkhikidze@aizzen.com` (Administrator), `d.baghdavadze@aizzen.com` (Administrator), plus a Super Admin account with both front-page management and risk-module access.
 
 ### 6.2 Google Sign-In with internal authorization (PRD requirement)
 

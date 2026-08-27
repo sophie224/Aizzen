@@ -222,7 +222,7 @@ describe('seed users', () => {
     const emails = createSeedState().users.map((user) => user.email)
 
     expect(emails).toContain('admin@erm.local')
-    expect(emails).toContain('s.phikidze@aizzen.com')
+    expect(emails).toContain('s.pkhikidze@aizzen.com')
     expect(emails).toContain('d.baghdavadze@aizzen.com')
   })
 

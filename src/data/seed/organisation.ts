@@ -87,9 +87,9 @@ export function createSeedUsers(): User[] {
     },
     {
       id: 'usr_admin_sp',
-      name: 'S. Phikidze',
+      name: 'S. Pkhikidze',
       title: 'Administration',
-      email: 's.phikidze@aizzen.com',
+      email: 's.pkhikidze@aizzen.com',
       password: 'Admin#2026',
       status: 'Active',
       roleIds: ['role_admin'],
