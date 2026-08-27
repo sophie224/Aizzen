@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { appConfig } from '../../config/index.ts'
 import { useAppData } from '../../data/app-data-context.ts'
@@ -16,6 +16,7 @@ import {
   IconWarning,
 } from '../../ui/icons.tsx'
 import { initialsOf } from '../../ui/initials.ts'
+import { LoadingState } from '../pages/loading-state.tsx'
 import { RiskPalette } from './risk-palette.tsx'
 import { useAuth } from '../session/use-auth.ts'
 import { useCurrentUser } from '../session/use-current-user.ts'
@@ -232,9 +233,11 @@ export function AppShell() {
 
       <main id="main-content" className="shell__main" ref={mainRef} tabIndex={-1}>
         <div key={location.pathname} className="route-enter">
-          <Outlet />
+          <Suspense fallback={<LoadingState />}>
+            <Outlet />
+          </Suspense>
         </div>
       </main>
-    </div>
+    </div> 
   )
 }
