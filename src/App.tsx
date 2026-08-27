@@ -17,7 +17,7 @@ export default function App() {
       <SessionBootstrap>
         {/* Publishes the active language to <html lang> for a11y and :lang(). */}
         <DocumentLanguage />
-        <BrowserRouter>
+        <BrowserRouter  basename="/Aizzen">
           <AppRoutes />
         </BrowserRouter>
       </SessionBootstrap>
