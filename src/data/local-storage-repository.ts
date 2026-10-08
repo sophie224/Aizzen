@@ -51,10 +51,27 @@ export class LocalStorageRepository implements AppRepository {
   async getState(): Promise<AppState> {
     const raw = this.#storage.getItem(this.#key)
 
+    // if (raw === null) {
+    //   const seeded = createSeedState()
+    //   this.#write(seeded)
+    //   return Promise.resolve(seeded)
+    // }
     if (raw === null) {
-      const seeded = createSeedState()
-      this.#write(seeded)
-      return Promise.resolve(seeded)
+      let initialState = createSeedState()
+
+      if (import.meta.env.DEV) {
+        const { default: fixture } = await import('../../fixtures/legacy-state.json')
+        const outcome = migrateState(fixture)
+
+        if (!outcome.ok) {
+          throw new Error(`Bundled demo fixture is invalid: ${outcome.errors.join('; ')}`)
+        }
+
+        initialState = outcome.result.state
+      }
+
+      this.#write(initialState)
+      return initialState
     }
 
     let parsed: unknown
