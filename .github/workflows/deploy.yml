@@ -30,6 +30,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_LOAD_DEMO_DATA: 'true'
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

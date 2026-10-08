@@ -59,7 +59,7 @@ export class LocalStorageRepository implements AppRepository {
     if (raw === null) {
       let initialState = createSeedState()
 
-      if (import.meta.env.DEV) {
+      if (import.meta.env.DEV || import.meta.env.VITE_LOAD_DEMO_DATA === 'true') {
         const { default: fixture } = await import('../../fixtures/legacy-state.json')
         const outcome = migrateState(fixture)
 
