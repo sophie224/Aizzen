@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { appConfig } from '../../config/index.ts'
 import { useAppData } from '../../data/app-data-context.ts'
@@ -7,9 +7,11 @@ import { useTranslation } from '../../i18n/index.ts'
 import { BrandMark } from '../../ui/brand-mark.tsx'
 import {
   IconChart,
+  IconClose,
   IconGauge,
   IconGlobe,
   IconList,
+  IconMenu,
   IconSettings,
   IconShield,
   IconSignOut,
@@ -33,11 +35,7 @@ import './app-shell.css'
  *   - ADMINISTRATION entry point, BOTTOM-LEFT
  */
 
-/**
- * Top-right client slot: the uploaded company logo, or the CLIENT placeholder
- * button shown in the target design until one is set (Risk Administration →
- * Branding, M12).
- */
+
 function ClientLogo() {
   const { t } = useTranslation()
   const { state } = useAppData()
@@ -53,12 +51,7 @@ function ClientLogo() {
   return <img className="topbar__client-logo" src={logo} alt={t('app.clientLogoAlt')} />
 }
 
-/**
- * EN / KA segmented toggle.
- *
- * One control, not two: the accessible name always states the action it will
- * perform, while the segments show which language is live.
- */
+
 function LanguageToggle() {
   const { t, language, toggleLanguage } = useTranslation()
 
@@ -79,19 +72,12 @@ function LanguageToggle() {
   )
 }
 
-/**
- * Smooth enter transition plus scroll-to-top on navigation.
- *
- * The animation itself is CSS, so `prefers-reduced-motion` disables it through
- * the global rule in index.css. Scrolling is matched to the same preference.
- */
+
 function useRouteTransition(pathname: string) {
   const mainRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const main = mainRef.current
-    // `scrollTo` is absent in some test environments; the guard keeps the
-    // transition a progressive enhancement rather than a hard dependency.
     if (!main || typeof main.scrollTo !== 'function') return
 
     const prefersReducedMotion =
@@ -114,6 +100,22 @@ export function AppShell() {
   const showAdministration = canOpenAdministration(context)
   const showWebsiteAdministration = canOpenWebsiteAdministration(context)
 
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setMenuOpen(false)
+      menuButtonRef.current?.focus()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [menuOpen])
+
   return (
     <div className="shell">
       {/* Publishes the configured rating palette as CSS variables. */}
@@ -122,15 +124,45 @@ export function AppShell() {
         {t('nav.skipToContent')}
       </a>
 
-      {/* Top-left: the AIZEN brand heads the dark navigation rail. */}
-      <nav className="rail" aria-label={t('nav.primary')}>
-        <Link to="/dashboard" className="rail__brand">
-          <BrandMark label={t('app.brandAlt')} className="rail__mark" />
-          <span className="rail__brand-text">
-            <span className="rail__brand-name">AIZEN</span>
-            <span className="rail__brand-line">{t('app.brandLine')}</span>
-          </span>
-        </Link>
+      {menuOpen ? (
+        <div
+          className="rail-backdrop"
+          aria-hidden="true"
+          onClick={() => {
+            setMenuOpen(false)
+          }}
+        />
+      ) : null}
+
+      <nav
+        id="primary-navigation"
+        className={menuOpen ? 'rail rail--open' : 'rail'}
+        aria-label={t('nav.primary')}
+        onClick={(event) => {
+          // Any link tap — brand, nav item or admin entry — closes the drawer.
+          if ((event.target as HTMLElement).closest('a')) setMenuOpen(false)
+        }}
+      >
+        <div className="rail__head">
+          <Link to="/dashboard" className="rail__brand">
+            <BrandMark label={t('app.brandAlt')} className="rail__mark" />
+            <span className="rail__brand-text">
+              <span className="rail__brand-name">AIZEN</span>
+              <span className="rail__brand-line">{t('app.brandLine')}</span>
+            </span>
+          </Link>
+          <button
+            type="button"
+            className="rail__close"
+            aria-label={t('nav.closeMenu')}
+            onClick={() => {
+              setMenuOpen(false)
+              menuButtonRef.current?.focus()
+            }}
+          >
+            <IconClose />
+          </button>
+        </div>
 
         <div className="rail__nav">
           {canAccess(context, 'dashboard', 'read') ? (
@@ -145,12 +177,7 @@ export function AppShell() {
               {t('nav.register')}
             </NavLink>
           ) : null}
-          {/*
-           * Control Register sits directly under Risk Register and before
-           * Reports, and the Deficiency Register under it — the placement the
-           * change request specifies (FR-CR-01, FR-CD-01, QA-01). Both are
-           * behind the feature flag.
-           */}
+         
           {appConfig.controlRegistersEnabled && canAccess(context, 'controls', 'read') ? (
             <>
               <NavLink to="/controls" className="rail__link">
@@ -171,11 +198,7 @@ export function AppShell() {
           ) : null}
         </div>
 
-        {/*
-         * Bottom-left ADMINISTRATION entry point. Hidden entirely from roles
-         * that cannot open it — the guard still enforces the rule on direct
-         * navigation (ARCHITECTURE.md §5.1).
-         */}
+        
         <div className="rail__foot">
           {showWebsiteAdministration ? (
             <NavLink to="/admin/site" className="rail__admin-link">
@@ -219,9 +242,26 @@ export function AppShell() {
       </nav>
 
       <header className="topbar">
-        <div className="topbar__identity">
-          <p className="topbar__product">{t('app.name')}</p>
-          <p className="topbar__module">{t('app.moduleSubtitle')}</p>
+        <div className="topbar__start">
+         
+          <button
+            type="button"
+            ref={menuButtonRef}
+            className="topbar__menu-btn"
+            aria-expanded={menuOpen}
+            aria-controls="primary-navigation"
+            aria-label={t(menuOpen ? 'nav.closeMenu' : 'nav.openMenu')}
+            onClick={() => {
+              setMenuOpen((open) => !open)
+            }}
+          >
+            {menuOpen ? <IconClose /> : <IconMenu />}
+          </button>
+
+          <div className="topbar__identity">
+            <p className="topbar__product">{t('app.name')}</p>
+            <p className="topbar__module">{t('app.moduleSubtitle')}</p>
+          </div>
         </div>
 
         <div className="topbar__actions">
@@ -231,13 +271,19 @@ export function AppShell() {
         </div>
       </header>
 
-      <main id="main-content" className="shell__main" ref={mainRef} tabIndex={-1}>
+      <main
+        id="main-content"
+        className="shell__main"
+        ref={mainRef}
+        tabIndex={-1}
+        inert={menuOpen || undefined}
+      >
         <div key={location.pathname} className="route-enter">
           <Suspense fallback={<LoadingState />}>
             <Outlet />
           </Suspense>
         </div>
       </main>
-    </div> 
+    </div>
   )
 }

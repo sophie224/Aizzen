@@ -119,6 +119,12 @@ export const IconList = (props: IconProps) => (
   </Svg>
 )
 
+export const IconMenu = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </Svg>
+)
+
 export const IconPencil = (props: IconProps) => (
   <Svg {...props}>
     <path d="M4 20h4l10-10-4-4L4 16z" />

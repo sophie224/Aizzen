@@ -43,6 +43,13 @@
   overflow-y: auto;
 }
 
+.rail__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
 .rail__brand {
   display: flex;
   align-items: center;
@@ -52,7 +59,24 @@
   text-decoration: none;
 }
 
-/* Navy-on-white mark, so it sits in a light badge rather than being recoloured. */
+.rail__close {
+  display: none;
+  flex: none;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: color-mix(in oklab, var(--surface) 78%, transparent);
+  cursor: pointer;
+}
+
+.rail__close:hover {
+  background: var(--color-rail-hover);
+  color: var(--color-accent);
+}
+
 .rail__mark {
   display: grid;
   place-items: center;
@@ -217,8 +241,37 @@
   border-block-end: 1px solid var(--color-border);
 }
 
+.topbar__start {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  min-width: 0;
+}
+
 .topbar__identity {
   min-width: 0;
+}
+
+/*
+ * Burger trigger for the off-canvas drawer. Hidden at desktop widths, where
+ * the rail is always visible and there is nothing to open — see the mobile
+ * media query below.
+ */
+.topbar__menu-btn {
+  display: none;
+  flex: none;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.topbar__menu-btn:hover {
+  background: var(--color-hover);
 }
 
 .topbar__product {
@@ -345,33 +398,52 @@
   font-size: var(--text-sm);
 }
 
+
+.rail-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-popover);
+  background: color-mix(in oklab, var(--brand-ink) 55%, transparent);
+}
+
 @media (max-width: 60rem) {
   .shell {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-rows: var(--header-height) minmax(0, 1fr);
   }
 
   .rail {
-    grid-column: 1;
-    grid-row: 1;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-8);
-    padding: var(--space-12) var(--space-16);
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: var(--layer-modal);
+    width: min(85vw, 20rem);
+    max-width: 20rem;
+    transform: translateX(-100%);
+    box-shadow: var(--shadow-raised);
+    transition: transform var(--transition-page) ease, visibility 0s linear var(--transition-page);
   }
 
-  .rail__nav,
-  .rail__foot {
-    flex-direction: row;
-    flex-wrap: wrap;
-    margin-block-start: 0;
-    padding-block-start: 0;
+  .rail:not(.rail--open) {
+    visibility: hidden;
   }
 
-  .rail__user {
-    margin-block-start: 0;
-    border-block-start: 0;
+  .rail--open {
+    transform: translateX(0);
+    transition: transform var(--transition-page) ease;
+  }
+
+  .rail__close {
+    display: grid;
+  }
+
+  .rail-backdrop {
+    display: block;
+  }
+
+  .topbar__menu-btn {
+    display: grid;
   }
 
   .topbar,
@@ -379,21 +451,44 @@
     grid-column: 1;
   }
 
+
   .topbar {
-    grid-row: 2;
+    grid-row: 1;
+    padding: 0 var(--space-16);
+    gap: var(--space-8);
+  }
+
+  .topbar__start {
+    gap: var(--space-8);
+    flex: 1;
+    min-width: 0;
+  }
+
+  .topbar__identity {
+    flex: 1;
+  }
+
+  .topbar__module {
+    display: none;
+  }
+
+  .topbar__product {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .topbar__actions {
+    flex: none;
+    gap: var(--space-8);
   }
 
   .shell__main {
-    grid-row: 3;
+    grid-row: 2;
     padding: var(--space-16);
   }
 }
 
-/*
- * Control Deficiency Register is a child of the Control Register in the
- * navigation (CR-2026 FR-CD-01), so it is indented under it rather than
- * presented as a peer of Dashboard and Register.
- */
 .rail__link--sub {
   padding-inline-start: var(--space-32);
   font-size: var(--text-xs);
